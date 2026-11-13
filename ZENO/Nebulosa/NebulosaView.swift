@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// El fondo vivo de ZENO. Cambia con la persona (semilla), con la hora y con la energía.
-struct NebulosaView: View {
+struct NebulosaView: View, Animatable {
     let apariencia: AparienciaLumi
     /// Energía de 0 a 1.
     var energia: Double
@@ -13,6 +13,12 @@ struct NebulosaView: View {
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
 
     private static let inicio = Date()
+
+    // Permite que la energía y la calidez cambien poco a poco con `withAnimation`.
+    var animatableData: AnimatablePair<Double, Double> {
+        get { AnimatablePair(energia, calidez) }
+        set { energia = newValue.first; calidez = newValue.second }
+    }
 
     var body: some View {
         // 30 cuadros por segundo bastan: el gas se mueve muy despacio.

@@ -7,6 +7,8 @@ struct LaboratorioView: View {
     @State private var energia = 70.0
     @State private var hora = Cielo.horaActual()
     @State private var cambios = 0
+    @Environment(\.dismiss) private var cerrar
+    @Environment(\.isPresented) private var presentado
     @State private var cielo = TonoDeCielo.azulado
     @State private var forma = FormaDeLumi.estrella
 
@@ -46,12 +48,19 @@ struct LaboratorioView: View {
 
     private var controles: some View {
         VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Estrella de \(persona.nombre)")
-                    .font(.headline.weight(.medium))
-                Text(persona.fechaLegible)
-                    .font(.footnote)
-                    .opacity(0.7)
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Estrella de \(persona.nombre)")
+                        .font(.headline.weight(.medium))
+                    Text(persona.fechaLegible)
+                        .font(.footnote)
+                        .opacity(0.7)
+                }
+                Spacer()
+                if presentado {
+                    Button("Cerrar") { cerrar() }
+                        .font(.subheadline)
+                }
             }
 
             VStack(alignment: .leading, spacing: 4) {

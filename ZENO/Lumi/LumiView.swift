@@ -8,11 +8,17 @@ enum FormaDeLumi: Int, CaseIterable, Identifiable {
 }
 
 /// Lumi: una estrella de luz que respira. Comunica con luz y movimiento, nunca con texto.
-struct LumiView: View {
+struct LumiView: View, Animatable {
     let apariencia: AparienciaLumi
     /// Energía de 0 a 1.
     var energia: Double
     var forma: FormaDeLumi = .estrella
+
+    // Permite que la energía cambie poco a poco con `withAnimation`.
+    var animatableData: Double {
+        get { energia }
+        set { energia = newValue }
+    }
 
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     @State private var reloj = RelojDeLumi()

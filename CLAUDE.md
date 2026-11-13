@@ -39,4 +39,6 @@ xcodebuild -project ZENO.xcodeproj -scheme ZENO -destination 'platform=iOS Simul
 ## Fases
 0 Proyecto · 1 Lumi y nebulosa · 2 Registro · 3 Presencia · 4 Tareas · 5 Energía · 6 Anillo y celebración · 7 Notificaciones · 8 Pulido.
 
-Estado: Fase 0 y Fase 1 construidas, pendientes de que Diaz las apruebe.
+- `UniversoView` es la raíz: el cielo y Lumi viven ahí y nunca se destruyen; el contenido (registro, casa, y luego presencia y tareas) va encima. No crear otra LumiView por pantalla.
+
+Estado: Fase 0 y 1 aprobadas y guardadas. Fase 2 (registro) construida, pendiente de que Diaz la apruebe.

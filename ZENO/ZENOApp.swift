@@ -2,12 +2,12 @@ import SwiftUI
 import SwiftData
 
 /// Punto de entrada de ZENO.
-/// En la Fase 1 la app abre directamente el laboratorio de Lumi.
+/// La app abre el universo: registro la primera vez, y después la casa de Lumi.
 @main
 struct ZENOApp: App {
     var body: some Scene {
         WindowGroup {
-            LaboratorioView()
+            UniversoView()
                 .fontDesign(.rounded)
                 .preferredColorScheme(.dark)
         }
