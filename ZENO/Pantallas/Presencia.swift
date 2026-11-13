@@ -15,7 +15,7 @@ struct PresenciaView: View {
         VStack(spacing: 14) {
             ForEach(Array(lineas.enumerated()), id: \.offset) { indice, linea in
                 Text(linea)
-                    .font(indice == lineas.count - 1 ? .zenoTitulo(.title3, .regular).italic() : .zenoTitulo(.title2))
+                    .font(indice == lineas.count - 1 ? .zenoTitulo(.title3, .regular, cursiva: true) : .zenoTitulo(.title2))
                     .luminoso()
                     .multilineTextAlignment(.center)
                     .opacity(visibles > indice ? (indice == lineas.count - 1 ? 1 : 0.85) : 0)

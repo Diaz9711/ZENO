@@ -2,6 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>BebasNeue-Regular.ttf</string>
+		<string>Fraunces.ttf</string>
+		<string>Fraunces-Italic.ttf</string>
+		<string>Manrope.ttf</string>
+		<string>CormorantGaramond.ttf</string>
+		<string>CormorantGaramond-Italic.ttf</string>
+	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>ZENO usa el micrófono solo mientras mantienes presionada a Lumi, para escribir la tarea que dices.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

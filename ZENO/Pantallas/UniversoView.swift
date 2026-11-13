@@ -25,6 +25,7 @@ struct UniversoView: View {
     @State private var mostrarLaboratorio = false
     @State private var mostrarAjustes = false
     @AppStorage("modoPrueba") private var modoPrueba = false
+    @AppStorage(VozTipografica.clave) private var voz = VozTipografica.fraunces.rawValue
     @State private var escuchando = false    // Lumi está oyendo una tarea dictada
     @State private var ahora = Date()        // se refresca cada pocos minutos
     @State private var abiertaDesde = Date()
@@ -117,6 +118,7 @@ struct UniversoView: View {
 
             if let persona {
                 contenido(de: persona, puntaje: puntaje)
+                    .id(voz)
             } else {
                 RegistroView(paso: $paso, borrador: $borrador, lumiNacida: lumiNacida, alTerminar: terminarRegistro)
                     .transition(.opacity)

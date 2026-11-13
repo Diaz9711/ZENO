@@ -19,11 +19,11 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 - **Animación única por persona**, toda derivada de la semilla en `AparienciaLumi`: número de rayos, ola de rayos, sentido de giro, periodo de respiración, órbita de las motas y vaivén al flotar.
 - **La energía cambia la luz, el tamaño y el ritmo, nunca el detalle.** Con energía baja Lumi es más pequeña y tenue y el cielo más oscuro, pero todo sigue nítido (pedido expreso de Diaz).
 - Una sola acción por pantalla. Mucho espacio vacío.
-- Tipografía (Diaz pidió nada genérico): títulos y frases en serifa fina New York (`Font.zenoTitulo`), botones y textos pequeños en SF Rounded (`Font.zenoTexto`). Logotipo `MarcaZeno`: sol dibujado + ZENO en serifa ultrafina espaciada. Texto en `Color.marfil`, acentos en `Color.oroZeno`.
+- Tipografía (Diaz pidió nada genérico, nada de letras de sistema): títulos con `Font.zenoTitulo`, botones y textos pequeños con `Font.zenoTexto` (Manrope). Logotipo `MarcaZeno`: sol dibujado + ZENO en Bebas Neue espaciada. Texto en `Color.marfil`, acentos en `Color.oroZeno`.
 - Botones y campos usan `.cristal()` (vidrio oscuro con borde de luz dorada) y `EstiloPresion`; nunca grises planos de sistema. Íconos dibujados a mano (`IconoOrbita`), sin SF Symbols genéricos.
 - Texto sobre el cielo: títulos con `.luminoso()` (marfil→oro, sombra y halo), etiquetas `Etiqueta` en mayúsculas doradas, y un velo oscuro suave bajo Lumi. Acciones secundarias con `BotonSecundario`; listas con filas de cristal, nunca `List` de sistema; interruptores con `InterruptorZeno`.
 - Los controles de prueba solo aparecen con Ajustes → Modo de prueba (solo en DEBUG).
-- Pendiente: Diaz quiere tipografías propias (no de sistema). Descargarlas solo con su permiso.
+- Tipografías propias incluidas en `ZENO/Fuentes` (Google Fonts, licencia OFL en `Licencias/`): Bebas Neue (logotipo), Fraunces, Cormorant Garamond y Manrope. `VozTipografica` elige la combinación de títulos; el texto pequeño siempre es Manrope. Pendiente que Diaz elija A Fraunces, B Cormorant o C Moderna; luego quitar el selector de Ajustes y las fuentes que sobren.
 - Transiciones continuas: Lumi nunca desaparece y reaparece; se mueve como objeto físico.
 - Respetar Reducir Movimiento, Dynamic Type y contraste.
 - Español e inglés con String Catalog (`Localizable.xcstrings`). El español es el idioma base.

@@ -11,15 +11,87 @@ extension Color {
 
 // MARK: - Tipografía
 
-extension Font {
-    /// Títulos y frases: serifa fina (New York), con voz propia y calma de libro.
-    static func zenoTitulo(_ estilo: Font.TextStyle, _ peso: Font.Weight = .light) -> Font {
-        .system(estilo, design: .serif, weight: peso)
+/// Las voces tipográficas de ZENO (letras propias, incluidas en la app; licencia OFL en /Licencias).
+/// Mientras Diaz elige, se puede cambiar en Ajustes. Todas usan Bebas Neue para el logotipo.
+enum VozTipografica: String, CaseIterable, Identifiable {
+    /// Fraunces (serifa cálida y suave) + Manrope.
+    case fraunces
+    /// Cormorant Garamond (serifa clásica y elegante) + Manrope.
+    case cormorant
+    /// Manrope en todo: moderna y limpia.
+    case moderna
+
+    var id: String { rawValue }
+    static let clave = "vozTipografica"
+    static var actual: VozTipografica {
+        VozTipografica(rawValue: UserDefaults.standard.string(forKey: clave) ?? "") ?? .fraunces
     }
 
-    /// Botones y textos pequeños: redondeada, clara y amable.
+    var nombre: String {
+        switch self {
+        case .fraunces: "Fraunces"
+        case .cormorant: "Cormorant"
+        case .moderna: "Moderna"
+        }
+    }
+}
+
+extension Font {
+    /// Tamaños base de cada estilo; con `relativeTo:` siguen creciendo con Dynamic Type.
+    private static func tamano(_ estilo: Font.TextStyle) -> CGFloat {
+        switch estilo {
+        case .largeTitle: 36
+        case .title: 29
+        case .title2: 23
+        case .title3: 20
+        case .headline, .body: 17
+        case .callout: 16
+        case .subheadline: 15
+        case .footnote: 13
+        case .caption: 12
+        case .caption2: 11
+        default: 17
+        }
+    }
+
+    private static func manrope(_ peso: Font.Weight) -> String {
+        switch peso {
+        case .ultraLight, .thin: "Manrope-ExtraLight"
+        case .light: "Manrope-Light"
+        case .medium: "Manrope-Medium"
+        case .semibold: "Manrope-SemiBold"
+        case .bold, .heavy, .black: "Manrope-Bold"
+        default: "Manrope-Regular"
+        }
+    }
+
+    /// Títulos y frases: la voz de ZENO.
+    static func zenoTitulo(_ estilo: Font.TextStyle, _ peso: Font.Weight = .light, cursiva: Bool = false) -> Font {
+        let nombre: String
+        var escala: CGFloat = 1
+        let fuerte = [.medium, .semibold, .bold, .heavy, .black].contains(peso)
+        switch VozTipografica.actual {
+        case .fraunces:
+            nombre = cursiva ? (fuerte ? "Fraunces-SemiBoldItalic" : (peso == .regular ? "Fraunces-Italic" : "Fraunces-LightItalic"))
+                             : (fuerte ? "Fraunces-SemiBold" : (peso == .regular ? "Fraunces-Regular" : "Fraunces-Light"))
+        case .cormorant:
+            escala = 1.16   // Cormorant es pequeña de ojo: se agranda para leerse igual
+            nombre = cursiva ? (fuerte ? "CormorantGaramond-MediumItalic" : (peso == .regular ? "CormorantGaramond-Italic" : "CormorantGaramond-LightItalic"))
+                             : (fuerte ? "CormorantGaramond-SemiBold" : (peso == .regular ? "CormorantGaramond-Medium" : "CormorantGaramond-Regular"))
+        case .moderna:
+            nombre = manrope(peso == .regular ? .regular : (fuerte ? .semibold : .light))
+        }
+        return .custom(nombre, size: tamano(estilo) * escala, relativeTo: estilo)
+    }
+
+    /// Botones y textos pequeños: Manrope, clara y moderna.
     static func zenoTexto(_ estilo: Font.TextStyle, _ peso: Font.Weight = .regular) -> Font {
-        .system(estilo, design: .rounded, weight: peso)
+        .custom(manrope(peso), size: tamano(estilo), relativeTo: estilo)
+    }
+
+    /// El logotipo: Bebas Neue, como pide la especificación.
+    static func zenoMarca(_ tamano: CGFloat) -> Font {
+        .custom("BebasNeue-Regular", fixedSize: tamano)
     }
 }
 
@@ -69,9 +141,9 @@ struct MarcaZeno: View {
             SolZeno()
                 .frame(width: tamano * 0.62, height: tamano * 0.62)
             Text(verbatim: "ZENO")
-                .font(.system(size: tamano, weight: .ultraLight, design: .serif))
-                .tracking(tamano * 0.42)
-                .padding(.leading, tamano * 0.42)      // compensa el espacio tras la última letra
+                .font(.zenoMarca(tamano * 1.15))
+                .tracking(tamano * 0.38)
+                .padding(.leading, tamano * 0.38)      // compensa el espacio tras la última letra
                 .foregroundStyle(LinearGradient(colors: [.marfil, Color.oroZeno.opacity(0.85)],
                                                 startPoint: .top, endPoint: .bottom))
         }
