@@ -8,6 +8,9 @@ struct AjustesView: View {
     @Environment(\.modelContext) private var contexto
     @Environment(\.dismiss) private var cerrar
     @State private var confirmarBorrado = false
+    @State private var permisoDenegado = false
+    @State private var pendientes: [(id: String, fecha: Date?)] = []
+    @Query(sort: \EventoDeEnergia.fecha) private var eventos: [EventoDeEnergia]
     @AppStorage("modoPrueba") private var modoPrueba = false
 
     var body: some View {
@@ -61,6 +64,59 @@ struct AjustesView: View {
                     .cristal(radio: 20)
                 }
 
+                // — Avisos —
+                VStack(alignment: .leading, spacing: 12) {
+                    titulo("Avisos")
+                    VStack(alignment: .leading, spacing: 14) {
+                        Toggle(isOn: interruptorDeAvisos) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Un aviso amable al día")
+                                    .font(.zenoTexto(.body))
+                                Text("Como mucho uno, a las \(mejorHora):00, tu mejor hora. Nunca un día en que ya abriste ZENO.")
+                                    .font(.zenoTexto(.footnote))
+                                    .opacity(0.6)
+                            }
+                        }
+                        .toggleStyle(InterruptorZeno())
+
+                        if persona.notificacionesActivas && persona.avisosEnPausa {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("Los dejé en pausa porque parecía que no hacían falta.")
+                                    .font(.zenoTexto(.footnote))
+                                    .opacity(0.75)
+                                Button("Volver a recibirlos") {
+                                    Task { await Avisos.reanudar(persona, eventos: eventos) }
+                                }
+                                .font(.zenoTexto(.subheadline, .medium))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 9)
+                                .cristal()
+                                .buttonStyle(EstiloPresion())
+                            }
+                        }
+
+                        if permisoDenegado {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("Para recibirlos, permite las notificaciones de ZENO en los Ajustes del iPhone.")
+                                    .font(.zenoTexto(.footnote))
+                                    .opacity(0.75)
+                                Button("Abrir Ajustes del iPhone") {
+                                    if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+                                        UIApplication.shared.open(url)
+                                    }
+                                }
+                                .font(.zenoTexto(.subheadline, .medium))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 9)
+                                .cristal()
+                                .buttonStyle(EstiloPresion())
+                            }
+                        }
+                    }
+                    .padding(16)
+                    .cristal(radio: 20)
+                }
+
                 // — Datos —
                 VStack(alignment: .leading, spacing: 12) {
                     titulo("Tus datos")
@@ -88,6 +144,32 @@ struct AjustesView: View {
                 .toggleStyle(InterruptorZeno())
                 .padding(16)
                 .cristal(radio: 20)
+
+                if modoPrueba {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Button("Enviar un aviso de prueba en 10 segundos") {
+                            Task { await Avisos.enviarPrueba() ; pendientes = await Avisos.pendientes() }
+                        }
+                        .font(.zenoTexto(.subheadline, .medium))
+                        Text("Avisos programados:")
+                            .font(.zenoTexto(.footnote, .semibold))
+                        if pendientes.isEmpty {
+                            Text("Ninguno").font(.zenoTexto(.footnote)).opacity(0.6)
+                        }
+                        ForEach(pendientes, id: \.id) { p in
+                            Text("\(p.id) · \(p.fecha?.formatted(date: .abbreviated, time: .shortened) ?? "—")")
+                                .font(.zenoTexto(.caption))
+                                .opacity(0.75)
+                        }
+                        Text("Ignorados seguidos: \(persona.avisosIgnorados) · En pausa: \(persona.avisosEnPausa ? "sí" : "no")")
+                            .font(.zenoTexto(.caption))
+                            .opacity(0.75)
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .cristal(radio: 20)
+                    .task { pendientes = await Avisos.pendientes() }
+                }
                 #endif
 
                 Text("ZENO acompaña tu día. No diagnostica ni reemplaza un tratamiento.")
@@ -137,7 +219,31 @@ struct AjustesView: View {
         .accessibilityAddTraits(elegida ? .isSelected : [])
     }
 
+    private var mejorHora: Int {
+        MotorDeEnergia.mejorHora(persona: persona, eventos: eventos)
+    }
+
+    /// Encender pide permiso (solo entonces); apagar borra todo lo pendiente.
+    private var interruptorDeAvisos: Binding<Bool> {
+        Binding(
+            get: { persona.notificacionesActivas },
+            set: { quiere in
+                if quiere {
+                    Task {
+                        let resultado = await Avisos.activar(persona, eventos: eventos)
+                        withAnimation { permisoDenegado = resultado == .denegados }
+                        pendientes = await Avisos.pendientes()
+                    }
+                } else {
+                    Avisos.desactivar(persona)
+                    permisoDenegado = false
+                    pendientes = []
+                }
+            })
+    }
+
     private func borrarTodo() {
+        Avisos.cancelarTodo()
         try? contexto.delete(model: EventoDeEnergia.self)
         try? contexto.delete(model: Tarea.self)
         try? contexto.delete(model: Persona.self)

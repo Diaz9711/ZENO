@@ -141,6 +141,9 @@ struct UniversoView: View {
             if nueva == .background {
                 estuvoEnFondo = true
                 registrarCierre()
+                if let persona = personas.first {
+                    Task { await Avisos.alSalir(persona, eventos: eventos) }
+                }
             } else if nueva == .active && estuvoEnFondo {
                 estuvoEnFondo = false
                 visita += 1
@@ -242,8 +245,9 @@ struct UniversoView: View {
     private func registrarApertura() {
         ahora = .now
         abiertaDesde = .now
-        guard !personas.isEmpty else { return }
+        guard let persona = personas.first else { return }
         contexto.insert(EventoDeEnergia(tipo: .abrioLaApp))
+        Task { await Avisos.alAbrir(persona, eventos: eventos) }
     }
 
     /// Abrir y cerrar sin hacer nada también es una señal (sin juicio: solo cuenta para la energía).

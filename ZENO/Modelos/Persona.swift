@@ -22,6 +22,10 @@ final class Persona {
     var formaDeLumiCruda: Int = 0
     var mostrarEdad: Bool
     var notificacionesActivas: Bool
+    // Estado de los avisos (sección 7). Con valores por defecto para que los datos viejos migren solos.
+    var avisosEnPausa: Bool = false
+    var avisosIgnorados: Int = 0
+    var avisoDiarioProgramado: Date? = nil
 
     var creadaEn: Date
 

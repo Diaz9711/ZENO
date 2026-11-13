@@ -51,4 +51,6 @@ xcodebuild -project ZENO.xcodeproj -scheme ZENO -destination 'platform=iOS Simul
 - Energía: `MotorDeEnergia` (funciones puras). Puntaje = curva base del cronotipo + lo aprendido por franja horaria + ajuste de hoy; todo se recalcula desde el historial `EventoDeEnergia`. Niveles: baja < 34, media 34–66, alta ≥ 67. "Ahora no" pospone esa tarea 90 minutos. Lumi y la nebulosa usan el puntaje real.
 - Celebración y anillo: `Lumi/Celebracion.swift`. Anillo de tiempo según `Tarea.minutosPrevistos` (primer paso 2, chica 5, mediana 15, grande 25 min); al acabarse no hay alarma. Al terminar: Lumi inhala, onda de luz de 1,5 s y ola háptica (Core Haptics). Grande: onda más amplia y Lumi más brillante el resto del día. Tres seguidas: giro lento. Con energía baja: el cielo se calienta ese día.
 
-Estado: Fases 0 a 5 aprobadas y guardadas en git. Fase 6 (anillo y celebración) construida, pendiente de que Diaz la apruebe.
+- Avisos (Fase 7): `Notificaciones/Avisos.swift`. Plan puro `Avisos.plan` + programación al abrir y al salir (iOS no corre código cuando llega un aviso). Aviso diario no repetitivo a `mejorHora`, nunca el día en que ya se abrió; 'Lumi sigue aquí' a los 3 días sin uso; pausa tras 2 ignorados (ignorado = no tocado y sin abrir la app en 3 h). Nunca texto de tareas ni sonido. El delegado `CentroDeAvisos` se instala en `ZENOApp.init`.
+
+Estado: Fases 0 a 6 aprobadas y guardadas en git; letra Fraunces elegida. Fase 7 (avisos) construida, pendiente de que Diaz la apruebe.
