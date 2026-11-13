@@ -21,6 +21,7 @@ struct UniversoView: View {
     @State private var visita = 0            // cambia cada vez que se abre la app
     @State private var estuvoEnFondo = false
     @State private var mostrarLaboratorio = false
+    @State private var escuchando = false    // Lumi está oyendo una tarea dictada
 
     /// El cielo antes de que exista la persona: tranquilo, sin dueño todavía.
     private static let semillaNeutra = Semilla(nombre: "zeno", anio: 2026, mes: 1, dia: 1)
@@ -39,7 +40,7 @@ struct UniversoView: View {
         let enTarea = persona != nil && momento == .tarea
         let enPresencia = persona != nil && momento == .presencia
         let centro = UnitPoint(x: 0.5, y: enTarea ? 0.23 : (enPresencia ? 0.34 : 0.33))
-        let tamano = enTarea ? 0.74 : 1.0
+        let tamano = (enTarea ? 0.74 : 1.0) * (escuchando ? 1.12 : 1.0)
 
         ZStack {
             Color("FondoArranque").ignoresSafeArea()
@@ -124,13 +125,16 @@ struct UniversoView: View {
                 .transition(.opacity)
 
             case .tarea:
-                VStack {
-                    Spacer().frame(height: geo.size.height * 0.46)
-                    TareaProvisionalView()
-                    Spacer()
+                // Lumi se dibuja a pantalla completa; aquí se descuenta el margen de arriba.
+                let arriba = geo.safeAreaInsets.top
+                let altoTotal = geo.size.height + arriba + geo.safeAreaInsets.bottom
+                VStack(spacing: 0) {
+                    TareaDelMomentoView(
+                        centroDeLumi: CGPoint(x: geo.size.width / 2, y: altoTotal * 0.23 - arriba),
+                        inicioDelContenido: altoTotal * 0.40 - arriba,
+                        escuchando: $escuchando)
                     botonesDePrueba(persona)
                 }
-                .frame(maxWidth: .infinity)
                 .transition(.opacity.combined(with: .offset(y: 18)))
             }
         }
@@ -172,7 +176,7 @@ struct UniversoView: View {
         }
         .font(.footnote)
         .foregroundStyle(.white.opacity(0.6))
-        .padding(.bottom, 22)
+        .padding(.bottom, 8)
         #endif
     }
 }

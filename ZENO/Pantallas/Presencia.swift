@@ -104,19 +104,3 @@ enum FraseDelDia {
         return String(localized: frases[indice])
     }
 }
-
-/// Lugar provisional de la tarea del momento. Las tareas llegan en la Fase 4 y la energía en la 5.
-struct TareaProvisionalView: View {
-    var body: some View {
-        VStack(spacing: 10) {
-            Text("Aquí aparecerá tu tarea del momento")
-                .font(.title3.weight(.light))
-                .multilineTextAlignment(.center)
-            Text("Una sola, elegida según tu energía.")
-                .font(.footnote)
-                .opacity(0.65)
-        }
-        .foregroundStyle(.white)
-        .padding(.horizontal, 36)
-    }
-}
