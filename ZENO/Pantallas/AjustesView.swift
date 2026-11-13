@@ -6,7 +6,6 @@ struct AjustesView: View {
     @Bindable var persona: Persona
 
     @Environment(\.modelContext) private var contexto
-    @Environment(\.dismiss) private var cerrar
     @State private var confirmarBorrado = false
     @State private var permisoDenegado = false
     @State private var pendientes: [(id: String, fecha: Date?)] = []
@@ -26,12 +25,6 @@ struct AjustesView: View {
                             .luminoso()
                     }
                     Spacer()
-                    Button("Listo") { cerrar() }
-                        .font(.zenoTexto(.body, .medium))
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 8)
-                        .cristal()
-                        .buttonStyle(EstiloPresion())
                 }
 
                 // — Forma de Lumi —
@@ -179,11 +172,12 @@ struct AjustesView: View {
                     .multilineTextAlignment(.center)
                     .padding(.top, 6)
             }
-            .padding(24)
+            .padding(.horizontal, 24)
+            .padding(.top, 4)
+            .padding(.bottom, 130)      // deja sitio a la barra
         }
         .foregroundStyle(Color.marfil)
-        .presentationBackground(Color("FondoArranque").opacity(0.96))
-        .presentationDragIndicator(.visible)
+        .scrollIndicators(.hidden)
         .confirmationDialog("¿Borrar todo?", isPresented: $confirmarBorrado, titleVisibility: .visible) {
             Button("Borrar mis datos", role: .destructive, action: borrarTodo)
         } message: {
@@ -248,6 +242,5 @@ struct AjustesView: View {
         try? contexto.delete(model: Tarea.self)
         try? contexto.delete(model: Persona.self)
         UserDefaults.standard.removeObject(forKey: "diaCalido")
-        cerrar()
     }
 }

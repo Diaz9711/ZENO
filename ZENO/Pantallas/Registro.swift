@@ -72,7 +72,7 @@ struct RegistroView: View {
             contenido
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .id(paso)
-                .transition(.opacity.combined(with: .offset(y: 14)))
+                .transition(.desenfoque)
         }
         .foregroundStyle(Color.marfil)
         .sensoryFeedback(.selection, trigger: paso)

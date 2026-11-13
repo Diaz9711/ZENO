@@ -16,6 +16,12 @@ struct TareaDelMomentoView: View {
     var eventos: [EventoDeEnergia]
     /// Avisa a Lumi que celebre una tarea terminada.
     var alTerminar: (Celebracion) -> Void = { _ in }
+    /// La hora de más energía, para la tarjeta de hoy.
+    var mejorHora: Int = 12
+    /// Cambia cada vez que se toca el "+" de la barra.
+    var pedirAgregar: Int = 0
+    /// Avisa cuando se está escribiendo, para esconder la barra.
+    @Binding var editando: Bool
 
     @Environment(\.modelContext) private var contexto
     @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
@@ -25,7 +31,6 @@ struct TareaDelMomentoView: View {
     @State private var frase = ""
     @State private var primerPaso = ""
     @State private var quiereAlgoIgual = false
-    @State private var mostrarLista = false
     @State private var dictado = Dictado()
     @State private var toques = 0
     @FocusState private var escribiendo: Bool
@@ -35,13 +40,13 @@ struct TareaDelMomentoView: View {
             VStack(spacing: 14) {
                 Spacer().frame(height: inicioDelContenido)
                 switch modo {
-                case .ver: ver
-                case .agregar: agregar
-                case .primerPaso: preguntaDelPrimerPaso
+                case .ver: Group { ver }.transition(.desenfoque)
+                case .agregar: agregar.transition(.desenfoque)
+                case .primerPaso: preguntaDelPrimerPaso.transition(.desenfoque)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.marfil)
 
             // Zona invisible sobre Lumi: mantener presionada para hablar.
             Circle()
@@ -69,9 +74,9 @@ struct TareaDelMomentoView: View {
         .onChange(of: dictado.activo) { _, activo in
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) { escuchando = activo }
         }
-        .sheet(isPresented: $mostrarLista) {
-            MisTareasView()
-                .preferredColorScheme(.dark)
+        .onChange(of: pedirAgregar) { _, _ in abrirAgregar() }
+        .onChange(of: modo) { _, nuevo in
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) { editando = nuevo != .ver }
         }
     }
 
@@ -114,7 +119,7 @@ struct TareaDelMomentoView: View {
             }
             .padding(.horizontal, 32)
             .id(tarea.persistentModelID)
-            .transition(.opacity.combined(with: .offset(y: 10)))
+            .transition(.desenfoque)
 
             Spacer().frame(height: 6)
             if enCurso == tarea.persistentModelID {
@@ -173,13 +178,16 @@ struct TareaDelMomentoView: View {
                 .opacity(0.75)
                 .padding(.horizontal, 32)
         }
-        HStack(spacing: 12) {
-            BotonSecundario(titulo: "Agregar tarea", icono: .mas) { abrirAgregar() }
-            if !pendientes.isEmpty {
-                BotonSecundario(titulo: "Mis tareas", icono: .lista) { mostrarLista = true }
-            }
-        }
-        .padding(.bottom, 14)
+        TarjetaDeHoy(hechas: hechasHoy.count, minutos: minutosEnFoco, mejorHora: mejorHora)
+            .padding(.bottom, 92)      // deja sitio a la barra
+    }
+
+    private var hechasHoy: [EventoDeEnergia] {
+        eventos.filter { $0.tipo == .tareaTerminada && Calendar.current.isDateInToday($0.fecha) }
+    }
+
+    private var minutosEnFoco: Int {
+        Int((hechasHoy.compactMap(\.valor).reduce(0, +) / 60).rounded())
     }
 
     /// La tarea que toca ahora: la que ya está en curso, o la que elige la energía.
@@ -396,7 +404,6 @@ struct TareaDelMomentoView: View {
 /// Lo pendiente, sin fechas, sin rojo y sin contadores.
 struct MisTareasView: View {
     @Environment(\.modelContext) private var contexto
-    @Environment(\.dismiss) private var cerrar
     @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
     private var pendientes: [Tarea]
     @State private var marcando: Set<PersistentIdentifier> = []
@@ -411,15 +418,9 @@ struct MisTareasView: View {
                         .luminoso()
                 }
                 Spacer()
-                Button("Cerrar") { cerrar() }
-                    .font(.zenoTexto(.subheadline, .medium))
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .cristal()
-                    .buttonStyle(EstiloPresion())
             }
             .padding(.horizontal, 24)
-            .padding(.top, 28)
+            .padding(.top, 4)
             .padding(.bottom, 14)
 
             if pendientes.isEmpty {
@@ -434,16 +435,12 @@ struct MisTareasView: View {
                         ForEach(pendientes) { tarea in fila(tarea) }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 30)
+                    .padding(.bottom, 120)
                 }
                 .scrollIndicators(.hidden)
             }
         }
         .foregroundStyle(Color.marfil)
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
-        // Azul profundo, del mismo mundo que la nebulosa (no gris).
-        .presentationBackground(Color("FondoArranque").opacity(0.96))
     }
 
     private func fila(_ tarea: Tarea) -> some View {

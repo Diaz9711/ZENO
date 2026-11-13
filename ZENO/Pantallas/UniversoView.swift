@@ -23,7 +23,9 @@ struct UniversoView: View {
     @State private var visita = 0            // cambia cada vez que se abre la app
     @State private var estuvoEnFondo = false
     @State private var mostrarLaboratorio = false
-    @State private var mostrarAjustes = false
+    @State private var pagina = Pagina.hoy
+    @State private var pedirAgregar = 0
+    @State private var editando = false
     @AppStorage("modoPrueba") private var modoPrueba = false
     @State private var escuchando = false    // Lumi está oyendo una tarea dictada
     @State private var ahora = Date()        // se refresca cada pocos minutos
@@ -51,8 +53,10 @@ struct UniversoView: View {
         // Dónde está Lumi: en el centro durante la presencia, arriba cuando llega la tarea.
         let enTarea = persona != nil && momento == .tarea
         let enPresencia = persona != nil && momento == .presencia
-        let centro = UnitPoint(x: 0.5, y: enTarea ? 0.23 : (enPresencia ? 0.34 : 0.33))
-        let tamano = (enTarea ? 0.74 : 1.0) * (escuchando ? 1.12 : 1.0)
+        // En Tareas y Ajustes, Lumi viaja arriba y se hace pequeña: acompaña sin estorbar.
+        let enOtraPagina = enTarea && pagina != .hoy
+        let centro = UnitPoint(x: 0.5, y: enOtraPagina ? 0.115 : (enTarea ? 0.245 : (enPresencia ? 0.34 : 0.33)))
+        let tamano = (enOtraPagina ? 0.36 : (enTarea ? 0.70 : 1.0)) * (escuchando ? 1.12 : 1.0)
         let tareaEnCurso = enTarea ? tareas.first(where: \.estaEnCurso) : nil
         let calidez = min(1, Cielo.calidez(hora: Cielo.horaActual()) + (diaCalido == Self.hoyTexto ? 0.28 : 0))
 
@@ -108,8 +112,8 @@ struct UniversoView: View {
             .ignoresSafeArea(.keyboard)
 
             // Un velo suave bajo Lumi: el texto se lee nítido sin apagar el cielo.
-            LinearGradient(stops: [.init(color: .clear, location: 0.34),
-                                   .init(color: .black.opacity(0.30), location: 0.62),
+            LinearGradient(stops: [.init(color: .black.opacity(enOtraPagina ? 0.22 : 0), location: 0.16),
+                                   .init(color: .black.opacity(enOtraPagina ? 0.40 : 0.30), location: 0.62),
                                    .init(color: .black.opacity(0.42), location: 1)],
                            startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
@@ -133,6 +137,7 @@ struct UniversoView: View {
                 borrador = BorradorDeRegistro()
                 paso = .bienvenida
                 momento = .presencia
+                pagina = .hoy
                 withAnimation(.easeInOut(duration: 1.2)) { lumiNacida = false }
             }
         }
@@ -176,38 +181,59 @@ struct UniversoView: View {
                 .id(visita)
                 .frame(height: geo.size.height * 0.34)
                 .position(x: geo.size.width / 2, y: geo.size.height * 0.70)
-                .transition(.opacity)
+                .transition(.desenfoque)
 
             case .tarea:
                 // Lumi se dibuja a pantalla completa; aquí se descuenta el margen de arriba.
                 let arriba = geo.safeAreaInsets.top
                 let altoTotal = geo.size.height + arriba + geo.safeAreaInsets.bottom
-                ZStack(alignment: .topTrailing) {
-                VStack(spacing: 0) {
-                    TareaDelMomentoView(
-                        centroDeLumi: CGPoint(x: geo.size.width / 2, y: altoTotal * 0.23 - arriba),
-                        inicioDelContenido: altoTotal * 0.40 - arriba,
-                        escuchando: $escuchando,
-                        puntaje: puntaje,
-                        eventos: eventos,
-                        alTerminar: celebrar)
-                    botonesDePrueba(persona, puntaje: puntaje)
-                }
-                    Button { mostrarAjustes = true } label: {
-                        IconoOrbita()
-                            .padding(12)
-                            .cristal()
+                ZStack(alignment: .bottom) {
+                    switch pagina {
+                    case .hoy:
+                        ZStack(alignment: .top) {
+                            VStack(spacing: 0) {
+                                TareaDelMomentoView(
+                                    centroDeLumi: CGPoint(x: geo.size.width / 2, y: altoTotal * 0.245 - arriba),
+                                    inicioDelContenido: altoTotal * 0.405 - arriba,
+                                    escuchando: $escuchando,
+                                    puntaje: puntaje,
+                                    eventos: eventos,
+                                    alTerminar: celebrar,
+                                    mejorHora: MotorDeEnergia.mejorHora(persona: persona, eventos: eventos),
+                                    pedirAgregar: pedirAgregar,
+                                    editando: $editando)
+                                botonesDePrueba(persona, puntaje: puntaje)
+                            }
+                            EncabezadoDeHoy(nombre: persona.nombre, puntaje: puntaje)
+                                .padding(.horizontal, 22)
+                                .padding(.top, 6)
+                                .aparece(0)
+                        }
+                        .transition(.desenfoque)
+
+                    case .tareas:
+                        MisTareasView()
+                            .padding(.top, altoTotal * 0.185 - arriba)
+                            .transition(.desenfoque)
+
+                    case .ajustes:
+                        AjustesView(persona: persona)
+                            .padding(.top, altoTotal * 0.185 - arriba)
+                            .transition(.desenfoque)
                     }
-                    .buttonStyle(EstiloPresion())
-                    .padding(.trailing, 20)
-                    .padding(.top, 6)
-                    .accessibilityLabel(Text("Ajustes"))
+
+                    if !editando {
+                        BarraZeno(pagina: $pagina) {
+                            // El "+" siempre lleva a escribir una tarea en la página de hoy.
+                            withAnimation(movimientoDeLumi) { pagina = .hoy }
+                            pedirAgregar += 1
+                        }
+                        .padding(.bottom, 4)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
                 }
-                .transition(.opacity.combined(with: .offset(y: 18)))
-                .sheet(isPresented: $mostrarAjustes) {
-                    AjustesView(persona: persona)
-                                .preferredColorScheme(.dark)
-                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.desenfoque)
             }
         }
     }
