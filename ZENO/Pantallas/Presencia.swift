@@ -16,6 +16,7 @@ struct PresenciaView: View {
             ForEach(Array(lineas.enumerated()), id: \.offset) { indice, linea in
                 Text(linea)
                     .font(indice == lineas.count - 1 ? .zenoTitulo(.title3, .regular).italic() : .zenoTitulo(.title2))
+                    .luminoso()
                     .multilineTextAlignment(.center)
                     .opacity(visibles > indice ? (indice == lineas.count - 1 ? 1 : 0.85) : 0)
                     .offset(y: visibles > indice ? 0 : 10)

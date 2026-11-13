@@ -94,14 +94,15 @@ struct TareaDelMomentoView: View {
         case .tarea(let tarea):
             if enRacha && enCurso == nil {
                 // Si va rápido, se le ofrece una más, sin presión.
-                Text("Vas en racha. ¿Una más?")
-                    .font(.zenoTexto(.footnote, .medium))
-                    .opacity(0.75)
+                Etiqueta("Vas en racha · ¿una más?")
                     .transition(.opacity)
+            } else {
+                Etiqueta(tarea.primerPaso != nil ? "Primer paso" : (enCurso == nil ? "Ahora" : "En curso"))
             }
             VStack(spacing: 8) {
                 Text(tarea.textoVisible)
                     .font(.zenoTitulo(.title, .light))
+                    .luminoso()
                     .multilineTextAlignment(.center)
                 if tarea.primerPaso != nil {
                     // Se muestra el primer paso; la tarea grande queda como contexto.
@@ -129,8 +130,10 @@ struct TareaDelMomentoView: View {
             }
 
         case .descanso:
+            Etiqueta("Descanso")
             Text("Hoy descansa, mañana atacamos")
                 .font(.zenoTitulo(.title3))
+                .luminoso()
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Text("Tu energía está baja, y está bien.")
@@ -147,6 +150,7 @@ struct TareaDelMomentoView: View {
         case .masTarde:
             Text("Por ahora, nada")
                 .font(.zenoTitulo(.title3))
+                .luminoso()
             Text("Lo intentamos más tarde.")
                 .font(.zenoTexto(.footnote))
                 .opacity(0.65)
@@ -154,6 +158,7 @@ struct TareaDelMomentoView: View {
         case .nadaPendiente:
             Text("No tienes nada pendiente")
                 .font(.zenoTitulo(.title3))
+                .luminoso()
             Text("Cuando quieras, agrega una sola cosa.")
                 .font(.zenoTexto(.footnote))
                 .opacity(0.65)
@@ -168,14 +173,13 @@ struct TareaDelMomentoView: View {
                 .opacity(0.75)
                 .padding(.horizontal, 32)
         }
-        HStack(spacing: 28) {
-            Button("Agregar tarea") { abrirAgregar() }
+        HStack(spacing: 12) {
+            BotonSecundario(titulo: "Agregar tarea", icono: .mas) { abrirAgregar() }
             if !pendientes.isEmpty {
-                Button("Mis tareas") { mostrarLista = true }
+                BotonSecundario(titulo: "Mis tareas", icono: .lista) { mostrarLista = true }
             }
         }
-        .font(.zenoTexto(.subheadline, .medium))
-        .padding(.bottom, 10)
+        .padding(.bottom, 14)
     }
 
     /// La tarea que toca ahora: la que ya está en curso, o la que elige la energía.
@@ -198,6 +202,7 @@ struct TareaDelMomentoView: View {
         VStack(spacing: 14) {
             Text(escuchando ? "Te escucho…" : "¿Qué quieres hacer?")
                 .font(.zenoTitulo(.title2))
+                .luminoso()
             campo($frase, sugerencia: "Una sola frase")
             HStack(spacing: 12) {
                 botonChico("Cancelar", fuerte: false) { cerrarAgregar() }
@@ -217,6 +222,7 @@ struct TareaDelMomentoView: View {
         VStack(spacing: 14) {
             Text("¿Cuál es el primer paso de dos minutos?")
                 .font(.zenoTitulo(.title3))
+                .luminoso()
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 28)
             campo($primerPaso, sugerencia: "Algo muy pequeño")
@@ -236,6 +242,7 @@ struct TareaDelMomentoView: View {
     private func campo(_ texto: Binding<String>, sugerencia: LocalizedStringKey) -> some View {
         TextField("", text: texto, prompt: Text(sugerencia).foregroundStyle(.white.opacity(0.35)), axis: .vertical)
             .font(.zenoTitulo(.title3, .regular))
+            .luminoso()
             .multilineTextAlignment(.center)
             .lineLimit(1...3)
             .submitLabel(.done)
@@ -392,68 +399,101 @@ struct MisTareasView: View {
     @Environment(\.dismiss) private var cerrar
     @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
     private var pendientes: [Tarea]
+    @State private var marcando: Set<PersistentIdentifier> = []
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Text("Mis tareas")
-                    .font(.zenoTitulo(.title2, .regular))
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Etiqueta("Pendiente")
+                    Text("Mis tareas")
+                        .font(.zenoTitulo(.largeTitle))
+                        .luminoso()
+                }
                 Spacer()
                 Button("Cerrar") { cerrar() }
-                    .font(.zenoTexto(.subheadline))
+                    .font(.zenoTexto(.subheadline, .medium))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .cristal()
+                    .buttonStyle(EstiloPresion())
             }
             .padding(.horizontal, 24)
-            .padding(.top, 26)
-            .padding(.bottom, 8)
+            .padding(.top, 28)
+            .padding(.bottom, 14)
 
             if pendientes.isEmpty {
                 Spacer()
                 Text("Nada pendiente.")
                     .font(.zenoTitulo(.title3))
-                    .opacity(0.8)
+                    .luminoso()
                 Spacer()
             } else {
-                List {
-                    ForEach(pendientes) { tarea in
-                        HStack(alignment: .top, spacing: 14) {
-                            Button {
-                                contexto.insert(EventoDeEnergia(tipo: .tareaTerminada, tarea: tarea))
-                                withAnimation { tarea.terminadaEn = .now }
-                            } label: {
-                                Circle()
-                                    .stroke(.white.opacity(0.55), lineWidth: 1.5)
-                                    .frame(width: 24, height: 24)
-                                    .contentShape(Rectangle().inset(by: -10))
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel(Text("Marcar como hecha"))
-
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(tarea.titulo)
-                                    .font(.zenoTexto(.body))
-                                if let paso = tarea.primerPaso {
-                                    Text("Primer paso: \(paso)")
-                                        .font(.zenoTexto(.footnote))
-                                        .opacity(0.6)
-                                }
-                            }
-                        }
-                        .padding(.vertical, 6)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparatorTint(.white.opacity(0.12))
+                ScrollView {
+                    VStack(spacing: 10) {
+                        ForEach(pendientes) { tarea in fila(tarea) }
                     }
-                    .onDelete { indices in
-                        for i in indices { contexto.delete(pendientes[i]) }
-                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 30)
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
+                .scrollIndicators(.hidden)
             }
         }
-        .foregroundStyle(.white)
-        .tint(.white)
+        .foregroundStyle(Color.marfil)
         .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
         // Azul profundo, del mismo mundo que la nebulosa (no gris).
-        .presentationBackground(Color("FondoArranque").opacity(0.94))
+        .presentationBackground(Color("FondoArranque").opacity(0.96))
+    }
+
+    private func fila(_ tarea: Tarea) -> some View {
+        let hecha = marcando.contains(tarea.persistentModelID)
+        return HStack(alignment: .center, spacing: 14) {
+            Button {
+                // Se enciende un instante en oro antes de irse.
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { _ = marcando.insert(tarea.persistentModelID) }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                    let evento = EventoDeEnergia(tipo: .tareaTerminada)
+                    contexto.insert(evento)
+                    evento.tarea = tarea
+                    withAnimation(.easeInOut(duration: 0.4)) { tarea.terminadaEn = .now }
+                }
+            } label: {
+                ZStack {
+                    Circle()
+                        .strokeBorder(Color.oroZeno.opacity(hecha ? 0 : 0.6), lineWidth: 1.4)
+                    Circle()
+                        .fill(Color.oroZeno)
+                        .shadow(color: Color.oroZeno.opacity(0.8), radius: 8)
+                        .scaleEffect(hecha ? 1 : 0.01)
+                        .opacity(hecha ? 1 : 0)
+                }
+                .frame(width: 24, height: 24)
+                .contentShape(Rectangle().inset(by: -10))
+            }
+            .buttonStyle(.plain)
+            .sensoryFeedback(.success, trigger: hecha)
+            .accessibilityLabel(Text("Marcar como hecha"))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(tarea.titulo)
+                    .font(.zenoTitulo(.body, .regular))
+                if let paso = tarea.primerPaso {
+                    Text("Primer paso: \(paso)")
+                        .font(.zenoTexto(.footnote))
+                        .opacity(0.6)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 16)
+        .cristal(radio: 20)
+        .opacity(hecha ? 0.55 : 1)
+        .contextMenu {
+            Button("Borrar", role: .destructive) {
+                withAnimation { contexto.delete(tarea) }
+            }
+        }
     }
 }

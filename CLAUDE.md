@@ -21,6 +21,9 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 - Una sola acción por pantalla. Mucho espacio vacío.
 - Tipografía (Diaz pidió nada genérico): títulos y frases en serifa fina New York (`Font.zenoTitulo`), botones y textos pequeños en SF Rounded (`Font.zenoTexto`). Logotipo `MarcaZeno`: sol dibujado + ZENO en serifa ultrafina espaciada. Texto en `Color.marfil`, acentos en `Color.oroZeno`.
 - Botones y campos usan `.cristal()` (vidrio oscuro con borde de luz dorada) y `EstiloPresion`; nunca grises planos de sistema. Íconos dibujados a mano (`IconoOrbita`), sin SF Symbols genéricos.
+- Texto sobre el cielo: títulos con `.luminoso()` (marfil→oro, sombra y halo), etiquetas `Etiqueta` en mayúsculas doradas, y un velo oscuro suave bajo Lumi. Acciones secundarias con `BotonSecundario`; listas con filas de cristal, nunca `List` de sistema; interruptores con `InterruptorZeno`.
+- Los controles de prueba solo aparecen con Ajustes → Modo de prueba (solo en DEBUG).
+- Pendiente: Diaz quiere tipografías propias (no de sistema). Descargarlas solo con su permiso.
 - Transiciones continuas: Lumi nunca desaparece y reaparece; se mueve como objeto físico.
 - Respetar Reducir Movimiento, Dynamic Type y contraste.
 - Español e inglés con String Catalog (`Localizable.xcstrings`). El español es el idioma base.

@@ -24,6 +24,7 @@ struct UniversoView: View {
     @State private var estuvoEnFondo = false
     @State private var mostrarLaboratorio = false
     @State private var mostrarAjustes = false
+    @AppStorage("modoPrueba") private var modoPrueba = false
     @State private var escuchando = false    // Lumi está oyendo una tarea dictada
     @State private var ahora = Date()        // se refresca cada pocos minutos
     @State private var abiertaDesde = Date()
@@ -105,6 +106,14 @@ struct UniversoView: View {
             }
             .ignoresSafeArea()
             .ignoresSafeArea(.keyboard)
+
+            // Un velo suave bajo Lumi: el texto se lee nítido sin apagar el cielo.
+            LinearGradient(stops: [.init(color: .clear, location: 0.34),
+                                   .init(color: .black.opacity(0.30), location: 0.62),
+                                   .init(color: .black.opacity(0.42), location: 1)],
+                           startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
 
             if let persona {
                 contenido(de: persona, puntaje: puntaje)
@@ -271,7 +280,8 @@ struct UniversoView: View {
     @ViewBuilder
     private func botonesDePrueba(_ persona: Persona, puntaje: Double) -> some View {
         #if DEBUG
-        // Botones temporales para probar; no estarán en la app final.
+        // Botones temporales para probar (se activan en Ajustes → Modo de prueba).
+        if modoPrueba {
         Button(energiaDePrueba == nil ? "Energía \(Int(puntaje)) · real" : "Energía \(Int(puntaje)) · de prueba") {
             // Cada toque cambia: real → alta → media → baja → real.
             switch energiaDePrueba {
@@ -297,6 +307,7 @@ struct UniversoView: View {
         .font(.zenoTexto(.footnote))
         .foregroundStyle(.white.opacity(0.6))
         .padding(.bottom, 8)
+        }
         #endif
     }
 }

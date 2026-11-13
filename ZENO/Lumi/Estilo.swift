@@ -118,3 +118,110 @@ struct IconoOrbita: View {
         .frame(width: 26, height: 26)
     }
 }
+
+// MARK: - Texto con luz
+
+extension View {
+    /// Títulos que brillan sobre el cielo: marfil que se calienta hacia abajo,
+    /// una sombra que los separa del gas y un halo dorado muy leve.
+    func luminoso() -> some View {
+        self
+            .foregroundStyle(LinearGradient(colors: [.marfil, Color(red: 1.0, green: 0.88, blue: 0.70)],
+                                            startPoint: .top, endPoint: .bottom))
+            .shadow(color: .black.opacity(0.5), radius: 10, y: 2)
+            .shadow(color: Color.oroZeno.opacity(0.22), radius: 20)
+    }
+}
+
+/// Etiqueta pequeña en mayúsculas espaciadas y dorada: ordena la pantalla como una revista.
+struct Etiqueta: View {
+    let texto: LocalizedStringKey
+    init(_ texto: LocalizedStringKey) { self.texto = texto }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Capsule().fill(Color.oroZeno.opacity(0.6)).frame(width: 14, height: 1)
+            Text(texto)
+                .textCase(.uppercase)
+                .font(.zenoTexto(.caption2, .semibold))
+                .tracking(2.6)
+                .foregroundStyle(Color.oroZeno)
+            Capsule().fill(Color.oroZeno.opacity(0.6)).frame(width: 14, height: 1)
+        }
+        .shadow(color: .black.opacity(0.5), radius: 6)
+    }
+}
+
+// MARK: - Botón secundario con ícono dibujado
+
+enum IconoZeno { case mas, lista }
+
+/// Una acción secundaria: píldora de cristal con su ícono propio.
+struct BotonSecundario: View {
+    let titulo: LocalizedStringKey
+    let icono: IconoZeno
+    let accion: () -> Void
+
+    var body: some View {
+        Button(action: accion) {
+            HStack(spacing: 9) {
+                Canvas { ctx, size in
+                    let w = size.width, h = size.height
+                    var p = Path()
+                    switch icono {
+                    case .mas:
+                        p.move(to: CGPoint(x: w / 2, y: h * 0.18)); p.addLine(to: CGPoint(x: w / 2, y: h * 0.82))
+                        p.move(to: CGPoint(x: w * 0.18, y: h / 2)); p.addLine(to: CGPoint(x: w * 0.82, y: h / 2))
+                    case .lista:
+                        for (i, y) in [0.25, 0.5, 0.75].enumerated() {
+                            p.move(to: CGPoint(x: w * (i == 1 ? 0.3 : 0.12), y: h * y))
+                            p.addLine(to: CGPoint(x: w * 0.88, y: h * y))
+                        }
+                    }
+                    ctx.stroke(p, with: .color(.oroZeno), style: StrokeStyle(lineWidth: 1.6, lineCap: .round))
+                }
+                .frame(width: 13, height: 13)
+                Text(titulo)
+                    .font(.zenoTexto(.subheadline, .medium))
+                    .tracking(0.3)
+            }
+            .foregroundStyle(Color.marfil)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 11)
+            .cristal()
+        }
+        .buttonStyle(EstiloPresion())
+    }
+}
+
+// MARK: - Interruptor propio
+
+struct InterruptorZeno: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Button {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { configuration.isOn.toggle() }
+        } label: {
+            HStack {
+                configuration.label
+                Spacer(minLength: 14)
+                ZStack(alignment: configuration.isOn ? .trailing : .leading) {
+                    Capsule()
+                        .fill(configuration.isOn
+                              ? AnyShapeStyle(LinearGradient(colors: [.oroZeno, Color(red: 0.98, green: 0.62, blue: 0.32)],
+                                                             startPoint: .leading, endPoint: .trailing))
+                              : AnyShapeStyle(Color.marfil.opacity(0.10)))
+                        .overlay(Capsule().strokeBorder(Color.oroZeno.opacity(configuration.isOn ? 0 : 0.35), lineWidth: 1))
+                        .shadow(color: Color.oroZeno.opacity(configuration.isOn ? 0.45 : 0), radius: 10)
+                    Circle()
+                        .fill(Color.marfil)
+                        .shadow(color: .black.opacity(0.3), radius: 3, y: 1)
+                        .padding(3)
+                }
+                .frame(width: 54, height: 31)
+            }
+        }
+        .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: configuration.isOn)
+        .accessibilityValue(configuration.isOn ? Text("Activado") : Text("Desactivado"))
+    }
+}

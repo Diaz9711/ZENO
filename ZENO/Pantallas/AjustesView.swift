@@ -8,6 +8,7 @@ struct AjustesView: View {
     @Environment(\.modelContext) private var contexto
     @Environment(\.dismiss) private var cerrar
     @State private var confirmarBorrado = false
+    @AppStorage("modoPrueba") private var modoPrueba = false
 
     var body: some View {
         let apariencia = AparienciaLumi(semilla: persona.semilla)
@@ -15,8 +16,12 @@ struct AjustesView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 30) {
                 HStack {
-                    Text("Ajustes")
-                        .font(.zenoTitulo(.largeTitle))
+                    VStack(alignment: .leading, spacing: 6) {
+                        Etiqueta("ZENO")
+                        Text("Ajustes")
+                            .font(.zenoTitulo(.largeTitle))
+                            .luminoso()
+                    }
                     Spacer()
                     Button("Listo") { cerrar() }
                         .font(.zenoTexto(.body, .medium))
@@ -51,7 +56,7 @@ struct AjustesView: View {
                                 .opacity(0.6)
                         }
                     }
-                    .tint(.oroZeno)
+                    .toggleStyle(InterruptorZeno())
                     .padding(16)
                     .cristal(radio: 20)
                 }
@@ -73,6 +78,17 @@ struct AjustesView: View {
                     }
                     .buttonStyle(EstiloPresion())
                 }
+
+                #if DEBUG
+                // Solo en desarrollo: los controles de prueba ya no ensucian la pantalla principal.
+                Toggle(isOn: $modoPrueba) {
+                    Text("Modo de prueba")
+                        .font(.zenoTexto(.body))
+                }
+                .toggleStyle(InterruptorZeno())
+                .padding(16)
+                .cristal(radio: 20)
+                #endif
 
                 Text("ZENO acompaña tu día. No diagnostica ni reemplaza un tratamiento.")
                     .font(.zenoTitulo(.footnote, .regular).italic())
