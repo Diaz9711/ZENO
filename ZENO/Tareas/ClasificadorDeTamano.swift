@@ -14,10 +14,12 @@ enum ClasificadorDeTamano {
         "presentation", "taxes", "clean the house", "resume", "learn", "research", "build"
     ]
 
+    /// Inicios de palabra de cosas rápidas ("llam" vale para llamar, llama, llamé…).
     private static let chicas = [
-        "llamar", "enviar", "mandar", "responder", "contestar", "pagar", "comprar", "sacar", "regar",
-        "tomar", "agendar", "confirmar", "revisar el correo", "tender la cama", "lavar los platos",
-        "call", "send", "email", "reply", "answer", "pay", "buy", "water", "book", "confirm", "text "
+        "llam", "envi", "mand", "respond", "contest", "pagar", "pague", "paga ", "compr", "regar", "riega",
+        "agend", "confirm", "tender la cama", "lavar los platos", "tirar la basura", "saca la basura",
+        "sacar la basura", "escrib", "avis", "recoger",
+        "call", "send", "email", "reply", "answer", "pay ", "buy", "water", "book", "confirm", "text "
     ]
 
     static func tamano(de frase: String) -> TamanoDeTarea {
@@ -28,7 +30,9 @@ enum ClasificadorDeTamano {
 
         if grandes.contains(where: texto.contains) { return .grande }
         if palabras >= 10 { return .grande }
-        if chicas.contains(where: texto.contains) { return .chica }
+        // Las chicas se buscan al inicio de una palabra, para no confundir "pagar" con "página".
+        let conEspacio = " " + texto
+        if chicas.contains(where: { conEspacio.contains(" " + $0) }) { return .chica }
         if palabras <= 2 { return .chica }
         return .mediana
     }

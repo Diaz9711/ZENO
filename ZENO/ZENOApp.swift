@@ -8,7 +8,6 @@ struct ZENOApp: App {
     var body: some Scene {
         WindowGroup {
             UniversoView()
-                .fontDesign(.rounded)
                 .preferredColorScheme(.dark)
         }
         // Todo se guarda en el teléfono. Sin cuentas ni servidor.

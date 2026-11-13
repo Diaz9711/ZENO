@@ -23,10 +23,15 @@ struct UniversoView: View {
     @State private var visita = 0            // cambia cada vez que se abre la app
     @State private var estuvoEnFondo = false
     @State private var mostrarLaboratorio = false
+    @State private var mostrarAjustes = false
     @State private var escuchando = false    // Lumi está oyendo una tarea dictada
     @State private var ahora = Date()        // se refresca cada pocos minutos
     @State private var abiertaDesde = Date()
     @State private var energiaDePrueba: Double?   // solo para probar (DEBUG)
+    @State private var celebracion = Celebracion()
+    @State private var celebraciones = 0
+    @State private var vueltas = 0.0          // giros lentos de Lumi (tres tareas seguidas)
+    @AppStorage("diaCalido") private var diaCalido = ""   // terminó algo con energía baja
 
     /// El cielo antes de que exista la persona: tranquilo, sin dueño todavía.
     private static let semillaNeutra = Semilla(nombre: "zeno", anio: 2026, mes: 1, dia: 1)
@@ -47,6 +52,8 @@ struct UniversoView: View {
         let enPresencia = persona != nil && momento == .presencia
         let centro = UnitPoint(x: 0.5, y: enTarea ? 0.23 : (enPresencia ? 0.34 : 0.33))
         let tamano = (enTarea ? 0.74 : 1.0) * (escuchando ? 1.12 : 1.0)
+        let tareaEnCurso = enTarea ? tareas.first(where: \.estaEnCurso) : nil
+        let calidez = min(1, Cielo.calidez(hora: Cielo.horaActual()) + (diaCalido == Self.hoyTexto ? 0.28 : 0))
 
         ZStack {
             Color("FondoArranque").ignoresSafeArea()
@@ -55,18 +62,42 @@ struct UniversoView: View {
                 ZStack {
                     NebulosaView(apariencia: apariencia,
                                  energia: energia,
-                                 calidez: Cielo.calidez(hora: Cielo.horaActual()),
+                                 calidez: calidez,
                                  centro: centro)
                         .id(semilla)
                         .transition(.opacity)
 
-                    LumiView(apariencia: apariencia, energia: energia, forma: forma)
-                        .frame(width: min(geo.size.width, 430) * 0.98)
+                    let anchoLumi = min(geo.size.width, 430) * 0.98
+                    LumiView(apariencia: apariencia, energia: energia, forma: forma, destello: destelloDeHoy)
+                        .frame(width: anchoLumi)
+                        // Al terminar una tarea: inhala, se encoge un instante y suelta la onda.
+                        .keyframeAnimator(initialValue: 1.0, trigger: celebraciones) { vista, escala in
+                            vista.scaleEffect(escala)
+                        } keyframes: { _ in
+                            KeyframeTrack {
+                                CubicKeyframe(0.88, duration: 0.35)
+                                SpringKeyframe(1.08, duration: 0.45, spring: .bouncy)
+                                SpringKeyframe(1.0, duration: 0.7, spring: .smooth)
+                            }
+                        }
+                        .rotationEffect(.degrees(vueltas))
                         .scaleEffect(hayLumi ? tamano : 0.04)
                         .opacity(hayLumi ? 1 : 0)
                         .position(x: geo.size.width * centro.x,
                                   y: geo.size.height * centro.y)
+
+                    if let tarea = tareaEnCurso, let inicio = tarea.empezadaEn {
+                        AnilloDeTiempoView(inicio: inicio, minutos: tarea.minutosPrevistos)
+                            .frame(width: anchoLumi * tamano * 0.50, height: anchoLumi * tamano * 0.50)
+                            .position(x: geo.size.width * centro.x, y: geo.size.height * centro.y)
+                            .transition(.opacity.combined(with: .scale(scale: 0.8)))
+                    }
+
+                    OndaDeLuzView(centro: CGPoint(x: geo.size.width * centro.x, y: geo.size.height * centro.y),
+                                  grande: celebracion.grande,
+                                  numero: celebraciones)
                 }
+                .animation(.easeInOut(duration: 0.6), value: tareaEnCurso?.persistentModelID)
                 // El cielo de la persona aparece despacio, como si se condensara.
                 .animation(.easeInOut(duration: 2.6), value: semilla)
                 // La energía nunca salta: Lumi y el cielo cambian despacio.
@@ -112,7 +143,6 @@ struct UniversoView: View {
         .onReceive(Timer.publish(every: 300, on: .main, in: .common).autoconnect()) { ahora = $0 }
         .fullScreenCover(isPresented: $mostrarLaboratorio) {
             LaboratorioView()
-                .fontDesign(.rounded)
                 .preferredColorScheme(.dark)
         }
     }
@@ -140,17 +170,61 @@ struct UniversoView: View {
                 // Lumi se dibuja a pantalla completa; aquí se descuenta el margen de arriba.
                 let arriba = geo.safeAreaInsets.top
                 let altoTotal = geo.size.height + arriba + geo.safeAreaInsets.bottom
+                ZStack(alignment: .topTrailing) {
                 VStack(spacing: 0) {
                     TareaDelMomentoView(
                         centroDeLumi: CGPoint(x: geo.size.width / 2, y: altoTotal * 0.23 - arriba),
                         inicioDelContenido: altoTotal * 0.40 - arriba,
                         escuchando: $escuchando,
                         puntaje: puntaje,
-                        eventos: eventos)
+                        eventos: eventos,
+                        alTerminar: celebrar)
                     botonesDePrueba(persona, puntaje: puntaje)
                 }
+                    Button { mostrarAjustes = true } label: {
+                        IconoOrbita()
+                            .padding(12)
+                            .cristal()
+                    }
+                    .buttonStyle(EstiloPresion())
+                    .padding(.trailing, 20)
+                    .padding(.top, 6)
+                    .accessibilityLabel(Text("Ajustes"))
+                }
                 .transition(.opacity.combined(with: .offset(y: 18)))
+                .sheet(isPresented: $mostrarAjustes) {
+                    AjustesView(persona: persona)
+                                .preferredColorScheme(.dark)
+                }
             }
+        }
+    }
+
+    // MARK: Celebración
+
+    private static var hoyTexto: String {
+        Date.now.formatted(.iso8601.year().month().day())
+    }
+
+    /// Lumi queda un poco más brillante el resto del día por cada tarea difícil terminada.
+    private var destelloDeHoy: Double {
+        let grandesHoy = eventos.filter {
+            $0.tipo == .tareaTerminada && Calendar.current.isDateInToday($0.fecha)
+                && $0.tarea?.tamano == .grande && $0.tarea?.primerPaso == nil
+        }.count
+        return min(Double(grandesHoy) * 0.5, 1)
+    }
+
+    private func celebrar(_ nueva: Celebracion) {
+        celebracion = nueva
+        celebraciones += 1
+        Haptica.compartida.onda(grande: nueva.grande)
+        if nueva.conEnergiaBaja {
+            withAnimation(.easeInOut(duration: 3)) { diaCalido = Self.hoyTexto }
+        }
+        if nueva.enRacha && !reducirMovimiento {
+            // Un giro lento sobre sí misma, después de la onda.
+            withAnimation(.easeInOut(duration: 2.8).delay(0.6)) { vueltas += 360 }
         }
     }
 
@@ -207,7 +281,7 @@ struct UniversoView: View {
             default: energiaDePrueba = nil
             }
         }
-        .font(.footnote)
+        .font(.zenoTexto(.footnote))
         .foregroundStyle(.white.opacity(0.6))
         .padding(.bottom, 6)
         HStack(spacing: 20) {
@@ -220,7 +294,7 @@ struct UniversoView: View {
                 withAnimation(.easeInOut(duration: 0.8)) { contexto.delete(persona) }
             }
         }
-        .font(.footnote)
+        .font(.zenoTexto(.footnote))
         .foregroundStyle(.white.opacity(0.6))
         .padding(.bottom, 8)
         #endif

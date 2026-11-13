@@ -15,13 +15,13 @@ struct PresenciaView: View {
         VStack(spacing: 14) {
             ForEach(Array(lineas.enumerated()), id: \.offset) { indice, linea in
                 Text(linea)
-                    .font(indice == lineas.count - 1 ? .title3.weight(.regular) : .title2.weight(.light))
+                    .font(indice == lineas.count - 1 ? .zenoTitulo(.title3, .regular).italic() : .zenoTitulo(.title2))
                     .multilineTextAlignment(.center)
                     .opacity(visibles > indice ? (indice == lineas.count - 1 ? 1 : 0.85) : 0)
                     .offset(y: visibles > indice ? 0 : 10)
             }
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(Color.marfil)
         .padding(.horizontal, 32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())

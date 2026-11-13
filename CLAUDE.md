@@ -19,7 +19,8 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 - **Animación única por persona**, toda derivada de la semilla en `AparienciaLumi`: número de rayos, ola de rayos, sentido de giro, periodo de respiración, órbita de las motas y vaivén al flotar.
 - **La energía cambia la luz, el tamaño y el ritmo, nunca el detalle.** Con energía baja Lumi es más pequeña y tenue y el cielo más oscuro, pero todo sigue nítido (pedido expreso de Diaz).
 - Una sola acción por pantalla. Mucho espacio vacío.
-- Tipografía: SF Pro Rounded. Bebas Neue solo para el logotipo.
+- Tipografía (Diaz pidió nada genérico): títulos y frases en serifa fina New York (`Font.zenoTitulo`), botones y textos pequeños en SF Rounded (`Font.zenoTexto`). Logotipo `MarcaZeno`: sol dibujado + ZENO en serifa ultrafina espaciada. Texto en `Color.marfil`, acentos en `Color.oroZeno`.
+- Botones y campos usan `.cristal()` (vidrio oscuro con borde de luz dorada) y `EstiloPresion`; nunca grises planos de sistema. Íconos dibujados a mano (`IconoOrbita`), sin SF Symbols genéricos.
 - Transiciones continuas: Lumi nunca desaparece y reaparece; se mueve como objeto físico.
 - Respetar Reducir Movimiento, Dynamic Type y contraste.
 - Español e inglés con String Catalog (`Localizable.xcstrings`). El español es el idioma base.
@@ -45,5 +46,6 @@ xcodebuild -project ZENO.xcodeproj -scheme ZENO -destination 'platform=iOS Simul
 - Tamaño de tarea: `ClasificadorDeTamano`, regla simple por palabras clave. La tarea del momento por ahora es la más antigua; la elección por energía llega en la Fase 5.
 
 - Energía: `MotorDeEnergia` (funciones puras). Puntaje = curva base del cronotipo + lo aprendido por franja horaria + ajuste de hoy; todo se recalcula desde el historial `EventoDeEnergia`. Niveles: baja < 34, media 34–66, alta ≥ 67. "Ahora no" pospone esa tarea 90 minutos. Lumi y la nebulosa usan el puntaje real.
+- Celebración y anillo: `Lumi/Celebracion.swift`. Anillo de tiempo según `Tarea.minutosPrevistos` (primer paso 2, chica 5, mediana 15, grande 25 min); al acabarse no hay alarma. Al terminar: Lumi inhala, onda de luz de 1,5 s y ola háptica (Core Haptics). Grande: onda más amplia y Lumi más brillante el resto del día. Tres seguidas: giro lento. Con energía baja: el cielo se calienta ese día.
 
-Estado: Fases 0 a 4 aprobadas y guardadas en git. Fase 5 (energía) construida, pendiente de que Diaz la apruebe.
+Estado: Fases 0 a 5 aprobadas y guardadas en git. Fase 6 (anillo y celebración) construida, pendiente de que Diaz la apruebe.

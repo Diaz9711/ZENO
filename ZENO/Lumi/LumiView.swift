@@ -13,6 +13,8 @@ struct LumiView: View, Animatable {
     /// Energía de 0 a 1.
     var energia: Double
     var forma: FormaDeLumi = .estrella
+    /// Brillo extra (0–1): Lumi queda más luminosa después de una tarea difícil.
+    var destello: Double = 0
 
     // Permite que la energía cambie poco a poco con `withAnimation`.
     var animatableData: Double {
@@ -41,7 +43,7 @@ struct LumiView: View, Animatable {
                         .float(m.giro),
                         .float(Double(apariencia.lobulos)),
                         .float(apariencia.profundidadLobulo),
-                        .float(0),
+                        .float(destello),
                         .float(m.fase),
                         .float(Double(apariencia.olaDeRayos)),
                         .float2(apariencia.inclinacionOrbita, apariencia.giroOrbita),

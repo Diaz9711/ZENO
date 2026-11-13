@@ -61,7 +61,7 @@ struct RegistroView: View {
             HStack {
                 if paso > .bienvenida && paso < .nacimiento {
                     Button("Atrás") { ir(a: paso.anterior) }
-                        .font(.subheadline)
+                        .font(.zenoTexto(.subheadline))
                         .foregroundStyle(.white.opacity(0.7))
                 }
                 Spacer()
@@ -74,7 +74,7 @@ struct RegistroView: View {
                 .id(paso)
                 .transition(.opacity.combined(with: .offset(y: 14)))
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(Color.marfil)
         .sensoryFeedback(.selection, trigger: paso)
     }
 
@@ -114,16 +114,15 @@ struct RegistroView: View {
     private var bienvenida: some View {
         VStack(spacing: 18) {
             Spacer()
-            Text(verbatim: "ZENO")
-                .font(.system(size: 64, weight: .heavy, design: .rounded))
-                .tracking(10)
+            MarcaZeno(tamano: 54)
+                .padding(.bottom, 14)
             Text("Una app que se adapta a tu energía,\nno al revés.")
-                .font(.title3.weight(.light))
+                .font(.zenoTitulo(.title3).italic())
                 .multilineTextAlignment(.center)
                 .opacity(0.9)
             Spacer()
             Text("ZENO acompaña tu día. No diagnostica ni reemplaza un tratamiento.")
-                .font(.footnote)
+                .font(.zenoTexto(.footnote))
                 .multilineTextAlignment(.center)
                 .opacity(0.65)
                 .padding(.horizontal, 36)
@@ -135,9 +134,9 @@ struct RegistroView: View {
         VStack(spacing: 28) {
             Spacer().frame(height: 60)
             Text("¿Cómo te llamas?")
-                .font(.title.weight(.light))
+                .font(.zenoTitulo(.title))
             TextField("", text: $borrador.nombre, prompt: Text("Tu nombre").foregroundStyle(.white.opacity(0.35)))
-                .font(.system(size: 34, weight: .regular, design: .rounded))
+                .font(.system(size: 36, weight: .light, design: .serif))
                 .multilineTextAlignment(.center)
                 .textInputAutocapitalization(.words)
                 .autocorrectionDisabled()
@@ -157,9 +156,9 @@ struct RegistroView: View {
         VStack(spacing: 20) {
             Spacer().frame(height: 60)
             Text("¿Cuándo naciste?")
-                .font(.title.weight(.light))
+                .font(.zenoTitulo(.title))
             Text("De tu nombre y tu fecha nace tu estrella.")
-                .font(.footnote)
+                .font(.zenoTexto(.footnote))
                 .opacity(0.65)
             DatePicker("Fecha de nacimiento", selection: $borrador.fecha, in: ...Date.now, displayedComponents: .date)
                 .datePickerStyle(.wheel)
@@ -177,7 +176,7 @@ struct RegistroView: View {
         VStack(spacing: 14) {
             Spacer().frame(height: 60)
             Text(titulo)
-                .font(.title.weight(.light))
+                .font(.zenoTitulo(.title))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 28)
                 .padding(.bottom, 18)
@@ -188,12 +187,12 @@ struct RegistroView: View {
                     ir(a: paso.siguiente)
                 } label: {
                     Text(opcion.0)
-                        .font(.title3.weight(.regular))
+                        .font(.zenoTitulo(.title3, .regular))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 17)
-                        .background(.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                        .cristal(radio: 22)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(EstiloPresion())
                 .padding(.horizontal, 28)
             }
             Spacer()
@@ -206,9 +205,9 @@ struct RegistroView: View {
             if lumiNacida {
                 Group {
                     Text("Ella es Lumi.")
-                        .font(.title.weight(.light))
+                        .font(.zenoTitulo(.title))
                     Text("Nació contigo, \(borrador.nombreLimpio). Nadie más tiene una igual.")
-                        .font(.body.weight(.light))
+                        .font(.zenoTitulo(.body))
                         .multilineTextAlignment(.center)
                         .opacity(0.8)
                         .padding(.horizontal, 36)
@@ -226,14 +225,14 @@ struct RegistroView: View {
         VStack(spacing: 16) {
             Spacer()
             Text("¿Cómo quieres verla?")
-                .font(.title2.weight(.light))
+                .font(.zenoTitulo(.title2))
             HStack(spacing: 12) {
                 opcionDeForma("Estrella", .estrella)
                 opcionDeForma("Esfera", .esfera)
             }
             .padding(.horizontal, 28)
             Text("Puedes cambiarla cuando quieras en Ajustes.")
-                .font(.footnote)
+                .font(.zenoTexto(.footnote))
                 .opacity(0.6)
             BotonZeno("Esta es la mía", accion: alTerminar)
         }
@@ -244,15 +243,12 @@ struct RegistroView: View {
             borrador.forma = valor
         } label: {
             Text(titulo)
-                .font(.body.weight(.medium))
+                .font(.zenoTexto(.body, .medium))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(.white.opacity(borrador.forma == valor ? 0.26 : 0.08),
-                            in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(.white.opacity(borrador.forma == valor ? 0.55 : 0), lineWidth: 1))
+                .cristal(radio: 18, activo: borrador.forma == valor)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(EstiloPresion())
         .sensoryFeedback(.selection, trigger: borrador.forma)
     }
 }
@@ -270,13 +266,14 @@ struct BotonZeno: View {
     var body: some View {
         Button(action: accion) {
             Text(titulo)
-                .font(.body.weight(.medium))
-                .foregroundStyle(.white)
+                .font(.zenoTexto(.body, .medium))
+                .tracking(0.6)
+                .foregroundStyle(Color.marfil)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(.white.opacity(0.16), in: Capsule())
+                .padding(.vertical, 17)
+                .cristal(fuerte: true)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(EstiloPresion())
         .padding(.horizontal, 28)
         .padding(.bottom, 18)
     }

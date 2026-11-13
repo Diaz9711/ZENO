@@ -14,6 +14,8 @@ struct TareaDelMomentoView: View {
     /// Puntaje de energía actual (0–100) y el historial del que sale.
     var puntaje: Double
     var eventos: [EventoDeEnergia]
+    /// Avisa a Lumi que celebre una tarea terminada.
+    var alTerminar: (Celebracion) -> Void = { _ in }
 
     @Environment(\.modelContext) private var contexto
     @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
@@ -22,7 +24,6 @@ struct TareaDelMomentoView: View {
     @State private var modo = Modo.ver
     @State private var frase = ""
     @State private var primerPaso = ""
-    @State private var enCurso: PersistentIdentifier?
     @State private var quiereAlgoIgual = false
     @State private var mostrarLista = false
     @State private var dictado = Dictado()
@@ -70,25 +71,42 @@ struct TareaDelMomentoView: View {
         }
         .sheet(isPresented: $mostrarLista) {
             MisTareasView()
-                .fontDesign(.rounded)
                 .preferredColorScheme(.dark)
         }
     }
 
     // MARK: Ver la tarea del momento
 
+    /// La tarea empezada (si hay una); sobrevive aunque se cierre la app.
+    private var enCurso: PersistentIdentifier? {
+        pendientes.first(where: \.estaEnCurso)?.persistentModelID
+    }
+
+    /// Dos tareas terminadas en menos de 30 minutos: está en racha.
+    private var enRacha: Bool {
+        let recientes = eventos.filter { $0.tipo == .tareaTerminada && Date.now.timeIntervalSince($0.fecha) < 30 * 60 }
+        return recientes.count >= 2
+    }
+
     @ViewBuilder
     private var ver: some View {
         switch eleccion {
         case .tarea(let tarea):
+            if enRacha && enCurso == nil {
+                // Si va rápido, se le ofrece una más, sin presión.
+                Text("Vas en racha. ¿Una más?")
+                    .font(.zenoTexto(.footnote, .medium))
+                    .opacity(0.75)
+                    .transition(.opacity)
+            }
             VStack(spacing: 8) {
                 Text(tarea.textoVisible)
-                    .font(.title2.weight(.regular))
+                    .font(.zenoTitulo(.title, .light))
                     .multilineTextAlignment(.center)
                 if tarea.primerPaso != nil {
                     // Se muestra el primer paso; la tarea grande queda como contexto.
                     Text("Primer paso de: \(tarea.titulo)")
-                        .font(.footnote)
+                        .font(.zenoTexto(.footnote))
                         .multilineTextAlignment(.center)
                         .opacity(0.6)
                 }
@@ -101,43 +119,43 @@ struct TareaDelMomentoView: View {
             if enCurso == tarea.persistentModelID {
                 BotonZeno("Terminé") { terminar(tarea) }
                 Button("Dejarla para después") { ahoraNo(tarea) }
-                    .font(.body)
+                    .font(.zenoTexto(.body))
                     .opacity(0.75)
             } else {
                 BotonZeno("Empezar") { empezar(tarea) }
                 Button("Ahora no") { ahoraNo(tarea) }
-                    .font(.body)
+                    .font(.zenoTexto(.body))
                     .opacity(0.75)
             }
 
         case .descanso:
             Text("Hoy descansa, mañana atacamos")
-                .font(.title3.weight(.light))
+                .font(.zenoTitulo(.title3))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Text("Tu energía está baja, y está bien.")
-                .font(.footnote)
+                .font(.zenoTexto(.footnote))
                 .opacity(0.65)
             Button("Quiero hacer algo igual") {
                 toques += 1
                 withAnimation(.easeInOut(duration: 0.4)) { quiereAlgoIgual = true }
             }
-            .font(.body)
+            .font(.zenoTexto(.body))
             .opacity(0.75)
             .padding(.top, 10)
 
         case .masTarde:
             Text("Por ahora, nada")
-                .font(.title3.weight(.light))
+                .font(.zenoTitulo(.title3))
             Text("Lo intentamos más tarde.")
-                .font(.footnote)
+                .font(.zenoTexto(.footnote))
                 .opacity(0.65)
 
         case .nadaPendiente:
             Text("No tienes nada pendiente")
-                .font(.title3.weight(.light))
+                .font(.zenoTitulo(.title3))
             Text("Cuando quieras, agrega una sola cosa.")
-                .font(.footnote)
+                .font(.zenoTexto(.footnote))
                 .opacity(0.65)
         }
 
@@ -145,7 +163,7 @@ struct TareaDelMomentoView: View {
 
         if let aviso = dictado.aviso {
             Text(aviso)
-                .font(.footnote)
+                .font(.zenoTexto(.footnote))
                 .multilineTextAlignment(.center)
                 .opacity(0.75)
                 .padding(.horizontal, 32)
@@ -156,7 +174,7 @@ struct TareaDelMomentoView: View {
                 Button("Mis tareas") { mostrarLista = true }
             }
         }
-        .font(.subheadline.weight(.medium))
+        .font(.zenoTexto(.subheadline, .medium))
         .padding(.bottom, 10)
     }
 
@@ -179,7 +197,7 @@ struct TareaDelMomentoView: View {
     private var agregar: some View {
         VStack(spacing: 14) {
             Text(escuchando ? "Te escucho…" : "¿Qué quieres hacer?")
-                .font(.title2.weight(.light))
+                .font(.zenoTitulo(.title2))
             campo($frase, sugerencia: "Una sola frase")
             HStack(spacing: 12) {
                 botonChico("Cancelar", fuerte: false) { cerrarAgregar() }
@@ -188,7 +206,7 @@ struct TareaDelMomentoView: View {
                     .opacity(limpio(frase).isEmpty ? 0.45 : 1)
             }
             Text(dictado.aviso ?? String(localized: "También puedes mantener presionada a Lumi y hablar."))
-                .font(.footnote)
+                .font(.zenoTexto(.footnote))
                 .multilineTextAlignment(.center)
                 .opacity(0.6)
                 .padding(.horizontal, 32)
@@ -198,7 +216,7 @@ struct TareaDelMomentoView: View {
     private var preguntaDelPrimerPaso: some View {
         VStack(spacing: 14) {
             Text("¿Cuál es el primer paso de dos minutos?")
-                .font(.title3.weight(.light))
+                .font(.zenoTitulo(.title3))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 28)
             campo($primerPaso, sugerencia: "Algo muy pequeño")
@@ -209,7 +227,7 @@ struct TareaDelMomentoView: View {
                     .opacity(limpio(primerPaso).isEmpty ? 0.45 : 1)
             }
             Text("\(limpio(frase))")
-                .font(.footnote)
+                .font(.zenoTexto(.footnote))
                 .opacity(0.55)
                 .padding(.horizontal, 32)
         }
@@ -217,7 +235,7 @@ struct TareaDelMomentoView: View {
 
     private func campo(_ texto: Binding<String>, sugerencia: LocalizedStringKey) -> some View {
         TextField("", text: texto, prompt: Text(sugerencia).foregroundStyle(.white.opacity(0.35)), axis: .vertical)
-            .font(.title3)
+            .font(.zenoTitulo(.title3, .regular))
             .multilineTextAlignment(.center)
             .lineLimit(1...3)
             .submitLabel(.done)
@@ -231,19 +249,19 @@ struct TareaDelMomentoView: View {
             }
             .padding(.vertical, 12)
             .padding(.horizontal, 18)
-            .background(.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .cristal(radio: 20)
             .padding(.horizontal, 28)
     }
 
     private func botonChico(_ titulo: LocalizedStringKey, fuerte: Bool, accion: @escaping () -> Void) -> some View {
         Button(action: accion) {
             Text(titulo)
-                .font(.body.weight(.medium))
+                .font(.zenoTexto(.body, .medium))
                 .padding(.vertical, 11)
                 .padding(.horizontal, 26)
-                .background(.white.opacity(fuerte ? 0.20 : 0.07), in: Capsule())
+                .cristal(fuerte: fuerte)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(EstiloPresion())
     }
 
     // MARK: Voz
@@ -342,19 +360,20 @@ struct TareaDelMomentoView: View {
 
     private func empezar(_ tarea: Tarea) {
         toques += 1
-        tarea.empezadaEn = .now
         registrar(.tareaEmpezada, tarea: tarea)
-        withAnimation(.easeInOut(duration: 0.4)) { enCurso = tarea.persistentModelID }
+        withAnimation(.easeInOut(duration: 0.4)) { tarea.empezadaEn = .now }
     }
 
     private func terminar(_ tarea: Tarea) {
         toques += 1
         // Cuánto tardó: sirve para comparar con su propio promedio.
         let segundos = tarea.empezadaEn.map { Date.now.timeIntervalSince($0) }
+        let celebracion = Celebracion.para(tarea, eventos: eventos, puntaje: puntaje)
         registrar(.tareaTerminada, valor: segundos, tarea: tarea)
-        withAnimation(.easeInOut(duration: 0.5)) {
+        alTerminar(celebracion)
+        // La tarea se va despacio, mientras Lumi celebra.
+        withAnimation(.easeInOut(duration: 0.8).delay(0.4)) {
             tarea.terminadaEn = .now
-            enCurso = nil
             quiereAlgoIgual = false
         }
     }
@@ -363,10 +382,7 @@ struct TareaDelMomentoView: View {
     private func ahoraNo(_ tarea: Tarea) {
         toques += 1
         registrar(.ahoraNo, tarea: tarea)
-        withAnimation(.easeInOut(duration: 0.4)) {
-            tarea.empezadaEn = nil
-            enCurso = nil
-        }
+        withAnimation(.easeInOut(duration: 0.4)) { tarea.empezadaEn = nil }
     }
 }
 
@@ -381,10 +397,10 @@ struct MisTareasView: View {
         VStack(spacing: 0) {
             HStack {
                 Text("Mis tareas")
-                    .font(.title2.weight(.medium))
+                    .font(.zenoTitulo(.title2, .regular))
                 Spacer()
                 Button("Cerrar") { cerrar() }
-                    .font(.subheadline)
+                    .font(.zenoTexto(.subheadline))
             }
             .padding(.horizontal, 24)
             .padding(.top, 26)
@@ -393,7 +409,7 @@ struct MisTareasView: View {
             if pendientes.isEmpty {
                 Spacer()
                 Text("Nada pendiente.")
-                    .font(.title3.weight(.light))
+                    .font(.zenoTitulo(.title3))
                     .opacity(0.8)
                 Spacer()
             } else {
@@ -414,10 +430,10 @@ struct MisTareasView: View {
 
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(tarea.titulo)
-                                    .font(.body)
+                                    .font(.zenoTexto(.body))
                                 if let paso = tarea.primerPaso {
                                     Text("Primer paso: \(paso)")
-                                        .font(.footnote)
+                                        .font(.zenoTexto(.footnote))
                                         .opacity(0.6)
                                 }
                             }
