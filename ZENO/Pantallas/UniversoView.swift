@@ -156,7 +156,12 @@ struct UniversoView: View {
                 withAnimation(movimientoDeLumi) { momento = .presencia }
             }
         }
-        .task { registrarApertura() }
+        .task {
+            #if DEBUG
+            DatosDeEjemplo.cargarSiHaceFalta(en: contexto, hayPersona: !personas.isEmpty)
+            #endif
+            registrarApertura()
+        }
         .onReceive(Timer.publish(every: 300, on: .main, in: .common).autoconnect()) { ahora = $0 }
         .fullScreenCover(isPresented: $mostrarLaboratorio) {
             LaboratorioView()
@@ -325,6 +330,7 @@ struct UniversoView: View {
         .foregroundStyle(.white.opacity(0.6))
         .padding(.bottom, 6)
         HStack(spacing: 20) {
+            MedidorFPS()
             Button("Ver presencia") {
                 visita += 1
                 withAnimation(movimientoDeLumi) { momento = .presencia }
@@ -338,6 +344,7 @@ struct UniversoView: View {
         .foregroundStyle(.white.opacity(0.6))
         .padding(.bottom, 8)
         }
+        Color.clear.frame(height: modoPrueba ? 76 : 0)   // los controles de prueba quedan sobre la barra
         #endif
     }
 }

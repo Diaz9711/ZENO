@@ -156,7 +156,8 @@ struct TareaDelMomentoView: View {
             Text("Por ahora, nada")
                 .font(.zenoTitulo(.title3))
                 .luminoso()
-            Text("Lo intentamos más tarde.")
+            Text(vuelveA.map { "Vuelvo a proponerte algo a las \($0.formatted(date: .omitted, time: .shortened))." }
+                 ?? String(localized: "Lo intentamos más tarde."))
                 .font(.zenoTexto(.footnote))
                 .opacity(0.65)
 
@@ -178,8 +179,23 @@ struct TareaDelMomentoView: View {
                 .opacity(0.75)
                 .padding(.horizontal, 32)
         }
-        TarjetaDeHoy(hechas: hechasHoy.count, minutos: minutosEnFoco, mejorHora: mejorHora)
-            .padding(.bottom, 92)      // deja sitio a la barra
+        // La tarjeta solo aparece cuando hay algo que celebrar: una fila de ceros parece un marcador vacío.
+        Group {
+            if hechasHoy.isEmpty {
+                Color.clear.frame(height: 1)
+            } else {
+                TarjetaDeHoy(hechas: hechasHoy.count, minutos: minutosEnFoco, mejorHora: mejorHora)
+                    .aparece(2)
+            }
+        }
+        .padding(.bottom, 92)      // deja sitio a la barra
+    }
+
+    /// Cuándo termina la pausa del último "Ahora no".
+    private var vuelveA: Date? {
+        eventos.filter { $0.tipo == .ahoraNo && Date.now.timeIntervalSince($0.fecha) < 90 * 60 }
+            .map { $0.fecha.addingTimeInterval(90 * 60) }
+            .min()
     }
 
     private var hechasHoy: [EventoDeEnergia] {

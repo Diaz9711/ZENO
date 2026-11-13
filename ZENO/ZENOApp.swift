@@ -13,8 +13,17 @@ struct ZENOApp: App {
 
     var body: some Scene {
         WindowGroup {
+            #if DEBUG
+            if UserDefaults.standard.bool(forKey: "generarIcono") {
+                IconoDeLaApp()
+            } else {
+                UniversoView()
+                    .preferredColorScheme(.dark)
+            }
+            #else
             UniversoView()
                 .preferredColorScheme(.dark)
+            #endif
         }
         // Todo se guarda en el teléfono. Sin cuentas ni servidor.
         .modelContainer(for: [Persona.self, Tarea.self, EventoDeEnergia.self])

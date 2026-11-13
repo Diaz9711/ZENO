@@ -140,6 +140,10 @@ struct AjustesView: View {
 
                 if modoPrueba {
                     VStack(alignment: .leading, spacing: 10) {
+                        Button("Cargar datos de ejemplo") {
+                            DatosDeEjemplo.cargar(en: contexto)
+                        }
+                        .font(.zenoTexto(.subheadline, .medium))
                         Button("Enviar un aviso de prueba en 10 segundos") {
                             Task { await Avisos.enviarPrueba() ; pendientes = await Avisos.pendientes() }
                         }
