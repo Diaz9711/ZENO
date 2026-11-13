@@ -9,7 +9,6 @@ struct AjustesView: View {
     @Environment(\.dismiss) private var cerrar
     @State private var confirmarBorrado = false
     @AppStorage("modoPrueba") private var modoPrueba = false
-    @AppStorage(VozTipografica.clave) private var voz = VozTipografica.fraunces.rawValue
 
     var body: some View {
         let apariencia = AparienciaLumi(semilla: persona.semilla)
@@ -43,26 +42,6 @@ struct AjustesView: View {
                     Text("Los colores y el movimiento son solo tuyos; la forma la eliges tú.")
                         .font(.zenoTexto(.footnote))
                         .opacity(0.6)
-                }
-
-                // — Letra (para elegir la definitiva) —
-                VStack(alignment: .leading, spacing: 12) {
-                    titulo("Letra")
-                    HStack(spacing: 10) {
-                        ForEach(VozTipografica.allCases) { opcion in
-                            let elegida = voz == opcion.rawValue
-                            Button {
-                                withAnimation(.easeInOut(duration: 0.3)) { voz = opcion.rawValue }
-                            } label: {
-                                Text(opcion.nombre)
-                                    .font(.zenoTexto(.subheadline, elegida ? .semibold : .regular))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
-                                    .cristal(radio: 16, activo: elegida)
-                            }
-                            .buttonStyle(EstiloPresion())
-                        }
-                    }
                 }
 
                 // — Presencia —

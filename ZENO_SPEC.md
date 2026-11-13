@@ -75,7 +75,7 @@ Lumi no habla con globos de texto ni regaña. Comunica con luz, postura y movimi
 - El fondo está vivo: más luminoso y cálido por la mañana, más azul profundo por la noche, y un poco más oscuro y calmado cuando la energía baja. **La energía cambia la luz, nunca la nitidez**: la calidad visual es la misma en todo el recorrido.
 - Cada persona tiene su propia nebulosa, derivada de su semilla.
 - **Una sola acción por pantalla.** Mucho espacio vacío. Que abrir la app se sienta como respirar.
-- **Tipografía**: fina, clara y redondeada para el texto (SF Pro Rounded). Bebas Neue solo para el logotipo ZENO.
+- **Tipografía**: letras propias, nunca las del sistema. Fraunces (serifa cálida y suave) para títulos y frases; Manrope (clara y moderna) para botones y texto pequeño; Bebas Neue solo para el logotipo ZENO. *(Decisión de Diaz, 13 nov 2026, tras comparar Fraunces, Cormorant y una versión sin serifa.)*
 - **Transiciones**: nunca cortes. La estrella jamás desaparece y reaparece; se mueve, se encoge y se desplaza entre pantallas como un objeto físico (matchedGeometryEffect, animaciones tipo resorte, pequeño rebote al llegar). Es un solo universo continuo.
 - **Respuesta al toque** inmediata, con háptica sutil.
 - **Íconos propios**, dibujados para ZENO. Nada genérico.

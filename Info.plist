@@ -8,8 +8,6 @@
 		<string>Fraunces.ttf</string>
 		<string>Fraunces-Italic.ttf</string>
 		<string>Manrope.ttf</string>
-		<string>CormorantGaramond.ttf</string>
-		<string>CormorantGaramond-Italic.ttf</string>
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>ZENO usa el micrófono solo mientras mantienes presionada a Lumi, para escribir la tarea que dices.</string>

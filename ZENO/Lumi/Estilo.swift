@@ -11,31 +11,8 @@ extension Color {
 
 // MARK: - Tipografía
 
-/// Las voces tipográficas de ZENO (letras propias, incluidas en la app; licencia OFL en /Licencias).
-/// Mientras Diaz elige, se puede cambiar en Ajustes. Todas usan Bebas Neue para el logotipo.
-enum VozTipografica: String, CaseIterable, Identifiable {
-    /// Fraunces (serifa cálida y suave) + Manrope.
-    case fraunces
-    /// Cormorant Garamond (serifa clásica y elegante) + Manrope.
-    case cormorant
-    /// Manrope en todo: moderna y limpia.
-    case moderna
-
-    var id: String { rawValue }
-    static let clave = "vozTipografica"
-    static var actual: VozTipografica {
-        VozTipografica(rawValue: UserDefaults.standard.string(forKey: clave) ?? "") ?? .fraunces
-    }
-
-    var nombre: String {
-        switch self {
-        case .fraunces: "Fraunces"
-        case .cormorant: "Cormorant"
-        case .moderna: "Moderna"
-        }
-    }
-}
-
+/// Letras propias de ZENO (incluidas en la app; licencia OFL en /Licencias):
+/// Fraunces para títulos y frases, Manrope para el texto pequeño y Bebas Neue para el logotipo.
 extension Font {
     /// Tamaños base de cada estilo; con `relativeTo:` siguen creciendo con Dynamic Type.
     private static func tamano(_ estilo: Font.TextStyle) -> CGFloat {
@@ -65,23 +42,13 @@ extension Font {
         }
     }
 
-    /// Títulos y frases: la voz de ZENO.
+    /// Títulos y frases: Fraunces, la voz de ZENO (elegida por Diaz).
     static func zenoTitulo(_ estilo: Font.TextStyle, _ peso: Font.Weight = .light, cursiva: Bool = false) -> Font {
-        let nombre: String
-        var escala: CGFloat = 1
         let fuerte = [.medium, .semibold, .bold, .heavy, .black].contains(peso)
-        switch VozTipografica.actual {
-        case .fraunces:
-            nombre = cursiva ? (fuerte ? "Fraunces-SemiBoldItalic" : (peso == .regular ? "Fraunces-Italic" : "Fraunces-LightItalic"))
-                             : (fuerte ? "Fraunces-SemiBold" : (peso == .regular ? "Fraunces-Regular" : "Fraunces-Light"))
-        case .cormorant:
-            escala = 1.16   // Cormorant es pequeña de ojo: se agranda para leerse igual
-            nombre = cursiva ? (fuerte ? "CormorantGaramond-MediumItalic" : (peso == .regular ? "CormorantGaramond-Italic" : "CormorantGaramond-LightItalic"))
-                             : (fuerte ? "CormorantGaramond-SemiBold" : (peso == .regular ? "CormorantGaramond-Medium" : "CormorantGaramond-Regular"))
-        case .moderna:
-            nombre = manrope(peso == .regular ? .regular : (fuerte ? .semibold : .light))
-        }
-        return .custom(nombre, size: tamano(estilo) * escala, relativeTo: estilo)
+        let nombre = cursiva
+            ? (fuerte ? "Fraunces-SemiBoldItalic" : (peso == .regular ? "Fraunces-Italic" : "Fraunces-LightItalic"))
+            : (fuerte ? "Fraunces-SemiBold" : (peso == .regular ? "Fraunces-Regular" : "Fraunces-Light"))
+        return .custom(nombre, size: tamano(estilo), relativeTo: estilo)
     }
 
     /// Botones y textos pequeños: Manrope, clara y moderna.

@@ -23,7 +23,7 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 - Botones y campos usan `.cristal()` (vidrio oscuro con borde de luz dorada) y `EstiloPresion`; nunca grises planos de sistema. Íconos dibujados a mano (`IconoOrbita`), sin SF Symbols genéricos.
 - Texto sobre el cielo: títulos con `.luminoso()` (marfil→oro, sombra y halo), etiquetas `Etiqueta` en mayúsculas doradas, y un velo oscuro suave bajo Lumi. Acciones secundarias con `BotonSecundario`; listas con filas de cristal, nunca `List` de sistema; interruptores con `InterruptorZeno`.
 - Los controles de prueba solo aparecen con Ajustes → Modo de prueba (solo en DEBUG).
-- Tipografías propias incluidas en `ZENO/Fuentes` (Google Fonts, licencia OFL en `Licencias/`): Bebas Neue (logotipo), Fraunces, Cormorant Garamond y Manrope. `VozTipografica` elige la combinación de títulos; el texto pequeño siempre es Manrope. Pendiente que Diaz elija A Fraunces, B Cormorant o C Moderna; luego quitar el selector de Ajustes y las fuentes que sobren.
+- Tipografías propias incluidas en `ZENO/Fuentes` (Google Fonts, licencia OFL en `Licencias/`): **Fraunces** para títulos (`Font.zenoTitulo`, con `cursiva:`), **Manrope** para texto (`Font.zenoTexto`), **Bebas Neue** para el logotipo (`Font.zenoMarca`). Decisión de Diaz; no volver a letras de sistema.
 - Transiciones continuas: Lumi nunca desaparece y reaparece; se mueve como objeto físico.
 - Respetar Reducir Movimiento, Dynamic Type y contraste.
 - Español e inglés con String Catalog (`Localizable.xcstrings`). El español es el idioma base.
