@@ -44,4 +44,6 @@ xcodebuild -project ZENO.xcodeproj -scheme ZENO -destination 'platform=iOS Simul
 - Dictado por voz: **solo reconocimiento dentro del teléfono** (`requiresOnDeviceRecognition`); si el idioma no lo permite, se avisa y se escribe. La voz nunca sale del dispositivo.
 - Tamaño de tarea: `ClasificadorDeTamano`, regla simple por palabras clave. La tarea del momento por ahora es la más antigua; la elección por energía llega en la Fase 5.
 
-Estado: Fases 0 a 3 aprobadas y guardadas en git. Fase 4 (tareas) construida, pendiente de que Diaz la apruebe.
+- Energía: `MotorDeEnergia` (funciones puras). Puntaje = curva base del cronotipo + lo aprendido por franja horaria + ajuste de hoy; todo se recalcula desde el historial `EventoDeEnergia`. Niveles: baja < 34, media 34–66, alta ≥ 67. "Ahora no" pospone esa tarea 90 minutos. Lumi y la nebulosa usan el puntaje real.
+
+Estado: Fases 0 a 4 aprobadas y guardadas en git. Fase 5 (energía) construida, pendiente de que Diaz la apruebe.

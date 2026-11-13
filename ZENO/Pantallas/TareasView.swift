@@ -11,6 +11,9 @@ struct TareaDelMomentoView: View {
     /// Dónde empieza el texto, debajo de Lumi.
     let inicioDelContenido: CGFloat
     @Binding var escuchando: Bool
+    /// Puntaje de energía actual (0–100) y el historial del que sale.
+    var puntaje: Double
+    var eventos: [EventoDeEnergia]
 
     @Environment(\.modelContext) private var contexto
     @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
@@ -19,7 +22,8 @@ struct TareaDelMomentoView: View {
     @State private var modo = Modo.ver
     @State private var frase = ""
     @State private var primerPaso = ""
-    @State private var saltadas = 0
+    @State private var enCurso: PersistentIdentifier?
+    @State private var quiereAlgoIgual = false
     @State private var mostrarLista = false
     @State private var dictado = Dictado()
     @State private var toques = 0
@@ -55,6 +59,12 @@ struct TareaDelMomentoView: View {
             guard !nuevo.isEmpty else { return }
             if modo == .primerPaso { primerPaso = nuevo } else { frase = nuevo }
         }
+        .onChange(of: idPropuesta, initial: true) { _, nueva in
+            // Queda registrado qué se propuso y con cuánta energía, para aprender.
+            if let nueva, let tarea = pendientes.first(where: { $0.persistentModelID == nueva }), enCurso != nueva {
+                registrar(.tareaPropuesta, valor: puntaje, tarea: tarea)
+            }
+        }
         .onChange(of: dictado.activo) { _, activo in
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) { escuchando = activo }
         }
@@ -69,7 +79,8 @@ struct TareaDelMomentoView: View {
 
     @ViewBuilder
     private var ver: some View {
-        if let tarea = tareaActual {
+        switch eleccion {
+        case .tarea(let tarea):
             VStack(spacing: 8) {
                 Text(tarea.textoVisible)
                     .font(.title2.weight(.regular))
@@ -87,11 +98,42 @@ struct TareaDelMomentoView: View {
             .transition(.opacity.combined(with: .offset(y: 10)))
 
             Spacer().frame(height: 6)
-            BotonZeno("Hecha") { terminar(tarea) }
-            Button("Ahora no") { ahoraNo(tarea) }
-                .font(.body)
-                .opacity(0.75)
-        } else {
+            if enCurso == tarea.persistentModelID {
+                BotonZeno("Terminé") { terminar(tarea) }
+                Button("Dejarla para después") { ahoraNo(tarea) }
+                    .font(.body)
+                    .opacity(0.75)
+            } else {
+                BotonZeno("Empezar") { empezar(tarea) }
+                Button("Ahora no") { ahoraNo(tarea) }
+                    .font(.body)
+                    .opacity(0.75)
+            }
+
+        case .descanso:
+            Text("Hoy descansa, mañana atacamos")
+                .font(.title3.weight(.light))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+            Text("Tu energía está baja, y está bien.")
+                .font(.footnote)
+                .opacity(0.65)
+            Button("Quiero hacer algo igual") {
+                toques += 1
+                withAnimation(.easeInOut(duration: 0.4)) { quiereAlgoIgual = true }
+            }
+            .font(.body)
+            .opacity(0.75)
+            .padding(.top, 10)
+
+        case .masTarde:
+            Text("Por ahora, nada")
+                .font(.title3.weight(.light))
+            Text("Lo intentamos más tarde.")
+                .font(.footnote)
+                .opacity(0.65)
+
+        case .nadaPendiente:
             Text("No tienes nada pendiente")
                 .font(.title3.weight(.light))
             Text("Cuando quieras, agrega una sola cosa.")
@@ -118,9 +160,18 @@ struct TareaDelMomentoView: View {
         .padding(.bottom, 10)
     }
 
-    private var tareaActual: Tarea? {
-        guard !pendientes.isEmpty else { return nil }
-        return pendientes[saltadas % pendientes.count]
+    /// La tarea que toca ahora: la que ya está en curso, o la que elige la energía.
+    private var eleccion: Eleccion {
+        if let id = enCurso, let tarea = pendientes.first(where: { $0.persistentModelID == id }) {
+            return .tarea(tarea)
+        }
+        return MotorDeEnergia.elegir(pendientes: pendientes, puntaje: puntaje, eventos: eventos,
+                                     quiereAlgoIgual: quiereAlgoIgual)
+    }
+
+    private var idPropuesta: PersistentIdentifier? {
+        if case .tarea(let tarea) = eleccion { return tarea.persistentModelID }
+        return nil
     }
 
     // MARK: Agregar
@@ -282,16 +333,40 @@ struct TareaDelMomentoView: View {
         withAnimation(.easeInOut(duration: 0.4)) { modo = .ver }
     }
 
-    private func terminar(_ tarea: Tarea) {
-        toques += 1
-        contexto.insert(EventoDeEnergia(tipo: .tareaTerminada, tarea: tarea))
-        withAnimation(.easeInOut(duration: 0.5)) { tarea.terminadaEn = .now }
+    /// Guarda un evento en el historial. La tarea se enlaza después de insertar, para que siempre quede guardada.
+    private func registrar(_ tipo: TipoDeEvento, valor: Double? = nil, tarea: Tarea) {
+        let evento = EventoDeEnergia(tipo: tipo, valor: valor)
+        contexto.insert(evento)
+        evento.tarea = tarea
     }
 
+    private func empezar(_ tarea: Tarea) {
+        toques += 1
+        tarea.empezadaEn = .now
+        registrar(.tareaEmpezada, tarea: tarea)
+        withAnimation(.easeInOut(duration: 0.4)) { enCurso = tarea.persistentModelID }
+    }
+
+    private func terminar(_ tarea: Tarea) {
+        toques += 1
+        // Cuánto tardó: sirve para comparar con su propio promedio.
+        let segundos = tarea.empezadaEn.map { Date.now.timeIntervalSince($0) }
+        registrar(.tareaTerminada, valor: segundos, tarea: tarea)
+        withAnimation(.easeInOut(duration: 0.5)) {
+            tarea.terminadaEn = .now
+            enCurso = nil
+            quiereAlgoIgual = false
+        }
+    }
+
+    /// "Ahora no" nunca es un fracaso: la app aprende que esta hora no era, y lo intenta más tarde.
     private func ahoraNo(_ tarea: Tarea) {
         toques += 1
-        contexto.insert(EventoDeEnergia(tipo: .ahoraNo, tarea: tarea))
-        withAnimation(.easeInOut(duration: 0.4)) { saltadas += 1 }
+        registrar(.ahoraNo, tarea: tarea)
+        withAnimation(.easeInOut(duration: 0.4)) {
+            tarea.empezadaEn = nil
+            enCurso = nil
+        }
     }
 }
 

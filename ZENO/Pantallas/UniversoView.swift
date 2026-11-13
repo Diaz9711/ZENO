@@ -12,6 +12,8 @@ struct UniversoView: View {
     @Environment(\.scenePhase) private var fase
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     @Query private var personas: [Persona]
+    @Query(sort: \EventoDeEnergia.fecha) private var eventos: [EventoDeEnergia]
+    @Query private var tareas: [Tarea]
 
     @State private var paso = PasoDeRegistro.bienvenida
     @State private var borrador = BorradorDeRegistro()
@@ -22,6 +24,9 @@ struct UniversoView: View {
     @State private var estuvoEnFondo = false
     @State private var mostrarLaboratorio = false
     @State private var escuchando = false    // Lumi está oyendo una tarea dictada
+    @State private var ahora = Date()        // se refresca cada pocos minutos
+    @State private var abiertaDesde = Date()
+    @State private var energiaDePrueba: Double?   // solo para probar (DEBUG)
 
     /// El cielo antes de que exista la persona: tranquilo, sin dueño todavía.
     private static let semillaNeutra = Semilla(nombre: "zeno", anio: 2026, mes: 1, dia: 1)
@@ -33,8 +38,9 @@ struct UniversoView: View {
         let apariencia = AparienciaLumi(semilla: semilla)
         let forma = persona?.formaDeLumi ?? borrador.forma
         let hayLumi = persona != nil || lumiNacida
-        // La energía real llega en la Fase 5; por ahora un valor amable.
-        let energia = hayLumi ? 0.72 : 0.30
+        // El puntaje de energía real: cronotipo + comportamiento en la app.
+        let puntaje = energiaDePrueba ?? persona.map { MotorDeEnergia.puntaje(persona: $0, eventos: eventos, ahora: ahora) } ?? 72
+        let energia = hayLumi ? puntaje / 100 : 0.30
 
         // Dónde está Lumi: en el centro durante la presencia, arriba cuando llega la tarea.
         let enTarea = persona != nil && momento == .tarea
@@ -63,12 +69,14 @@ struct UniversoView: View {
                 }
                 // El cielo de la persona aparece despacio, como si se condensara.
                 .animation(.easeInOut(duration: 2.6), value: semilla)
+                // La energía nunca salta: Lumi y el cielo cambian despacio.
+                .animation(.easeInOut(duration: 1.8), value: energia)
             }
             .ignoresSafeArea()
             .ignoresSafeArea(.keyboard)
 
             if let persona {
-                contenido(de: persona)
+                contenido(de: persona, puntaje: puntaje)
             } else {
                 RegistroView(paso: $paso, borrador: $borrador, lumiNacida: lumiNacida, alTerminar: terminarRegistro)
                     .transition(.opacity)
@@ -92,12 +100,16 @@ struct UniversoView: View {
             // Cada vez que la persona vuelve a la app, se repite el momento de presencia.
             if nueva == .background {
                 estuvoEnFondo = true
+                registrarCierre()
             } else if nueva == .active && estuvoEnFondo {
                 estuvoEnFondo = false
                 visita += 1
+                registrarApertura()
                 withAnimation(movimientoDeLumi) { momento = .presencia }
             }
         }
+        .task { registrarApertura() }
+        .onReceive(Timer.publish(every: 300, on: .main, in: .common).autoconnect()) { ahora = $0 }
         .fullScreenCover(isPresented: $mostrarLaboratorio) {
             LaboratorioView()
                 .fontDesign(.rounded)
@@ -111,7 +123,7 @@ struct UniversoView: View {
     }
 
     @ViewBuilder
-    private func contenido(de persona: Persona) -> some View {
+    private func contenido(de persona: Persona, puntaje: Double) -> some View {
         GeometryReader { geo in
             switch momento {
             case .presencia:
@@ -132,11 +144,33 @@ struct UniversoView: View {
                     TareaDelMomentoView(
                         centroDeLumi: CGPoint(x: geo.size.width / 2, y: altoTotal * 0.23 - arriba),
                         inicioDelContenido: altoTotal * 0.40 - arriba,
-                        escuchando: $escuchando)
-                    botonesDePrueba(persona)
+                        escuchando: $escuchando,
+                        puntaje: puntaje,
+                        eventos: eventos)
+                    botonesDePrueba(persona, puntaje: puntaje)
                 }
                 .transition(.opacity.combined(with: .offset(y: 18)))
             }
+        }
+    }
+
+    // MARK: Señales de comportamiento
+
+    private func registrarApertura() {
+        ahora = .now
+        abiertaDesde = .now
+        guard !personas.isEmpty else { return }
+        contexto.insert(EventoDeEnergia(tipo: .abrioLaApp))
+    }
+
+    /// Abrir y cerrar sin hacer nada también es una señal (sin juicio: solo cuenta para la energía).
+    private func registrarCierre() {
+        guard !personas.isEmpty else { return }
+        let hizoAlgo = eventos.contains {
+            $0.fecha >= abiertaDesde && [.tareaEmpezada, .tareaTerminada, .ahoraNo].contains($0.tipo)
+        } || tareas.contains { $0.creadaEn >= abiertaDesde }
+        if !hizoAlgo {
+            contexto.insert(EventoDeEnergia(tipo: .cerroSinHacerNada))
         }
     }
 
@@ -161,9 +195,21 @@ struct UniversoView: View {
     }
 
     @ViewBuilder
-    private func botonesDePrueba(_ persona: Persona) -> some View {
+    private func botonesDePrueba(_ persona: Persona, puntaje: Double) -> some View {
         #if DEBUG
         // Botones temporales para probar; no estarán en la app final.
+        Button(energiaDePrueba == nil ? "Energía \(Int(puntaje)) · real" : "Energía \(Int(puntaje)) · de prueba") {
+            // Cada toque cambia: real → alta → media → baja → real.
+            switch energiaDePrueba {
+            case nil: energiaDePrueba = 85
+            case 85: energiaDePrueba = 50
+            case 50: energiaDePrueba = 15
+            default: energiaDePrueba = nil
+            }
+        }
+        .font(.footnote)
+        .foregroundStyle(.white.opacity(0.6))
+        .padding(.bottom, 6)
         HStack(spacing: 20) {
             Button("Ver presencia") {
                 visita += 1
