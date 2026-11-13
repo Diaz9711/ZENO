@@ -14,10 +14,15 @@ struct NebulosaView: View, Animatable {
 
     private static let inicio = Date()
 
-    // Permite que la energía y la calidez cambien poco a poco con `withAnimation`.
-    var animatableData: AnimatablePair<Double, Double> {
-        get { AnimatablePair(energia, calidez) }
-        set { energia = newValue.first; calidez = newValue.second }
+    // Permite que la energía, la calidez y el centro cambien poco a poco con `withAnimation`:
+    // cuando Lumi se mueve, el calor del cielo la sigue.
+    var animatableData: AnimatablePair<AnimatablePair<Double, Double>, AnimatablePair<CGFloat, CGFloat>> {
+        get { AnimatablePair(AnimatablePair(energia, calidez), AnimatablePair(centro.x, centro.y)) }
+        set {
+            energia = newValue.first.first
+            calidez = newValue.first.second
+            centro = UnitPoint(x: newValue.second.first, y: newValue.second.second)
+        }
     }
 
     var body: some View {
