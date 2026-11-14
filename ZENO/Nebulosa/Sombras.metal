@@ -399,7 +399,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
 // ───────── Botón nebulosa ─────────
 // Un trozo de cielo con forma de nube: gas azul con hilos de oro, bordes deshilachados
 // (no hay contorno duro) y una luz tibia detrás del texto. `luz` sube al tocar.
-[[ stitchable ]] half4 nebulosaBoton(float2 pos, half4 color, float2 tam, float t, float luz) {
+[[ stitchable ]] half4 nebulosaBoton(float2 pos, half4 color, float2 tam, float t, float luz, float paleta) {
     float2 uv = (pos - tam * 0.5) / (tam.y * 0.5);
     float largo = max(tam.x / tam.y - 1.0, 0.0);
     float2 q = float2(max(abs(uv.x) - largo, 0.0), uv.y);
@@ -417,9 +417,23 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     alfa *= smoothstep(0.98, 0.78, length(q));
 
     // Los mismos azules del cielo de ZENO, un poco más hondos: el botón es un trozo de ese cielo.
+    // Paletas: 0 azul del cielo · 1 oro · 2 oro sobre noche · 3 luz de luna.
     float3 hondo = float3(0.11, 0.14, 0.32);
     float3 nube = float3(0.24, 0.29, 0.58);
     float3 oro = float3(0.95, 0.84, 0.55);
+    if (paleta > 0.5 && paleta < 1.5) {          // oro: gas dorado con sombras de oro viejo
+        hondo = float3(0.36, 0.26, 0.10);
+        nube = float3(0.86, 0.70, 0.40);
+        oro = float3(1.0, 0.95, 0.80);
+    } else if (paleta > 1.5 && paleta < 2.5) {   // oro sobre noche: hondo azul, nube dorada
+        hondo = float3(0.08, 0.09, 0.20);
+        nube = float3(0.72, 0.58, 0.32);
+        oro = float3(1.0, 0.92, 0.72);
+    } else if (paleta > 2.5) {                   // luz de luna: plata tibia, casi marfil
+        hondo = float3(0.22, 0.23, 0.30);
+        nube = float3(0.78, 0.78, 0.82);
+        oro = float3(1.0, 0.95, 0.85);
+    }
     float3 col = mix(hondo, nube, smoothstep(0.30, 0.90, n));
     col += oro * pow(hilos, 4.0) * (0.22 + 0.28 * luz);
     // Una luz tibia en el núcleo que se aviva al respirar y al tocar.

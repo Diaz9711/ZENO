@@ -439,12 +439,13 @@ struct GaleriaDeBotones: View {
     var body: some View {
         VStack(spacing: 34) {
             Spacer()
+            // Colores de la nebulosa: 1 oro · 2 oro sobre noche · 3 luz de luna.
             ForEach(1...3, id: \.self) { n in
                 VStack(spacing: 10) {
                     Text(verbatim: "\(n)")
                         .font(.zenoTitulo(.title, .regular))
                         .foregroundStyle(Color.oroZeno)
-                    BotonZeno("Empezar", variante: n) {}
+                    BotonZeno("Empezar", variante: 3, paleta: n) {}
                 }
             }
             Spacer()

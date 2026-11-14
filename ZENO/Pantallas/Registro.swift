@@ -255,11 +255,15 @@ struct BotonZeno: View {
     var compacto = false
     /// Para la galería: fuerza un estilo. Si es nil, usa el elegido.
     var variante: Int?
+    /// Para la galería: fuerza un color de nebulosa. Si es nil, usa el elegido.
+    var paleta: Int?
     let accion: () -> Void
     @AppStorage("estiloBoton") private var elegido = 3   // nebulosa: elección de Diaz
+    @AppStorage("colorNebulosaBoton") private var paletaElegida = 0
 
     init(_ titulo: LocalizedStringKey, intensidad: Double = 1, compacto: Bool = false,
-         variante: Int? = nil, accion: @escaping () -> Void) {
+         variante: Int? = nil, paleta: Int? = nil, accion: @escaping () -> Void) {
+        self.paleta = paleta
         self.titulo = titulo
         self.intensidad = intensidad
         self.compacto = compacto
@@ -273,7 +277,8 @@ struct BotonZeno: View {
         Button(action: accion) {
             Text(titulo)
         }
-        .buttonStyle(EstiloLuz(intensidad: intensidad, compacto: compacto, variante: variante ?? elegido))
+        .buttonStyle(EstiloLuz(intensidad: intensidad, compacto: compacto, variante: variante ?? elegido,
+                               paleta: paleta ?? paletaElegida))
         .padding(.bottom, compacto ? 0 : 16)
     }
 }
@@ -283,8 +288,10 @@ struct EstiloLuz: ButtonStyle {
     var intensidad: Double = 1
     var compacto = false
     var variante = 2
+    var paleta = 0
     func makeBody(configuration: Configuration) -> some View {
-        CuerpoDeLuz(configuration: configuration, intensidad: intensidad, compacto: compacto, variante: variante)
+        CuerpoDeLuz(configuration: configuration, intensidad: intensidad, compacto: compacto,
+                    variante: variante, paleta: paleta)
     }
 }
 
@@ -293,12 +300,15 @@ private struct CuerpoDeLuz: View {
     let intensidad: Double
     let compacto: Bool
     let variante: Int
+    let paleta: Int
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     @Environment(\.isEnabled) private var activo
     @State private var ondas = 0
     @State private var respira = false
 
     private var esOro: Bool { variante == 1 }
+    /// Letra oscura cuando el fondo es claro (oro macizo, nebulosa de oro o de luna).
+    private var letraOscura: Bool { esOro || (variante == 3 && (paleta == 1 || paleta == 3)) }
 
     var body: some View {
         let presionado = configuration.isPressed
@@ -308,10 +318,10 @@ private struct CuerpoDeLuz: View {
             configuration.label
                 .font(.zenoTexto(compacto ? .subheadline : .body, .bold))
                 .tracking(0.4)
-                .foregroundStyle(esOro ? AnyShapeStyle(BotonZeno.tinta)
+                .foregroundStyle(letraOscura ? AnyShapeStyle(BotonZeno.tinta)
                                        : AnyShapeStyle(LinearGradient(colors: [.oroClaro, .oroZeno],
                                                                       startPoint: .top, endPoint: .bottom)))
-                .shadow(color: esOro ? .clear : .black.opacity(0.5), radius: 4)
+                .shadow(color: letraOscura ? .white.opacity(0.35) : .black.opacity(0.5), radius: 4)
                 .padding(.leading, compacto ? 18 : 26)
             ZStack {
                 // La onda: un anillo de luz que sale del círculo, como cuando Lumi celebra.
@@ -329,7 +339,7 @@ private struct CuerpoDeLuz: View {
                             CubicKeyframe(0, duration: 0.75)
                         }
                     }
-                if esOro {
+                if letraOscura {
                     Circle().fill(BotonZeno.tinta.opacity(0.92))
                 } else {
                     Circle().strokeBorder(Color.oroZeno.opacity(presionado ? 0.9 : 0.55), lineWidth: 1)
@@ -386,7 +396,8 @@ private struct CuerpoDeLuz: View {
                         .colorEffect(ShaderLibrary.nebulosaBoton(
                             .float2(geo.size),
                             .float(linea.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1000)),
-                            .float(presionado ? 1 : (respira ? 0.55 : 0.15))))
+                            .float(presionado ? 1 : (respira ? 0.55 : 0.15)),
+                            .float(Double(paleta))))
                 }
             }
             .padding(.horizontal, compacto ? -16 : -24)
