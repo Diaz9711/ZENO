@@ -24,6 +24,8 @@ struct LumiView: View, Animatable {
     }
 
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+    /// Pixeles por punto de la pantalla (3 en los iPhone Pro): la estrella se dibuja a esa resolución.
+    @Environment(\.displayScale) private var escalaPantalla
     @State private var reloj = RelojDeLumi()
 
     // Amarillos cálidos de la estrella según la energía (tono, saturación, brillo).
@@ -78,7 +80,8 @@ struct LumiView: View, Animatable {
                         .float(Double(forma.rawValue)),
                         .float3(nucleo.x, nucleo.y, nucleo.z),
                         .float3(corona.x, corona.y, corona.z),
-                        .float3(apariencia.colorHalo.x, apariencia.colorHalo.y, apariencia.colorHalo.z)
+                        .float3(apariencia.colorHalo.x, apariencia.colorHalo.y, apariencia.colorHalo.z),
+                        .float(escalaPantalla)
                     ))
                     .offset(x: m.flotarX * geo.size.width, y: m.flotarY * geo.size.width)
             }

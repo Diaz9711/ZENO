@@ -241,15 +241,23 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
                             float energia, float respiro, float giro,
                             float lobulos, float profundidad, float destello,
                             float fase, float ola, float2 orbita, float forma_,
-                            float3 cNucleo, float3 cCorona, float3 cHalo)
+                            float3 cNucleo, float3 cCorona, float3 cHalo, float escala)
 {
     float2 uv = (pos - tam * 0.5) / (min(tam.x, tam.y) * 0.5);
+    // Tamaño de un pixel real de la pantalla, en estas unidades: lo fino nunca baja de un pixel
+    // (así no parpadea ni se ve dentado) y lo nítido nunca se emborrona más de lo necesario.
+    float px = 2.0 / (min(tam.x, tam.y) * max(escala, 1.0));
     float d = length(uv);
     float a = atan2(uv.y, uv.x);
     float2 dir = uv / max(d, 0.0001);
     bool esEsfera = forma_ > 0.5;
 
     float brillo = mix(0.82, 1.0, energia) + 0.06 * destello;
+    // Parpadeo de estrella real: tres ritmos que no coinciden nunca, de amplitud muy baja.
+    // Cada persona parpadea a su manera (la fase sale de su semilla).
+    float centelleo = 1.0 + 0.045 * sin(t * 2.31 + desplazamiento.x)
+                          + 0.030 * sin(t * 3.73 + desplazamiento.y * 1.7)
+                          + 0.020 * sin(t * 6.11 + desplazamiento.x * 0.6);
 
     // ── Halo (común) ──
     float ondaH = 0.62 * sin(a * lobulos + giro)
@@ -279,6 +287,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
 
     float3 col = cHalo * halo * mix(0.40, 0.60, energia);
     float disco = 0.0;
+    float nitido = 0.0;   // la chispa blanca del centro (solo la estrella)
     float3 esfera = float3(0.0);
 
     if (!esEsfera) {
@@ -286,12 +295,16 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         float3 cClaro = mix(cNucleo, float3(1.0, 0.97, 0.90), 0.28);
         float rN = mix(0.092, 0.112, energia) * (1.0 + 0.055 * respiro);
         float x = d / rN;
-        float corazon = exp(-x * x * 0.85);
+        // Corazón: más definido. Cae rápido al principio (forma de luz real, no de mancha)
+        // y en el centro hay una chispa blanca diminuta que le da foco.
+        float corazon = exp(-pow(x, 2.4) * 0.95);
+        float chispa = exp(-pow(d / max(rN * 0.30, px * 2.0), 2.0));
         float vivo = nube(uv / rN * 0.8 + desplazamiento + float2(t * 0.04, -t * 0.03));
-        float pegado = 1.0 / (1.0 + pow(x / 1.45, 2.0));
+        float pegado = pow(1.0 / (1.0 + x * x), 1.5);
         float fil = nube(dir * 1.25 + desplazamiento + (x * 0.12 - t * 0.035));
-        float medio = 1.0 / (1.0 + pow(x / mix(2.9, 3.9, energia), 2.0));
-        medio *= 0.74 + 0.52 * fil;
+        // El resplandor ancho, más corto y más tenue: antes era lo que hacía ver la estrella borrosa.
+        float medio = 1.0 / (1.0 + pow(x / mix(2.1, 2.9, energia), 2.0));
+        medio *= 0.70 + 0.45 * fil;
         float velo = exp(-pow((d - rHalo * 0.84) / 0.075, 2.0)) * (0.4 + 0.6 * fil);
 
         // Rayos: líneas finas que se afilan hacia la punta. Cada persona tiene
@@ -310,29 +323,46 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
             float al = dot(uv, e);
             float pe = abs(uv.x * e.y - uv.y * e.x);
             float L = largo * (0.82 + 0.18 * danza);
-            float w = 0.0040 + 0.0105 * clamp(1.0 - al / L, 0.0, 1.0);
-            float linea = exp(-pe * pe / (w * w)) + 0.22 * exp(-pe * pe / (w * w * 20.0));
-            rayos += activo * smoothstep(-0.01, 0.03, al) * linea * exp(-al / L * 2.5);
+            // Rayo fino y afilado: nunca más delgado que un pixel, con una falda corta y suave.
+            float w = max(0.0026 + 0.0064 * clamp(1.0 - al / L, 0.0, 1.0), px * 0.85);
+            float linea = exp(-pe * pe / (w * w)) + 0.10 * exp(-pe * pe / (w * w * 6.0));
+            // Cada rayo titila a su ritmo, apenas.
+            float titila = 0.90 + 0.10 * sin(t * (1.6 + 0.37 * fi) + fi * 2.1 + desplazamiento.x);
+            rayos += activo * titila * smoothstep(-0.01, 0.03, al) * linea * exp(-al / L * 2.5);
 
             float ang2 = ang + 3.14159265 / nR;
             float2 e2 = float2(cos(ang2), sin(ang2));
             float al2 = dot(uv, e2);
             float pe2 = abs(uv.x * e2.y - uv.y * e2.x);
             float L2 = L * 0.46;
-            float w2 = 0.0032 + 0.0075 * clamp(1.0 - al2 / L2, 0.0, 1.0);
-            float linea2 = exp(-pe2 * pe2 / (w2 * w2)) + 0.20 * exp(-pe2 * pe2 / (w2 * w2 * 20.0));
+            float w2 = max(0.0022 + 0.0048 * clamp(1.0 - al2 / L2, 0.0, 1.0), px * 0.8);
+            float linea2 = exp(-pe2 * pe2 / (w2 * w2)) + 0.08 * exp(-pe2 * pe2 / (w2 * w2 * 6.0));
             rayosCortos += activo * smoothstep(-0.01, 0.03, al2) * linea2 * exp(-al2 / L2 * 2.5);
         }
         // Rayitos muy finos pegados al corazón.
         float brasa = pow(nube(dir * 5.5 + desplazamiento + float2(t * 0.05, giro)), 3.0) * exp(-x * 0.55) * 2.2;
 
         col += mix(cHalo, cCorona, 0.35) * velo * mix(0.02, 0.10, energia);
-        col += cCorona * medio * 1.05 * brillo;
-        col += mix(cNucleo, cCorona, 0.40) * pegado * 0.95 * brillo * (1.0 + 0.30 * destello);
-        col += cCorona * brasa * 0.20 * brillo;
-        col += mix(mix(cClaro, cCorona, 0.48), cHalo, 0.12) * rayos * 0.95 * brillo;
-        col += mix(mix(cClaro, cCorona, 0.55), cHalo, 0.15) * rayosCortos * 0.60 * brillo;
-        col += cClaro * corazon * (1.9 + 0.5 * (vivo - 0.5)) * brillo;
+        // Destello: una cruz de luz muy fina y corta pegada al corazón, como la de las fotos de estrellas.
+        // Gira con la estrella y respira con el parpadeo.
+        float cruz = 0.0;
+        for (int k = 0; k < 2; k++) {
+            float angC = giro * 0.35 + desplazamiento.y + 0.7854 + 1.5708 * float(k);
+            float2 eC = float2(cos(angC), sin(angC));
+            float aC = abs(dot(uv, eC));
+            float pC = abs(uv.x * eC.y - uv.y * eC.x);
+            float wC = max(0.0018, px * 0.75);
+            cruz += exp(-pC * pC / (wC * wC)) * exp(-aC / (rN * 2.6));
+        }
+
+        col += cCorona * medio * 0.80 * brillo;
+        col += mix(cNucleo, cCorona, 0.40) * pegado * 1.05 * brillo * (1.0 + 0.30 * destello) * centelleo;
+        col += cCorona * brasa * 0.16 * brillo;
+        col += mix(mix(cClaro, cCorona, 0.48), cHalo, 0.12) * rayos * 1.10 * brillo;
+        col += mix(mix(cClaro, cCorona, 0.55), cHalo, 0.15) * rayosCortos * 0.66 * brillo;
+        col += cClaro * cruz * 0.55 * brillo * centelleo;
+        col += cClaro * corazon * (2.1 + 0.5 * (vivo - 0.5)) * brillo * centelleo;
+        nitido = chispa * centelleo;
     } else {
         // ═════ ESFERA ═════
         float rN = mix(0.222, 0.262, energia) * (1.0 + 0.040 * respiro);
@@ -367,7 +397,9 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         esfera += mix(cCorona, cHalo, 0.40) * borde * 0.42;
         esfera *= 0.78 + 0.26 * brillo;
 
-        disco = smoothstep(1.015, 1.0 - mix(0.085, 0.045, energia), x);
+        // Contorno nítido: el borde se suaviza solo lo justo (un pixel y medio), sin halo borroso.
+        float bordeNitido = max(px * 1.5 / rN, 0.008);
+        disco = smoothstep(1.0 + bordeNitido, 1.0 - bordeNitido, x);
 
         float fuera = max(x - 1.0, 0.0);
         float fil = nube(dir * 1.25 + desplazamiento + (x * 0.30 - t * 0.035));
@@ -382,6 +414,8 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     }
 
     col = 1.0 - exp(-col * 1.20);                   // curva suave: no se quema
+    // La chispa va después de la curva: el centro queda blanco y con foco, no lechoso.
+    col = mix(col, float3(1.0, 0.99, 0.96), clamp(nitido * 0.75, 0.0, 1.0));
     col = mix(col, clamp(esfera, 0.0, 1.0), disco);
     col += mix(cNucleo, cHalo, 0.35) * motas * mix(0.10, 0.50, energia);
 

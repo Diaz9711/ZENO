@@ -93,8 +93,10 @@ struct UniversoView: View {
 
                     let anchoLumi = min(geo.size.width, 430) * 0.98
                     LumiQueSeRetira(desplazamiento: desplazamiento, activo: enOtraPagina) {
+                        // Se dibuja a su tamaño real (no se encoge una imagen grande): así queda nítida.
                         LumiView(apariencia: apariencia, energia: energia, forma: forma, destello: destelloDeHoy)
-                            .frame(width: anchoLumi)
+                            .frame(width: anchoLumi * (hayLumi ? tamano : 0.04),
+                                   height: anchoLumi * (hayLumi ? tamano : 0.04))
                     }
                         // Al terminar una tarea: inhala, se encoge un instante y suelta la onda.
                         .keyframeAnimator(initialValue: 1.0, trigger: celebraciones) { vista, escala in
@@ -117,7 +119,6 @@ struct UniversoView: View {
                             }
                         }
                         .rotationEffect(.degrees(vueltas))
-                        .scaleEffect(hayLumi ? tamano : 0.04)
                         .opacity(hayLumi ? 1 : 0)
                         .position(x: geo.size.width * centro.x,
                                   y: geo.size.height * centro.y)
