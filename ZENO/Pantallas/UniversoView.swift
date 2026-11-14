@@ -91,6 +91,7 @@ struct UniversoView: View {
                         .rotationEffect(.degrees(viajando ? -6 : 0))
 
                     let anchoLumi = min(geo.size.width, 430) * 0.98
+                    RetiradaAlDeslizar(activa: enOtraPagina) {
                     LumiView(apariencia: apariencia, energia: energia, forma: forma, destello: destelloDeHoy)
                         .frame(width: anchoLumi)
                         // Al terminar una tarea: inhala, se encoge un instante y suelta la onda.
@@ -114,6 +115,7 @@ struct UniversoView: View {
                             }
                         }
                         .rotationEffect(.degrees(vueltas))
+                    }
                         .scaleEffect(hayLumi ? tamano : 0.04)
                         .opacity(hayLumi ? 1 : 0)
                         .position(x: geo.size.width * centro.x,
@@ -276,13 +278,11 @@ struct UniversoView: View {
                         .transition(.pasoDePagina(sentido: sentido))
 
                     case .tareas:
-                        MisTareasView()
-                            .padding(.top, altoTotal * 0.185 - arriba)
+                        MisTareasView(arriba: altoTotal * 0.185 - arriba)
                             .transition(.pasoDePagina(sentido: sentido))
 
                     case .ajustes:
-                        AjustesView(persona: persona)
-                            .padding(.top, altoTotal * 0.185 - arriba)
+                        AjustesView(persona: persona, arriba: altoTotal * 0.185 - arriba)
                             .transition(.pasoDePagina(sentido: sentido))
                     }
 

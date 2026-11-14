@@ -423,46 +423,51 @@ struct TareaDelMomentoView: View {
     }
 }
 
-/// Lo pendiente, sin fechas, sin rojo y sin contadores.
+/// Lo pendiente, sin fechas vencidas, sin rojo y sin contadores.
 struct MisTareasView: View {
+    /// Dónde empieza el contenido, debajo de Lumi. Lo de encima se funde con el cielo.
+    var arriba: CGFloat = 0
     @Environment(\.modelContext) private var contexto
     @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
     private var pendientes: [Tarea]
     @State private var marcando: Set<PersistentIdentifier> = []
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Etiqueta("Pendiente")
-                    Text("Mis tareas")
-                        .font(.zenoTitulo(.largeTitle))
-                        .luminoso()
+        ScrollView {
+            VStack(spacing: 0) {
+                HStack(alignment: .firstTextBaseline) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Etiqueta("Pendiente")
+                        Text("Mis tareas")
+                            .font(.zenoTitulo(.largeTitle))
+                            .luminoso()
+                    }
+                    Spacer()
                 }
-                Spacer()
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 4)
-            .padding(.bottom, 14)
+                .padding(.horizontal, 4)
+                .padding(.bottom, 14)
 
-            if pendientes.isEmpty {
-                Spacer()
-                Text("Nada pendiente.")
-                    .font(.zenoTitulo(.title3))
-                    .luminoso()
-                Spacer()
-            } else {
-                ScrollView {
+                if pendientes.isEmpty {
+                    Text("Nada pendiente.")
+                        .font(.zenoTitulo(.title3))
+                        .luminoso()
+                        .padding(.top, 120)
+                } else {
                     VStack(spacing: 10) {
                         ForEach(pendientes) { tarea in fila(tarea) }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 120)
                 }
-                .scrollIndicators(.hidden)
             }
+            .padding(.horizontal, 20)
+            .padding(.top, arriba + 4)
+            .padding(.bottom, 120)
+            .informaDesplazamiento()
         }
+        .coordinateSpace(name: "pagina")
+        .bordesFundidos(arriba: arriba)
+        .scrollIndicators(.hidden)
         .foregroundStyle(Color.marfil)
+        .onAppear { Desplazamiento.compartido.valor = 0 }
     }
 
     private func fila(_ tarea: Tarea) -> some View {

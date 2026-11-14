@@ -4,6 +4,8 @@ import SwiftData
 /// Ajustes: lo poco que la persona decide. Aquí puede cambiar la forma de su Lumi cuando quiera.
 struct AjustesView: View {
     @Bindable var persona: Persona
+    /// Dónde empieza el contenido, debajo de Lumi. Lo de encima se funde con el cielo.
+    var arriba: CGFloat = 0
 
     @Environment(\.modelContext) private var contexto
     @State private var confirmarBorrado = false
@@ -160,11 +162,15 @@ struct AjustesView: View {
                     .padding(.top, 6)
             }
             .padding(.horizontal, 24)
-            .padding(.top, 4)
+            .padding(.top, arriba + 4)
             .padding(.bottom, 130)      // deja sitio a la barra
+            .informaDesplazamiento()
         }
+        .coordinateSpace(name: "pagina")
+        .bordesFundidos(arriba: arriba)
         .foregroundStyle(Color.marfil)
         .scrollIndicators(.hidden)
+        .onAppear { Desplazamiento.compartido.valor = 0 }
         .confirmationDialog("¿Borrar todo?", isPresented: $confirmarBorrado, titleVisibility: .visible) {
             Button("Borrar mis datos", role: .destructive, action: borrarTodo)
         } message: {
