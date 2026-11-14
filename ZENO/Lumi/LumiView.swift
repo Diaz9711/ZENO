@@ -26,6 +26,12 @@ struct LumiView: View, Animatable {
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     @State private var reloj = RelojDeLumi()
 
+    // Amarillos cálidos de la estrella según la energía (tono, saturación, brillo).
+    private static let coronaBaja = AparienciaLumi.hsb(0.108, 0.72, 1.0)   // oro cálido y hondo
+    private static let coronaAlta = AparienciaLumi.hsb(0.138, 0.55, 1.0)   // amarillo claro
+    private static let nucleoBajo = AparienciaLumi.hsb(0.112, 0.46, 1.0)
+    private static let nucleoAlto = AparienciaLumi.hsb(0.142, 0.30, 1.0)
+
     /// Lumi ya muestra la energía con su luz; VoiceOver la dice en palabras.
     private var nivelDeEnergia: LocalizedStringKey {
         switch MotorDeEnergia.nivel(energia * 100) {
@@ -42,9 +48,16 @@ struct LumiView: View, Animatable {
                                   apariencia: apariencia,
                                   quieto: reducirMovimiento)
             // La luz va y viene entre sus dos tonos: viva, pero siempre ella misma.
-            let mezcla = Float(0.5 - 0.5 * cos(m.tiempo * 2 * .pi / apariencia.periodoDeLuz))
-            let corona = simd_mix(apariencia.colorCorona, apariencia.colorCoronaVecino, SIMD3(repeating: mezcla))
-            let nucleo = simd_mix(apariencia.colorNucleo, apariencia.colorNucleoVecino, SIMD3(repeating: mezcla))
+            // El color sigue a la energía: con poca, oro cálido y hondo; con mucha, amarillo claro
+            // y brillante. Nunca naranja. La luz de cada persona tiñe el resultado y respira apenas.
+            let e = Float(min(max(energia, 0), 1))
+            let mezcla = Float(0.5 - 0.5 * cos(m.tiempo * 2 * .pi / apariencia.periodoDeLuz)) * 0.35
+            let propiaCorona = simd_mix(apariencia.colorCorona, apariencia.colorCoronaVecino, SIMD3(repeating: mezcla))
+            let propioNucleo = simd_mix(apariencia.colorNucleo, apariencia.colorNucleoVecino, SIMD3(repeating: mezcla))
+            let coronaEnergia = simd_mix(Self.coronaBaja, Self.coronaAlta, SIMD3(repeating: e))
+            let nucleoEnergia = simd_mix(Self.nucleoBajo, Self.nucleoAlto, SIMD3(repeating: e))
+            let corona = simd_mix(propiaCorona, coronaEnergia, SIMD3(repeating: 0.65))
+            let nucleo = simd_mix(propioNucleo, nucleoEnergia, SIMD3(repeating: 0.65))
             GeometryReader { geo in
                 Rectangle()
                     .fill(.white)

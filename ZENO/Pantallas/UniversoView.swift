@@ -157,7 +157,7 @@ struct UniversoView: View {
 
             if Self.verGaleria {
                 #if DEBUG
-                GaleriaDeBotones()
+                GaleriaDeLumi(apariencia: apariencia)
                 #endif
             } else if let persona {
                 if presentando {
@@ -435,6 +435,33 @@ struct UniversoView: View {
 }
 
 #if DEBUG
+/// Solo para comparar: Lumi con energía baja, media y alta, en sus dos formas.
+struct GaleriaDeLumi: View {
+    let apariencia: AparienciaLumi
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer().frame(height: 60)
+            ForEach([FormaDeLumi.estrella, .esfera], id: \.self) { forma in
+                HStack(spacing: 0) {
+                    ForEach([0.12, 0.5, 0.9], id: \.self) { e in
+                        VStack(spacing: 0) {
+                            LumiView(apariencia: apariencia, energia: e, forma: forma)
+                                .frame(width: 150, height: 150)
+                            Text(verbatim: e < 0.3 ? "baja" : (e < 0.7 ? "media" : "alta"))
+                                .font(.zenoTexto(.caption))
+                                .foregroundStyle(Color.oroZeno)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+                .padding(.vertical, 30)
+            }
+            Spacer()
+        }
+        .background(Color.black.opacity(0.25))
+    }
+}
+
 /// Solo para elegir: los tres estilos del botón principal sobre el cielo real.
 struct GaleriaDeBotones: View {
     var body: some View {

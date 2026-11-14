@@ -184,7 +184,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
 
     // Filamentos luminosos, más visibles donde hay gas.
     float hilo = pow(fila, 3.0);
-    col += mix(cBrasa, cNube, 0.35) * hilo * (0.10 + 0.34 * dens) * luzE;
+    col += mix(cBrasa, cNube, 0.35) * hilo * (0.12 + 0.42 * dens) * luzE;
 
     // El centro se enciende: el resplandor de una estrella naciendo.
     float apertura = 3.4 - 0.8 * energia - 1.0 * calidez;
@@ -196,7 +196,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
 
     // Vetas de polvo oscuro: dan contraste y sensación de volumen.
     float veta = smoothstep(0.52, 0.78, polvo);
-    col *= 1.0 - 0.34 * veta * (1.0 - 0.8 * calor);
+    col *= 1.0 - 0.40 * veta * (1.0 - 0.8 * calor);
 
     // Estrellas en tres profundidades; el gas denso las tapa un poco.
     float tapa = 1.0 - 0.60 * dens;
@@ -207,7 +207,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     float cerca = estrellas(posCerca, 53.0, 0.090, 1.35, t, desplazamiento + 41.0);
     float3 tinte = mix(float3(0.78, 0.86, 1.0), float3(1.0, 0.88, 0.72), azar(floor(posCerca / 53.0) + 2.0));
     col += cEstrella * (lejos * 0.42 + medias * 0.70) * tapa * (1.0 - calor);
-    col += tinte * cerca * 0.95 * tapa * (1.0 - calor);
+    col += tinte * cerca * 1.12 * tapa * (1.0 - calor);
 
     // Viñeta suave; el piso nunca baja del color del cielo.
     col *= 1.0 - 0.24 * smoothstep(0.45, 1.25, d);
@@ -283,7 +283,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
 
     if (!esEsfera) {
         // ═════ ESTRELLA ═════
-        float3 cClaro = mix(cNucleo, float3(1.0, 0.97, 0.90), 0.45);
+        float3 cClaro = mix(cNucleo, float3(1.0, 0.97, 0.90), 0.28);
         float rN = mix(0.092, 0.112, energia) * (1.0 + 0.055 * respiro);
         float x = d / rN;
         float corazon = exp(-x * x * 0.85);
@@ -330,8 +330,8 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         col += cCorona * medio * 1.05 * brillo;
         col += mix(cNucleo, cCorona, 0.40) * pegado * 0.95 * brillo * (1.0 + 0.30 * destello);
         col += cCorona * brasa * 0.20 * brillo;
-        col += mix(mix(cClaro, cCorona, 0.30), cHalo, 0.15) * rayos * 0.95 * brillo;
-        col += mix(mix(cClaro, cCorona, 0.40), cHalo, 0.20) * rayosCortos * 0.60 * brillo;
+        col += mix(mix(cClaro, cCorona, 0.48), cHalo, 0.12) * rayos * 0.95 * brillo;
+        col += mix(mix(cClaro, cCorona, 0.55), cHalo, 0.15) * rayosCortos * 0.60 * brillo;
         col += cClaro * corazon * (1.9 + 0.5 * (vivo - 0.5)) * brillo;
     } else {
         // ═════ ESFERA ═════
@@ -354,7 +354,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         float granos = ruido(q * 6.5 + 3.0 * w1 + float2(t * 0.05, t * 0.04));
 
         float luz = clamp(dot(n, normalize(float3(-0.22, -0.34, 0.92))), 0.0, 1.0);
-        float3 cHondo = cCorona * float3(0.86, 0.76, 0.66);   // oro viejo en la sombra, sin naranja
+        float3 cHondo = cCorona * float3(0.90, 0.80, 0.62);   // oro viejo en la sombra, sin marrón ni naranja
         float3 cMedio = mix(cCorona, cNucleo, 0.55);
         float3 cClaro = mix(cNucleo, float3(1.0, 0.97, 0.90), 0.55);
 
