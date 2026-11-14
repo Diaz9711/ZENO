@@ -9,6 +9,8 @@ struct AjustesView: View {
 
     @Environment(\.modelContext) private var contexto
     @State private var confirmarBorrado = false
+    @State private var confirmarSalida = false
+    @AppStorage(Sesion.clave) private var sesionAbierta = true
     @State private var permisoDenegado = false
     @State private var pendientes: [(id: String, fecha: Date?)] = []
     @Query(sort: \EventoDeEnergia.fecha) private var eventos: [EventoDeEnergia]
@@ -120,6 +122,24 @@ struct AjustesView: View {
                     .cristal(radio: 20)
                 }
 
+                // — Sesión —
+                VStack(alignment: .leading, spacing: 12) {
+                    titulo("Sesión")
+                    Text(persona.cuentaApple == nil ? "Entraste como invitado." : "Entraste con tu cuenta de Apple.")
+                        .font(.zenoTexto(.footnote))
+                        .opacity(0.6)
+                    Button {
+                        confirmarSalida = true
+                    } label: {
+                        Text("Cerrar sesión")
+                            .font(.zenoTexto(.body, .medium))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .cristal(radio: 20)
+                    }
+                    .buttonStyle(EstiloPresion())
+                }
+
                 // — Datos —
                 VStack(alignment: .leading, spacing: 12) {
                     titulo("Tus datos")
@@ -196,6 +216,11 @@ struct AjustesView: View {
         .foregroundStyle(Color.marfil)
         .scrollIndicators(.hidden)
         .onAppear { Desplazamiento.compartido.valor = 0 }
+        .confirmationDialog("¿Cerrar sesión?", isPresented: $confirmarSalida, titleVisibility: .visible) {
+            Button("Cerrar sesión", role: .destructive, action: cerrarSesion)
+        } message: {
+            Text("Tu estrella, tus tareas y tu historial se quedan guardados en este teléfono. Para volver, entra de nuevo.")
+        }
         .confirmationDialog("¿Borrar todo?", isPresented: $confirmarBorrado, titleVisibility: .visible) {
             Button("Borrar mis datos", role: .destructive, action: borrarTodo)
         } message: {
@@ -252,6 +277,12 @@ struct AjustesView: View {
                     pendientes = []
                 }
             })
+    }
+
+    /// Cierra la sesión sin borrar nada. Mientras esté cerrada no llega ningún aviso.
+    private func cerrarSesion() {
+        Avisos.cancelarTodo()
+        withAnimation(.spring(response: 0.75, dampingFraction: 0.74)) { sesionAbierta = false }
     }
 
     private func borrarTodo() {

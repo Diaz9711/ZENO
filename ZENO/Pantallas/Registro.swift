@@ -572,34 +572,47 @@ struct ElipseDesdeArriba: Shape {
 // MARK: - Menú de entrada
 
 /// Dos maneras de entrar: con Apple (para no perder los datos al cambiar de iPhone, vía iCloud)
-/// o como invitado. En las dos, todo vive en el teléfono de la persona; ZENO no tiene servidor.
+/// o como invitado. En las dos, todo vive en el teléfono de la persona; ZENO no tiene servidor,
+/// por eso no hay correo ni contraseña que recordar.
 struct MenuDeEntrada: View {
     let alInvitado: () -> Void
     let alApple: ((String, String?) -> Void)?
     @State private var aviso: LocalizedStringKey?
+    @State private var cargando = false
+    @State private var entrando = false
 
     var body: some View {
         VStack(spacing: 14) {
             SignInWithAppleButton(.continue) { pedido in
                 pedido.requestedScopes = [.fullName]
+                withAnimation(Ritmo.contenido) { cargando = true; aviso = nil }
             } onCompletion: { resultado in
+                withAnimation(Ritmo.contenido) { cargando = false }
                 switch resultado {
                 case .success(let autorizacion):
-                    guard let credencial = autorizacion.credential as? ASAuthorizationAppleIDCredential else { return }
-                    let nombre = credencial.fullName?.givenName
-                    alApple?(credencial.user, nombre)
+                    guard let credencial = autorizacion.credential as? ASAuthorizationAppleIDCredential else {
+                        withAnimation { aviso = "Apple no envió tus datos. Inténtalo otra vez o entra como invitado." }
+                        return
+                    }
+                    entrando = true
+                    alApple?(credencial.user, credencial.fullName?.givenName)
                 case .failure(let error):
-                    // Cancelar no es un error: no se dice nada.
-                    if (error as? ASAuthorizationError)?.code == .canceled { return }
-                    withAnimation { aviso = "Entrar con Apple aún no está listo en esta versión. Puedes entrar como invitado." }
+                    withAnimation(Ritmo.contenido) { aviso = Self.mensaje(para: error) }
                 }
             }
             .signInWithAppleButtonStyle(.white)
             .frame(width: 280, height: 50)
             .clipShape(Capsule())
             .shadow(color: Color.oroZeno.opacity(0.25), radius: 16)
+            .opacity(cargando ? 0.55 : 1)
+            .allowsHitTesting(!cargando && !entrando)
+            .accessibilityHint(Text("Tus datos siguen solo en este teléfono"))
 
-            Button(action: alInvitado) {
+            Button {
+                guard !entrando else { return }
+                entrando = true
+                alInvitado()
+            } label: {
                 Text("Entrar como invitado")
                     .font(.zenoTexto(.body, .medium))
                     .foregroundStyle(Color.marfil)
@@ -607,16 +620,67 @@ struct MenuDeEntrada: View {
                     .cristal()
             }
             .buttonStyle(EstiloPresion())
+            .disabled(cargando)
 
-            if let aviso {
-                Text(aviso)
-                    .font(.zenoTexto(.footnote))
-                    .foregroundStyle(Color.marfil.opacity(0.7))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                    .transition(.opacity)
+            Group {
+                if cargando {
+                    HStack(spacing: 10) {
+                        PuntoQueRespira()
+                        Text("Conectando con Apple…")
+                    }
+                } else if let aviso {
+                    Text(aviso)
+                } else {
+                    Text("Sin correo ni contraseña: todo se queda en tu teléfono.")
+                        .opacity(0.7)
+                }
             }
+            .font(.zenoTexto(.footnote))
+            .foregroundStyle(Color.marfil.opacity(0.75))
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 40)
+            .frame(minHeight: 36)
+            .transition(.opacity)
         }
         .padding(.bottom, 24)
+        .sensoryFeedback(.error, trigger: aviso != nil) { _, hay in hay }
+    }
+
+    /// Un mensaje claro para cada error de Apple. Cancelar no es un error: no se dice nada.
+    static func mensaje(para error: Error) -> LocalizedStringKey? {
+        guard let codigo = (error as? ASAuthorizationError)?.code else {
+            return "No se pudo entrar con Apple. Revisa tu conexión o entra como invitado."
+        }
+        switch codigo {
+        case .canceled:
+            return nil
+        case .failed, .invalidResponse:
+            return "Apple no pudo confirmar tu cuenta. Inténtalo otra vez en un momento."
+        case .notHandled, .notInteractive:
+            return "Tu iPhone no pudo mostrar la entrada con Apple. Inténtalo otra vez."
+        default:
+            // Pasa mientras la app no tenga activada la capacidad "Sign in with Apple".
+            return "Entrar con Apple aún no está listo en esta versión. Puedes entrar como invitado."
+        }
+    }
+}
+
+/// Un punto de oro que respira: el "cargando" de ZENO, sin ruedas de sistema.
+struct PuntoQueRespira: View {
+    @State private var arriba = false
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+
+    var body: some View {
+        Circle()
+            .fill(Color.oroZeno)
+            .frame(width: 7, height: 7)
+            .shadow(color: Color.oroZeno.opacity(0.9), radius: 5)
+            .scaleEffect(arriba ? 1.25 : 0.75)
+            .opacity(arriba ? 1 : 0.5)
+            .onAppear {
+                guard !reducirMovimiento else { arriba = true; return }
+                withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) { arriba = true }
+            }
+            .accessibilityHidden(true)
     }
 }

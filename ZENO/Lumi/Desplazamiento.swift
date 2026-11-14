@@ -41,7 +41,7 @@ extension View {
 
     /// Bordes que se funden: el contenido entra y sale por degradados, nunca por una línea de corte.
     /// `arriba` es dónde empieza a verse del todo; por encima se va desvaneciendo bajo Lumi.
-    func bordesFundidos(arriba: CGFloat, abajo: CGFloat = 110) -> some View {
+    func bordesFundidos(arriba: CGFloat, abajo: CGFloat = 150) -> some View {
         mask {
             VStack(spacing: 0) {
                 LinearGradient(stops: [.init(color: .clear, location: 0),
@@ -50,7 +50,11 @@ extension View {
                                startPoint: .top, endPoint: .bottom)
                     .frame(height: max(arriba, 1))
                 Color.black
-                LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
+                // Abajo se apaga del todo antes de la barra, para que nada asome a sus lados.
+                LinearGradient(stops: [.init(color: .black, location: 0),
+                                       .init(color: .clear, location: 0.62),
+                                       .init(color: .clear, location: 1)],
+                               startPoint: .top, endPoint: .bottom)
                     .frame(height: abajo)
             }
         }

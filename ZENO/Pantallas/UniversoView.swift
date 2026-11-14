@@ -39,6 +39,7 @@ struct UniversoView: View {
     @AppStorage("diaCalido") private var diaCalido = ""   // terminó algo con energía baja
     @State private var llegada = false        // al abrir, el universo se acerca
     @State private var presentando = true     // al abrir: la presentación corta de ZENO
+    @AppStorage(Sesion.clave) private var sesionAbierta = true
 
     /// Solo para elegir el botón (se abre con el argumento -galeriaBotones YES).
     private static var verGaleria: Bool {
@@ -59,7 +60,7 @@ struct UniversoView: View {
         let apariencia = AparienciaLumi(semilla: semilla)
         let forma = persona?.formaDeLumi ?? borrador.forma
         // Al abrir, Lumi aún no está: nace del sol de la presentación cuando esta termina.
-        let hayLumi = (persona != nil && !presentando) || lumiNacida
+        let hayLumi = (persona != nil && !presentando && sesionAbierta) || lumiNacida
         let viajando = (enRegistro || presentando) && !llegada
         // El puntaje de energía real: cronotipo + comportamiento en la app.
         let puntaje = energiaDePrueba ?? persona.map { MotorDeEnergia.puntaje(persona: $0, eventos: eventos, ahora: ahora) } ?? 72
@@ -166,7 +167,15 @@ struct UniversoView: View {
                 GaleriaDeLumi(apariencia: apariencia)
                 #endif
             } else if let persona {
-                if presentando {
+                if !sesionAbierta {
+                    // Sesión cerrada: el universo, ZENO y el menú de entrada. Todo lo suyo sigue guardado.
+                    BienvenidaView(alEmpezar: { abrirSesion() },
+                                   alEntrarConApple: { cuenta, _ in
+                                       persona.cuentaApple = cuenta
+                                       abrirSesion()
+                                   })
+                    .transition(.desenfoque)
+                } else if presentando {
                     // Cada vez que se abre: el universo, el sol y ZENO. Sin botón; sigue sola.
                     BienvenidaView(conBoton: false) {
                         withAnimation(movimientoDeLumi) { presentando = false }
@@ -200,7 +209,7 @@ struct UniversoView: View {
             if nueva == .background {
                 estuvoEnFondo = true
                 registrarCierre()
-                if let persona = personas.first {
+                if let persona = personas.first, sesionAbierta {
                     Task { await Avisos.alSalir(persona, eventos: eventos) }
                 }
             } else if nueva == .active && estuvoEnFondo {
@@ -227,6 +236,11 @@ struct UniversoView: View {
             if ajustes.bool(forKey: "sinPresentacion") { presentando = false; llegada = true }
             #endif
             registrarApertura()
+            // Si quitó el permiso de Apple desde el iPhone, la sesión se cierra (sus datos se quedan).
+            if let persona = personas.first, sesionAbierta,
+               !(await Sesion.sigueValida(cuentaApple: persona.cuentaApple)) {
+                withAnimation(movimientoDeLumi) { sesionAbierta = false }
+            }
         }
         .onReceive(Timer.publish(every: 300, on: .main, in: .common).autoconnect()) { ahora = $0 }
         .fullScreenCover(isPresented: $mostrarLaboratorio) {
@@ -361,7 +375,7 @@ struct UniversoView: View {
     private func registrarApertura() {
         ahora = .now
         abiertaDesde = .now
-        guard let persona = personas.first else { return }
+        guard let persona = personas.first, sesionAbierta else { return }
         contexto.insert(EventoDeEnergia(tipo: .abrioLaApp))
         Task {
             await Avisos.alAbrir(persona, eventos: eventos)
@@ -371,7 +385,7 @@ struct UniversoView: View {
 
     /// Abrir y cerrar sin hacer nada también es una señal (sin juicio: solo cuenta para la energía).
     private func registrarCierre() {
-        guard !personas.isEmpty else { return }
+        guard !personas.isEmpty, sesionAbierta else { return }
         let hizoAlgo = eventos.contains {
             $0.fecha >= abiertaDesde && [.tareaEmpezada, .tareaTerminada, .ahoraNo].contains($0.tipo)
         } || tareas.contains { $0.creadaEn >= abiertaDesde }
@@ -392,7 +406,16 @@ struct UniversoView: View {
         }
     }
 
+    /// Volver a entrar: directo a Hoy, y los avisos vuelven a programarse.
+    private func abrirSesion() {
+        presentando = false
+        pagina = .hoy
+        withAnimation(movimientoDeLumi) { sesionAbierta = true }
+        registrarApertura()
+    }
+
     private func terminarRegistro() {
+        sesionAbierta = true
         presentando = false
         momento = .tarea
         visita += 1
