@@ -93,8 +93,25 @@ static float estrellas(float2 pos, float celda, float densidad, float radio, flo
     return (nucleo + aura) * brilla * titila * (0.45 + 0.55 * fract(h * 131.0));
 }
 
+// Lucecitas que flotan despacio, como luciérnagas: cada una vive en su celda,
+// se pasea en ella y se enciende y se apaga con calma.
+static float lucecitas(float2 pos, float celda, float radio, float t, float2 semilla) {
+    float2 g = pos / celda;
+    float2 id = floor(g);
+    float h = azar(id + semilla);
+    float h2 = fract(h * 113.0);
+    float2 paseo = float2(sin(t * (0.10 + 0.14 * h2) + h * 40.0),
+                          cos(t * (0.08 + 0.12 * h) + h2 * 70.0));
+    float dist = length(fract(g) - (0.5 + 0.27 * paseo)) * celda;
+    float presente = step(0.62, h);
+    float pulso = smoothstep(0.15, 0.85, 0.5 + 0.5 * sin(t * (0.22 + 0.35 * h2) + h * 30.0));
+    float nucleo = exp(-dist * dist / (radio * radio));
+    float aura = 0.30 * exp(-dist * dist / (radio * radio * 10.0));
+    return (nucleo + aura) * presente * pulso;
+}
+
 [[ stitchable ]] half4 nebulosa(float2 pos, half4 color,
-                                float2 tam, float2 centro, float t,
+                                float2 tam, float2 centro, float t, float2 inclina,
                                 float2 desplazamiento, float energia, float calidez,
                                 float3 cFondo, float3 cNube, float3 cBrasa, float3 cOro)
 {
@@ -108,7 +125,8 @@ static float estrellas(float2 pos, float celda, float densidad, float radio, flo
     float2 ru = float2(uv.x * cg - uv.y * sg, uv.x * sg + uv.y * cg);
 
     // Gas que se pliega sobre sí mismo, muy despacio.
-    float2 p = ru * 1.30 + desplazamiento;
+    // Al inclinar el teléfono, el gas se corre un poco: lo lejano se mueve menos que lo cercano.
+    float2 p = ru * 1.30 + desplazamiento + inclina * 0.035;
     float2 q = float2(gasN(p + float2(0.0, t * 0.020), 3),
                       gasN(p + float2(5.2, 1.3) - float2(t * 0.016, 0.0), 3));
     float2 r = float2(gasN(p + 1.9 * q + float2(1.7, 9.2) + t * 0.011, 3),
@@ -119,7 +137,9 @@ static float estrellas(float2 pos, float celda, float densidad, float radio, flo
 
     // La energía cambia la luz, no el detalle: la calidad es la misma en todo el recorrido.
     float luzE = mix(0.84, 1.0, energia);
-    float dens = smoothstep(0.30, 0.74, n);
+    // Detalle fino: deshilacha los bordes de las nubes para que no parezcan manchas lisas.
+    float fino = gasN(p * 3.6 + 2.4 * r + 23.0, 2);
+    float dens = smoothstep(0.30, 0.74, n + (fino - 0.5) * 0.18);
     float pliegue = smoothstep(0.58, 0.92, length(r) * 1.15);
 
     // Profundidad: cielo hondo, nube, y un color de acento en los pliegues.
@@ -127,6 +147,12 @@ static float estrellas(float2 pos, float celda, float densidad, float radio, flo
     float3 col = cFondo * mix(0.80, 1.06, calidez);
     col = mix(col, cNube, dens * 0.74);
     col = mix(col, cAcento, pliegue * dens * 0.38);
+    // Zonas un poco más frías y otras más cálidas: el cielo deja de ser de un solo tono.
+    col *= mix(float3(1.0), float3(0.82, 0.96, 1.12), 0.45 * smoothstep(0.42, 0.72, q.x));
+    col *= mix(float3(1.0), float3(1.10, 0.94, 1.04), 0.40 * smoothstep(0.45, 0.75, q.y));
+    // Los bordes de las nubes atrapan luz, más del lado de la estrella.
+    float borde = dens * (1.0 - dens) * 4.0;
+    col += mix(cNube, cBrasa, 0.30) * borde * fino * (0.10 + 0.22 * exp(-d * 1.6)) * luzE;
 
     // Filamentos luminosos, más visibles donde hay gas.
     float hilo = pow(fila, 3.0);
@@ -147,10 +173,11 @@ static float estrellas(float2 pos, float celda, float densidad, float radio, flo
     // Estrellas en tres profundidades; el gas denso las tapa un poco.
     float tapa = 1.0 - 0.60 * dens;
     float3 cEstrella = float3(1.0, 0.95, 0.88);
-    float lejos = estrellas(pos, 7.0, 0.050, 0.55, t, desplazamiento);
-    float medias = estrellas(pos, 19.0, 0.060, 0.85, t, desplazamiento + 17.0);
-    float cerca = estrellas(pos, 53.0, 0.090, 1.35, t, desplazamiento + 41.0);
-    float3 tinte = mix(float3(0.78, 0.86, 1.0), float3(1.0, 0.88, 0.72), azar(floor(pos / 53.0) + 2.0));
+    float2 posCerca = pos + inclina * 14.0;
+    float lejos = estrellas(pos + inclina * 3.0, 7.0, 0.050, 0.55, t, desplazamiento);
+    float medias = estrellas(pos + inclina * 7.0, 19.0, 0.060, 0.85, t, desplazamiento + 17.0);
+    float cerca = estrellas(posCerca, 53.0, 0.090, 1.35, t, desplazamiento + 41.0);
+    float3 tinte = mix(float3(0.78, 0.86, 1.0), float3(1.0, 0.88, 0.72), azar(floor(posCerca / 53.0) + 2.0));
     col += cEstrella * (lejos * 0.42 + medias * 0.70) * tapa * (1.0 - calor);
     col += tinte * cerca * 0.95 * tapa * (1.0 - calor);
 
@@ -158,6 +185,13 @@ static float estrellas(float2 pos, float celda, float densidad, float radio, flo
     col *= 1.0 - 0.24 * smoothstep(0.45, 1.25, d);
     col *= luzE;
     col = max(col, cFondo * 0.74);
+
+    // Lucecitas doradas en dos distancias, delante del gas. Son lo más cercano:
+    // al inclinar el teléfono se mueven más que todo lo demás.
+    float2 sube = float2(0.0, -t * 2.2);
+    float luzLejos = lucecitas(pos + inclina * 22.0 + sube, 104.0, 1.5, t, desplazamiento + 5.0);
+    float luzCerca = lucecitas(pos + inclina * 38.0 + sube * 1.7, 171.0, 2.5, t * 0.8, desplazamiento + 29.0);
+    col += mix(cOro, float3(1.0, 0.93, 0.80), 0.35) * (luzLejos * 0.55 + luzCerca * 0.42) * (1.0 - 0.7 * calor);
 
     // Grano finísimo contra el bandeado.
     col += (azar(pos + fract(t)) - 0.5) / 160.0;

@@ -30,12 +30,14 @@ struct NebulosaView: View, Animatable {
         TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: reducirMovimiento)) { linea in
             GeometryReader { geo in
                 let t = reducirMovimiento ? 0 : linea.date.timeIntervalSince(Self.inicio)
+                let inclina = reducirMovimiento ? .zero : Inclinacion.compartida.leer()
                 Rectangle()
                     .fill(Color("FondoArranque"))
                     .colorEffect(ShaderLibrary.nebulosa(
                         .float2(geo.size),
                         .float2(geo.size.width * centro.x, geo.size.height * centro.y),
                         .float(t),
+                        .float2(inclina.x, inclina.y),
                         .float2(apariencia.desplazamiento.x, apariencia.desplazamiento.y),
                         .float(energia),
                         .float(calidez),
@@ -48,5 +50,7 @@ struct NebulosaView: View, Animatable {
         }
         .ignoresSafeArea()
         .accessibilityHidden(true)
+        .onAppear { if !reducirMovimiento { Inclinacion.compartida.empezar() } }
+        .onDisappear { Inclinacion.compartida.detener() }
     }
 }
