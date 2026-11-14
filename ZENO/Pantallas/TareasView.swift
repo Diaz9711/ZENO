@@ -22,8 +22,6 @@ struct TareaDelMomentoView: View {
     var pedirAgregar: Int = 0
     /// Avisa cuando se está escribiendo, para esconder la barra.
     @Binding var editando: Bool
-    /// Avisa cuando se abre el día y la hora: Lumi sube y se hace pequeña para dar sitio.
-    @Binding var planificando: Bool
 
     @Environment(\.modelContext) private var contexto
     /// Leído para que, al cambiar de idioma, también se redibujen las frases armadas en código.
@@ -83,9 +81,7 @@ struct TareaDelMomentoView: View {
         .onChange(of: modo) { _, nuevo in
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) { editando = nuevo != .ver }
         }
-        .onChange(of: plan.conFecha && modo == .agregar) { _, abierto in
-            withAnimation(Ritmo.lumi) { planificando = abierto }
-        }
+
     }
 
     // MARK: Ver la tarea del momento
@@ -252,8 +248,10 @@ struct TareaDelMomentoView: View {
             HStack(spacing: 12) {
                 botonChico("Cancelar", fuerte: false) { cerrarAgregar() }
                 Button {
+                    // El día y la hora se eligen en una hoja: Lumi no se mueve y el teclado se baja.
                     escribiendo = false
-                    withAnimation(Ritmo.contenido) { plan.conFecha.toggle() }
+                    let enlace = $plan
+                    Hojas.compartidas.mostrar { HojaDePlan(plan: enlace) }
                 } label: {
                     IconoReloj(activo: plan.conFecha)
                         .frame(width: 44, height: 44)
@@ -265,9 +263,8 @@ struct TareaDelMomentoView: View {
                     .disabled(limpio(frase).isEmpty)
             }
             if plan.conFecha {
-                PlanDeTareaView(plan: $plan)
-                    .padding(.horizontal, 28)
-                    .transition(.desenfoque)
+                EtiquetaDePlanBorrador(plan: plan)
+                    .transition(.opacity)
             }
             Text(dictado.aviso ?? Idioma.texto("También puedes mantener presionada a Lumi y hablar."))
                 .font(.zenoTexto(.footnote))
@@ -475,6 +472,16 @@ struct MisTareasView: View {
     @State private var editando: Tarea?
 
     var body: some View {
+        contenido
+            .onAppear {
+                #if DEBUG
+                // -abrirEditor YES: abre directamente el editor de la primera tarea (para probar).
+                if UserDefaults.standard.bool(forKey: "abrirEditor") { editando = pendientes.first }
+                #endif
+            }
+    }
+
+    private var contenido: some View {
         ScrollView {
             if let tarea = editando {
                 EditorDeTarea(tarea: tarea) {

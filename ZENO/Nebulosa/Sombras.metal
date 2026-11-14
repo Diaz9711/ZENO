@@ -288,10 +288,10 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         float x = d / rN;
         float corazon = exp(-x * x * 0.85);
         float vivo = nube(uv / rN * 0.8 + desplazamiento + float2(t * 0.04, -t * 0.03));
-        // Más definida: los brillos anchos se recogen hacia el centro para que no la empañen.
-        float pegado = 1.0 / (1.0 + pow(x / 1.05, 2.0));
+        // Resplandor recogido hacia el centro: con el resplandor ancho la estrella se veía borrosa (Diaz).
+        float pegado = 1.0 / (1.0 + pow(x / 1.0, 2.0));
         float fil = nube(dir * 1.25 + desplazamiento + (x * 0.12 - t * 0.035));
-        float medio = 1.0 / (1.0 + pow(x / mix(2.2, 3.0, energia), 2.0));
+        float medio = 1.0 / (1.0 + pow(x / mix(1.9, 2.6, energia), 2.0));
         medio *= 0.74 + 0.52 * fil;
         float velo = exp(-pow((d - rHalo * 0.84) / 0.075, 2.0)) * (0.4 + 0.6 * fil);
 
@@ -337,18 +337,18 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         float brasa = pow(nube(dir * 5.5 + desplazamiento + float2(t * 0.05, giro)), 3.0) * exp(-x * 0.55) * 2.2;
 
         col += mix(cHalo, cCorona, 0.35) * velo * mix(0.02, 0.10, energia);
-        col += cCorona * medio * 0.78 * brillo;
-        col += mix(cNucleo, cCorona, 0.40) * pegado * 0.85 * brillo * (1.0 + 0.30 * destello) * centelleo;
-        col += cCorona * brasa * 0.16 * brillo;
+        // Los mismos colores de siempre (ningún valor de color nuevo). Lo que cambia es la definición:
+        // resplandor más recogido, rayos finos y claros, y un borde nítido en el centro con su color cClaro.
+        col += cCorona * medio * 0.80 * brillo;
+        col += mix(cNucleo, cCorona, 0.40) * pegado * 0.90 * brillo * (1.0 + 0.30 * destello) * centelleo;
+        col += cCorona * brasa * 0.14 * brillo;
         col += mix(mix(cClaro, cCorona, 0.48), cHalo, 0.12) * rayos * 1.25 * brillo;
         col += mix(mix(cClaro, cCorona, 0.55), cHalo, 0.15) * rayosCortos * 0.80 * brillo;
         col += cClaro * corazon * (1.9 + 0.5 * (vivo - 0.5)) * brillo * centelleo;
-        // El punto blanco del centro: un disco pequeño con borde nítido (un punto de suavizado),
-        // lo que hace que se lea como una estrella y no como una mancha de luz.
         float px = 2.0 / min(tam.x, tam.y);              // un punto de pantalla, en estas unidades
-        float rPunto = rN * 0.55;
+        float rPunto = rN * 0.50;
         float punto = smoothstep(rPunto + px, rPunto - px, d);
-        col += float3(1.0, 0.985, 0.95) * punto * 1.6 * centelleo;
+        col += cClaro * punto * 1.1 * centelleo;
     } else {
         // ═════ ESFERA ═════
         float rN = mix(0.222, 0.262, energia) * (1.0 + 0.040 * respiro);

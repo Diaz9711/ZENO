@@ -28,7 +28,6 @@ struct UniversoView: View {
     @State private var viajes = 0             // cada cambio de página: Lumi toma impulso
     @State private var pedirAgregar = 0
     @State private var editando = false
-    @State private var planificando = false   // en Hoy, eligiendo día y hora: Lumi sube para dar sitio
     @AppStorage("modoPrueba") private var modoPrueba = false
     @State private var escuchando = false    // Lumi está oyendo una tarea dictada
     @State private var ahora = Date()        // se refresca cada pocos minutos
@@ -64,14 +63,14 @@ struct UniversoView: View {
         let hayLumi = (persona != nil && !presentando && sesionAbierta) || lumiNacida
         let viajando = (enRegistro || presentando) && !llegada
         // El puntaje de energía real: cronotipo + comportamiento en la app.
-        let puntaje = energiaDePrueba ?? persona.map { MotorDeEnergia.puntaje(persona: $0, eventos: eventos, ahora: ahora) } ?? 72
+        let puntaje = energiaDePrueba ?? Pruebas.energia ?? persona.map { MotorDeEnergia.puntaje(persona: $0, eventos: eventos, ahora: ahora) } ?? 72
         let energia = hayLumi ? puntaje / 100 : 0.30
 
         // Dónde está Lumi: en el centro durante la presencia, arriba cuando llega la tarea.
         let enTarea = persona != nil && momento == .tarea
         let enPresencia = persona != nil && momento == .presencia
         // En Tareas y Ajustes, Lumi viaja arriba y se hace pequeña: acompaña sin estorbar.
-        let enOtraPagina = enTarea && (pagina != .hoy || planificando)
+        let enOtraPagina = enTarea && pagina != .hoy
         let centro = UnitPoint(x: 0.5, y: enOtraPagina ? 0.115 : (enTarea ? 0.245 : (enPresencia ? 0.34 : 0.33)))
         let tamano = (enOtraPagina ? 0.38 : (enTarea ? 0.80 : 1.0)) * (escuchando ? 1.12 : 1.0)
         let tareaEnCurso = enTarea ? tareas.first(where: \.estaEnCurso) : nil
@@ -87,7 +86,7 @@ struct UniversoView: View {
                                  calidez: calidez,
                                  centro: centro)
                         // El calor del cielo sigue a Lumi con su mismo resorte.
-                        .animation(reducirMovimiento ? .easeInOut(duration: 0.4) : Ritmo.lumi, value: pagina)
+                        .animation(reducirMovimiento ? .easeInOut(duration: 0.5) : Ritmo.lumi, value: pagina)
                         .id(semilla)
                         .transition(.opacity)
                         // Bienvenida: la cámara viaja hacia el cielo, que gira apenas al llegar.
@@ -125,7 +124,7 @@ struct UniversoView: View {
                         .position(x: geo.size.width * centro.x,
                                   y: geo.size.height * centro.y)
                         // Lumi viaja con su propio resorte, aunque el contenido cambie más rápido.
-                        .animation(reducirMovimiento ? .easeInOut(duration: 0.4) : Ritmo.lumi, value: pagina)
+                        .animation(reducirMovimiento ? .easeInOut(duration: 0.5) : Ritmo.lumi, value: pagina)
 
                     if let tarea = tareaEnCurso, let inicio = tarea.empezadaEn {
                         AnilloDeTiempoView(inicio: inicio, minutos: Aprendizaje.minutosPrevistos(tarea, eventos: eventos))
@@ -175,13 +174,13 @@ struct UniversoView: View {
                                        persona.cuentaApple = cuenta
                                        abrirSesion()
                                    })
-                    .transition(.desenfoque)
+                    .transition(.presentacion)
                 } else if presentando {
                     // Cada vez que se abre: el universo, el sol y ZENO. Sin botón; sigue sola.
                     BienvenidaView(conBoton: false) {
                         withAnimation(movimientoDeLumi) { presentando = false }
                     }
-                    .transition(.desenfoque)
+                    .transition(.presentacion)
                 } else {
                     contenido(de: persona, puntaje: puntaje)
                 }
@@ -189,6 +188,8 @@ struct UniversoView: View {
                 RegistroView(paso: $paso, borrador: $borrador, lumiNacida: lumiNacida, alTerminar: terminarRegistro)
                     .transition(.opacity)
             }
+            // Las hojas que suben desde abajo (selectores, confirmaciones): encima de todo.
+            CapaDeHojas()
         }
         .sensoryFeedback(.impact(weight: .medium, intensity: 0.7), trigger: nacimientos)
         .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: momento)
@@ -280,15 +281,14 @@ struct UniversoView: View {
                             VStack(spacing: 0) {
                                 TareaDelMomentoView(
                                     centroDeLumi: CGPoint(x: geo.size.width / 2, y: altoTotal * 0.245 - arriba),
-                                    inicioDelContenido: (planificando ? altoTotal * 0.185 : altoTotal * 0.405) - arriba,
+                                    inicioDelContenido: altoTotal * 0.405 - arriba,
                                     escuchando: $escuchando,
                                     puntaje: puntaje,
                                     eventos: eventos,
                                     alTerminar: celebrar,
                                     mejorHora: MotorDeEnergia.mejorHora(persona: persona, eventos: eventos),
                                     pedirAgregar: pedirAgregar,
-                                    editando: $editando,
-                                    planificando: $planificando)
+                                    editando: $editando)
                             }
                             // Encima y no debajo: si empujan el contenido, la barra se sale de la pantalla.
                             .overlay(alignment: .top) {
@@ -339,7 +339,7 @@ struct UniversoView: View {
             withAnimation(reducirMovimiento ? .easeInOut(duration: 0.3) : Ritmo.contenido) {
                 pagina = destino
                 // Si se estaba escribiendo en Hoy, al salir la barra vuelve siempre.
-                if destino != .hoy { editando = false; planificando = false }
+                if destino != .hoy { editando = false }
             }
         }
     }

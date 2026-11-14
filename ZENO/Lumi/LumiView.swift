@@ -49,7 +49,7 @@ struct LumiView: View, Animatable {
             let m = reloj.avanzar(hasta: linea.date,
                                   energia: energia,
                                   apariencia: apariencia,
-                                  quieto: reducirMovimiento)
+                                  quieto: reducirMovimiento || Pruebas.quieto)
             // La luz va y viene entre sus dos tonos: viva, pero siempre ella misma.
             // El color sigue a la energía: con poca, oro cálido y hondo; con mucha, amarillo claro
             // y brillante. Nunca naranja. La luz de cada persona tiñe el resultado y respira apenas.

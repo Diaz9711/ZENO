@@ -480,7 +480,7 @@ struct BienvenidaView: View {
 
             Spacer()
 
-            MenuDeEntrada(alInvitado: alEmpezar, alApple: alEntrarConApple)
+            MenuDeEntrada(alInvitado: alEmpezar, alApple: alEntrarConApple, conLineaDeAyuda: conBoton)
                 .opacity(conBoton && fase >= 4 ? 1 : 0)
                 .offset(y: fase >= 4 ? 0 : 26)
                 .allowsHitTesting(conBoton && fase >= 4)
@@ -577,6 +577,9 @@ struct ElipseDesdeArriba: Shape {
 struct MenuDeEntrada: View {
     let alInvitado: () -> Void
     let alApple: ((String, String?) -> Void)?
+    /// Sin la línea de ayuda, el menú ocupa lo mismo que antes: así la presentación de cada día
+    /// (que lleva el menú oculto) conserva exactamente su composición.
+    var conLineaDeAyuda = true
     @State private var aviso: LocalizedStringKey?
     @State private var cargando = false
     @State private var entrando = false
@@ -622,6 +625,7 @@ struct MenuDeEntrada: View {
             .buttonStyle(EstiloPresion())
             .disabled(cargando)
 
+            if conLineaDeAyuda || cargando || aviso != nil {
             Group {
                 if cargando {
                     HStack(spacing: 10) {
@@ -641,6 +645,7 @@ struct MenuDeEntrada: View {
             .padding(.horizontal, 40)
             .frame(minHeight: 36)
             .transition(.opacity)
+            }
         }
         .padding(.bottom, 24)
         .sensoryFeedback(.error, trigger: aviso != nil) { _, hay in hay }

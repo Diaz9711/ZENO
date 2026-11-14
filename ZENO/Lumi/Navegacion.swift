@@ -19,11 +19,29 @@ private struct Desenfoque: ViewModifier {
 enum Ritmo {
     /// Páginas, secciones y contenido: rápido y sin rebote.
     static let contenido = Animation.spring(response: 0.38, dampingFraction: 0.9)
-    /// Lumi y el cielo: un objeto físico, con un poco de inercia.
-    static let lumi = Animation.spring(response: 0.75, dampingFraction: 0.74)
+    /// Lumi y el cielo: un objeto físico, con un poco de inercia. Es el resorte original de Lumi
+    /// (su comportamiento no se toca): 0,95 s y amortiguación 0,68.
+    static let lumi = Animation.spring(response: 0.95, dampingFraction: 0.68)
+}
+
+/// La salida original de la presentación (intocable): desenfoque 16, escala 0,955 y 18 pt hacia abajo.
+private struct DesenfoqueDePresentacion: ViewModifier {
+    let activo: Bool
+    func body(content: Content) -> some View {
+        content
+            .blur(radius: activo ? 16 : 0)
+            .opacity(activo ? 0 : 1)
+            .scaleEffect(activo ? 0.955 : 1)
+            .offset(y: activo ? 18 : 0)
+    }
 }
 
 extension AnyTransition {
+    /// Solo para la presentación de ZENO: se queda exactamente como estaba.
+    static var presentacion: AnyTransition {
+        .modifier(active: DesenfoqueDePresentacion(activo: true), identity: DesenfoqueDePresentacion(activo: false))
+    }
+
     static var desenfoque: AnyTransition {
         .modifier(active: Desenfoque(activo: true), identity: Desenfoque(activo: false))
     }

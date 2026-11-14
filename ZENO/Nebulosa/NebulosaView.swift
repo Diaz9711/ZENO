@@ -30,7 +30,7 @@ struct NebulosaView: View, Animatable {
         // 30 cuadros por segundo bastan: el gas se mueve muy despacio.
         TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: reducirMovimiento)) { linea in
             GeometryReader { geo in
-                let t = reducirMovimiento ? 0 : linea.date.timeIntervalSince(Self.inicio)
+                let t = reducirMovimiento || Pruebas.quieto ? 0 : linea.date.timeIntervalSince(Self.inicio)
                 let inclina = reducirMovimiento ? .zero : Inclinacion.compartida.leer()
                 Rectangle()
                     .fill(Color("FondoArranque"))

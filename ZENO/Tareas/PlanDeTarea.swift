@@ -30,121 +30,132 @@ struct BorradorDePlan: Equatable {
     }
 }
 
-/// El día, la hora y el aviso de una tarea, en una tarjeta de cristal.
-/// Plegada por defecto: escribir una tarea sigue siendo una sola acción.
+
+/// El día, la hora y el aviso de una tarea, en una tarjeta de lujo.
+/// Día y hora son campos propios que abren un selector en una hoja que sube desde abajo.
 struct PlanDeTareaView: View {
     @Binding var plan: BorradorDePlan
     @State private var permisoDenegado = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Toggle(isOn: $plan.conFecha.animation(Ritmo.contenido)) {
-                VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 0) {
+            Toggle(isOn: $plan.conFecha.animation(Lujo.curva())) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text("Día y hora")
                         .font(.zenoTexto(.body))
+                        .foregroundStyle(Lujo.marfil)
                     Text("Opcional. Si la hora pasa, no pasa nada.")
                         .font(.zenoTexto(.caption))
-                        .opacity(0.6)
+                        .foregroundStyle(Lujo.marfilSecundario)
                 }
             }
-            .toggleStyle(InterruptorZeno())
+            .toggleStyle(InterruptorLujo())
 
             if plan.conFecha {
-                // Si la fecha ya pasó (una tarea vieja), el rango la incluye para no romper el selector.
-                DatePicker("Cuándo", selection: $plan.fecha, in: min(plan.fecha, Date.now)...,
-                           displayedComponents: [.date, .hourAndMinute])
-                    .font(.zenoTexto(.body))
-                    .tint(Color.oroZeno)
-                    .colorScheme(.dark)
-                    .transition(.desenfoque)
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Avisarme")
-                        .font(.zenoTexto(.caption, .semibold))
-                        .textCase(.uppercase)
-                        .tracking(1.6)
-                        .foregroundStyle(Color.oroZeno)
-                    // Una rejilla y no una fila deslizable: así el brillo de lo elegido no se corta.
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 104), spacing: 8)], alignment: .leading, spacing: 8) {
-                        ForEach(OpcionDeAviso.allCases) { opcion in chip(opcion) }
+                VStack(alignment: .leading, spacing: 0) {
+                    SeparadorLujo().padding(.vertical, 16)
+                    HStack(spacing: 10) {
+                        CampoDeValor(icono: .calendario, accion: { elegir(\.fecha, titulo: "El día") }) {
+                            Text(plan.fecha, format: .dateTime.weekday(.abbreviated).day().month(.abbreviated))
+                        }
+                        CampoDeValor(icono: .reloj, accion: { elegir(\.fecha, titulo: "La hora") }) {
+                            Text(plan.fecha, format: .dateTime.hour().minute())
+                        }
+                        .frame(width: 118)
                     }
+
+                    EtiquetaLujo("Avisarme")
+                        .padding(.top, 24)
+                        .padding(.bottom, 12)
+                    ChipsDeAviso(seleccion: $plan.aviso, alElegir: pedirPermiso)
 
                     if plan.aviso == .personalizado {
-                        DatePicker("Aviso a las", selection: $plan.personalizado, in: min(plan.personalizado, Date.now)...,
-                                   displayedComponents: [.date, .hourAndMinute])
-                            .font(.zenoTexto(.body))
-                            .tint(Color.oroZeno)
-                            .colorScheme(.dark)
-                            .transition(.desenfoque)
-                    }
-                    if permisoDenegado {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Para avisarte, permite las notificaciones de ZENO en los Ajustes del iPhone.")
-                                .font(.zenoTexto(.footnote))
-                                .opacity(0.75)
-                            Button("Abrir Ajustes del iPhone") {
-                                if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
-                                    UIApplication.shared.open(url)
-                                }
-                            }
-                            .font(.zenoTexto(.subheadline, .medium))
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 9)
-                            .cristal()
-                            .buttonStyle(EstiloPresion())
+                        CampoDeValor(icono: .campana, activo: true,
+                                     accion: { elegir(\.personalizado, titulo: "La hora del aviso") }) {
+                            Text(plan.personalizado, format: .dateTime.weekday(.abbreviated).day().hour().minute())
                         }
-                        .transition(.opacity)
-                    } else if plan.aviso != .ninguno {
-                        Text("Solo te avisaré de lo que tú programes, sin sonido.")
-                            .font(.zenoTexto(.caption))
-                            .opacity(0.55)
+                        .padding(.top, 10)
+                        .transition(.opacity.combined(with: .offset(y: -6)))
                     }
+
+                    Group {
+                        if permisoDenegado {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Para avisarte, permite las notificaciones de ZENO en los Ajustes del iPhone.")
+                                    .font(.zenoTexto(.caption))
+                                    .foregroundStyle(Lujo.marfilSecundario)
+                                BotonTerciarioLujo(titulo: "Abrir Ajustes del iPhone") {
+                                    if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+                                        UIApplication.shared.open(url)
+                                    }
+                                }
+                                .padding(.leading, -12)
+                            }
+                        } else if plan.aviso != .ninguno {
+                            Text("Solo te avisaré de lo que tú programes, sin sonido.")
+                                .font(.zenoTexto(.caption))
+                                .foregroundStyle(Lujo.marfil.opacity(0.42))
+                        }
+                    }
+                    .padding(.top, 12)
+                    .transition(.opacity)
                 }
-                .transition(.desenfoque)
+                .transition(.opacity.combined(with: .offset(y: -8)))
             }
         }
-        .padding(16)
-        .cristal(radio: 20)
-        .foregroundStyle(Color.marfil)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 14)
+        .tarjetaLujo()
     }
 
-    private func chip(_ opcion: OpcionDeAviso) -> some View {
-        let elegida = plan.aviso == opcion
-        return Button {
-            withAnimation(Ritmo.contenido) { plan.aviso = opcion }
-            guard opcion != .ninguno else { permisoDenegado = false; return }
-            // El permiso se pide aquí, cuando se entiende para qué sirve.
-            Task {
-                let permiso = await AvisosDeTareas.pedirPermiso()
-                withAnimation(Ritmo.contenido) { permisoDenegado = permiso == .denegado }
-            }
-        } label: {
-            Text(titulo(opcion))
-                .font(.zenoTexto(.subheadline, elegida ? .semibold : .medium))
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 8)
-                .cristal(activo: elegida)
+    /// Abre el selector propio sobre una copia; al cambiar, la devuelve al plan.
+    private func elegir(_ campo: WritableKeyPath<BorradorDePlan, Date>, titulo: LocalizedStringKey) {
+        let enlace = $plan
+        Hojas.compartidas.mostrar {
+            SelectorDeFecha(titulo: titulo,
+                            fecha: Binding(get: { enlace.wrappedValue[keyPath: campo] },
+                                           set: { enlace.wrappedValue[keyPath: campo] = $0 }))
         }
-        .buttonStyle(EstiloPresion())
-        .sensoryFeedback(.selection, trigger: elegida)
-        .accessibilityAddTraits(elegida ? .isSelected : [])
     }
 
-    private func titulo(_ opcion: OpcionDeAviso) -> LocalizedStringKey {
-        switch opcion {
-        case .ninguno: "Sin aviso"
-        case .aLaHora: "A la hora"
-        case .diezAntes: "10 min antes"
-        case .unaHoraAntes: "1 hora antes"
-        case .personalizado: "Otra hora"
+    /// El permiso se pide aquí, cuando se entiende para qué sirve.
+    private func pedirPermiso(_ opcion: OpcionDeAviso) {
+        guard opcion != .ninguno else { permisoDenegado = false; return }
+        Task {
+            let permiso = await AvisosDeTareas.pedirPermiso()
+            withAnimation(Lujo.curva()) { permisoDenegado = permiso == .denegado }
         }
     }
 }
 
-/// Editar una tarea: una página dentro del universo (no una hoja de sistema).
+/// Para Hoy: el día, la hora y el aviso en una hoja (Lumi no se mueve). Trabaja sobre una copia
+/// propia y la devuelve al cambiar, para que la hoja siempre se vea al día.
+struct HojaDePlan: View {
+    @Binding var plan: BorradorDePlan
+    @State private var local = BorradorDePlan()
+    @State private var listo = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 6) {
+                EtiquetaLujo("Tu tarea")
+                Text("Cuándo")
+                    .font(.zenoTitulo(.title2, .regular))
+                    .foregroundStyle(Lujo.marfil)
+            }
+            PlanDeTareaView(plan: $local)
+            BotonPrimarioLujo("Listo") { Hojas.compartidas.cerrar() }
+        }
+        .onAppear {
+            local = plan
+            if !local.conFecha { local.conFecha = true }
+            listo = true
+        }
+        .onChange(of: local) { _, nuevo in if listo { plan = nuevo } }
+    }
+}
+
+/// Editar una tarea: una página dentro del universo (no una hoja de sistema), con los controles de lujo.
 struct EditorDeTarea: View {
     @Bindable var tarea: Tarea
     var alCerrar: () -> Void
@@ -153,82 +164,61 @@ struct EditorDeTarea: View {
     @State private var titulo = ""
     @State private var paso = ""
     @State private var plan = BorradorDePlan()
-    @State private var confirmarBorrado = false
-    @FocusState private var escribiendo: Bool
+    @State private var guardados = 0
+    @FocusState private var enTitulo: Bool
+    @FocusState private var enPaso: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            VStack(alignment: .leading, spacing: 6) {
-                Etiqueta("Editar")
+        VStack(alignment: .leading, spacing: 30) {
+            VStack(alignment: .leading, spacing: 8) {
+                EtiquetaLujo("Editar")
                 Text("Tu tarea")
                     .font(.zenoTitulo(.largeTitle))
-                    .luminoso()
+                    .foregroundStyle(Lujo.marfil)
+                    .shadow(color: .black.opacity(0.45), radius: 12, y: 2)
             }
+            .aparece(0)
 
-            campo($titulo, "Qué quieres hacer")
+            VStack(alignment: .leading, spacing: 10) {
+                EtiquetaLujo("Qué quieres hacer")
+                CampoTextoLujo(texto: $titulo, sugerencia: "Una sola frase", enfocado: $enTitulo)
+            }
+            .aparece(1)
+
             if tarea.tamano == .grande || tarea.primerPaso != nil {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Primer paso de dos minutos")
-                        .font(.zenoTexto(.caption, .semibold))
-                        .textCase(.uppercase)
-                        .tracking(1.6)
-                        .foregroundStyle(Color.oroZeno)
-                    campo($paso, "Algo muy pequeño (opcional)")
+                VStack(alignment: .leading, spacing: 10) {
+                    EtiquetaLujo("Primer paso de dos minutos")
+                    CampoTextoLujo(texto: $paso, sugerencia: "Algo muy pequeño (opcional)", enfocado: $enPaso)
                 }
+                .aparece(2)
             }
 
             PlanDeTareaView(plan: $plan)
+                .aparece(3)
 
             HStack(spacing: 12) {
-                Button { alCerrar() } label: {
-                    Text("Cancelar")
-                        .font(.zenoTexto(.body, .medium))
-                        .padding(.vertical, 11)
-                        .padding(.horizontal, 26)
-                        .cristal()
-                }
-                .buttonStyle(EstiloPresion())
-                Spacer()
-                BotonZeno("Guardar", compacto: true, accion: guardar)
+                BotonSecundarioLujo("Cancelar") { alCerrar() }
+                BotonPrimarioLujo("Guardar", accion: guardar)
                     .disabled(limpio(titulo).isEmpty)
             }
+            .padding(.top, 4)
+            .aparece(4)
 
-            Button { confirmarBorrado = true } label: {
-                Text("Borrar esta tarea")
-                    .font(.zenoTexto(.subheadline))
-                    .opacity(0.6)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 6)
+            BotonTerciarioLujo(titulo: "Borrar esta tarea", icono: .papelera, destructivo: true) {
+                enTitulo = false; enPaso = false
+                Hojas.compartidas.mostrar { ConfirmarBorrado(alBorrar: borrar) }
             }
-            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity)
+            .aparece(5)
         }
-        .foregroundStyle(Color.marfil)
+        .padding(.horizontal, Lujo.margen - 20)    // la página ya trae 20 de margen: en total 28
+        .foregroundStyle(Lujo.marfil)
+        .sensoryFeedback(.success, trigger: guardados)
         .onAppear {
             titulo = tarea.titulo
             paso = tarea.primerPaso ?? ""
             plan = BorradorDePlan(de: tarea)
         }
-        .confirmationDialog("¿Borrar esta tarea?", isPresented: $confirmarBorrado, titleVisibility: .visible) {
-            Button("Borrar", role: .destructive) {
-                // Primero se cierra el editor; la tarea se borra cuando ya no está en pantalla.
-                let tarea = tarea
-                alCerrar()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-                    contexto.delete(tarea)
-                    Task { await AvisosDeTareas.sincronizar(contexto) }
-                }
-            }
-        }
-    }
-
-    private func campo(_ texto: Binding<String>, _ sugerencia: LocalizedStringKey) -> some View {
-        TextField("", text: texto, prompt: Text(sugerencia).foregroundStyle(Color.marfil.opacity(0.35)), axis: .vertical)
-            .font(.zenoTitulo(.title3, .regular))
-            .lineLimit(1...3)
-            .focused($escribiendo)
-            .padding(.vertical, 12)
-            .padding(.horizontal, 18)
-            .cristal(radio: 20)
     }
 
     private func limpio(_ s: String) -> String { s.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -236,7 +226,7 @@ struct EditorDeTarea: View {
     private func guardar() {
         let nuevo = limpio(titulo)
         guard !nuevo.isEmpty else { return }
-        escribiendo = false
+        enTitulo = false; enPaso = false
         if nuevo != tarea.titulo {
             tarea.titulo = nuevo
             tarea.tamano = ClasificadorDeTamano.tamano(de: nuevo)
@@ -244,8 +234,55 @@ struct EditorDeTarea: View {
         let p = limpio(paso)
         tarea.primerPaso = p.isEmpty ? nil : p
         plan.aplicar(a: tarea)
+        guardados += 1
         Task { await AvisosDeTareas.sincronizar(contexto) }
         alCerrar()
+    }
+
+    /// Primero se cierra el editor; la tarea se borra cuando ya no está en pantalla.
+    private func borrar() {
+        let tarea = tarea
+        alCerrar()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+            contexto.delete(tarea)
+            Task { await AvisosDeTareas.sincronizar(contexto) }
+        }
+    }
+}
+
+/// Confirmación de borrado en una hoja de ZENO (no un diálogo gris de sistema).
+private struct ConfirmarBorrado: View {
+    let alBorrar: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("¿Borrar esta tarea?")
+                    .font(.zenoTitulo(.title2, .regular))
+                    .foregroundStyle(Lujo.marfil)
+                Text("Se borra con su día, su hora y su aviso. No se puede deshacer.")
+                    .font(.zenoTexto(.footnote))
+                    .foregroundStyle(Lujo.marfilSecundario)
+            }
+            HStack(spacing: 12) {
+                BotonSecundarioLujo("Cancelar") { Hojas.compartidas.cerrar() }
+                Button {
+                    Hojas.compartidas.cerrar()
+                    alBorrar()
+                } label: {
+                    Text("Borrar")
+                        .font(.lujoEtiqueta(.footnote, .medium))
+                        .versalitas(1.8)
+                        .foregroundStyle(Lujo.rojizo)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: Lujo.altoBoton)
+                        .background(RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous)
+                            .strokeBorder(Lujo.rojizo.opacity(0.55), lineWidth: 0.75))
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(EstiloLujo())
+            }
+        }
     }
 }
 
@@ -286,5 +323,20 @@ struct EtiquetaDePlan: View {
             .font(.zenoTexto(.caption, .medium))
             .foregroundStyle(Color.oroZeno.opacity(0.85))
         }
+    }
+}
+
+/// Bajo los botones de Hoy: el día y la hora ya elegidos, en voz baja.
+struct EtiquetaDePlanBorrador: View {
+    let plan: BorradorDePlan
+
+    var body: some View {
+        HStack(spacing: 6) {
+            IconoFino(icono: .reloj, color: Lujo.oro, tamano: 13)
+            Text(plan.fecha, format: .dateTime.weekday(.wide).day().hour().minute())
+            if plan.aviso != .ninguno { Text("· con aviso") }
+        }
+        .font(.zenoTexto(.caption, .medium))
+        .foregroundStyle(Lujo.oro.opacity(0.9))
     }
 }

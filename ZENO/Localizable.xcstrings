@@ -243,16 +243,6 @@
         }
       }
     },
-    "Aviso a las": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remind at"
-          }
-        }
-      }
-    },
     "Avisos": {
       "localizations": {
         "en": {
@@ -549,6 +539,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dictation isn't available right now. You can type instead."
+          }
+        }
+      }
+    },
+    "El día": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The day"
           }
         }
       }
@@ -1009,6 +1009,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ignored in a row: %lld · Paused: %@"
+          }
+        }
+      }
+    },
+    "La hora": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The time"
+          }
+        }
+      }
+    },
+    "La hora del aviso": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reminder time"
           }
         }
       }
@@ -1542,6 +1562,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Something you planned is coming up. No rush."
+          }
+        }
+      }
+    },
+    "Se borra con su día, su hora y su aviso. No se puede deshacer.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It's deleted along with its day, time and reminder. This can't be undone."
           }
         }
       }
