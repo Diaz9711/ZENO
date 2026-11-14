@@ -12,7 +12,12 @@ final class Inclinacion {
     /// La postura en la que la persona sostiene el teléfono: desde ahí se mide.
     private var reposo: CGPoint?
 
+    /// Cuántos cielos lo están usando. Al nacer Lumi el cielo se recrea: el viejo se va
+    /// después de que llegó el nuevo, y sin esta cuenta apagaba el sensor del nuevo.
+    private var usuarios = 0
+
     func empezar() {
+        usuarios += 1
         guard sensor.isDeviceMotionAvailable, !sensor.isDeviceMotionActive else { return }
         reposo = nil
         sensor.deviceMotionUpdateInterval = 1.0 / 30.0
@@ -20,6 +25,8 @@ final class Inclinacion {
     }
 
     func detener() {
+        usuarios = max(usuarios - 1, 0)
+        guard usuarios == 0 else { return }
         sensor.stopDeviceMotionUpdates()
     }
 

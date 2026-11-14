@@ -1,4 +1,5 @@
 import SwiftUI
+import AuthenticationServices
 import simd
 
 /// Los pasos del registro, en orden. Una sola cosa por pantalla.
@@ -23,6 +24,7 @@ struct BorradorDeRegistro: Equatable {
     var horaPico = 10.0
     var horaApagado = 22.0
     var forma = FormaDeLumi.estrella
+    var cuentaApple: String?
 
     var nombreLimpio: String { nombre.trimmingCharacters(in: .whitespacesAndNewlines) }
 
@@ -42,6 +44,7 @@ struct BorradorDeRegistro: Equatable {
                               nacimientoAnio: n.anio, nacimientoMes: n.mes, nacimientoDia: n.dia,
                               horaDespertar: horaDespertar, horaPico: horaPico, horaApagado: horaApagado)
         persona.formaDeLumi = forma
+        persona.cuentaApple = cuentaApple
         return persona
     }
 }
@@ -87,7 +90,13 @@ struct RegistroView: View {
     @ViewBuilder
     private var contenido: some View {
         switch paso {
-        case .bienvenida: BienvenidaView { ir(a: .nombre) }
+        case .bienvenida:
+            BienvenidaView(alEmpezar: { ir(a: .nombre) },
+                           alEntrarConApple: { cuenta, nombreDeApple in
+                               borrador.cuentaApple = cuenta
+                               if let nombreDeApple, borrador.nombreLimpio.isEmpty { borrador.nombre = nombreDeApple }
+                               ir(a: .nombre)
+                           })
         case .nombre: nombre
         case .fecha: fecha
         case .despertar:
@@ -543,7 +552,10 @@ private struct OndaDeBoton {
 struct BienvenidaView: View {
     /// Con botón: la primera vez, antes del registro. Sin botón: cada vez que se abre, y sigue sola.
     var conBoton = true
+    /// Entrar como invitado (o, sin botones, seguir sola).
     let alEmpezar: () -> Void
+    /// Entrar con Apple: identificador de la cuenta y, si Apple lo da, el nombre.
+    var alEntrarConApple: ((String, String?) -> Void)? = nil
     @State private var terminada = false
 
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
@@ -594,10 +606,10 @@ struct BienvenidaView: View {
 
             Spacer()
 
-            BotonZeno("Crear mi estrella", accion: alEmpezar)
-            .opacity(conBoton && fase >= 4 ? 1 : 0)
-            .offset(y: fase >= 4 ? 0 : 26)
-            .allowsHitTesting(conBoton && fase >= 4)
+            MenuDeEntrada(alInvitado: alEmpezar, alApple: alEntrarConApple)
+                .opacity(conBoton && fase >= 4 ? 1 : 0)
+                .offset(y: fase >= 4 ? 0 : 26)
+                .allowsHitTesting(conBoton && fase >= 4)
         }
         .contentShape(Rectangle())
         .onTapGesture { mostrarTodo() }
@@ -692,5 +704,57 @@ extension EnvironmentValues {
     var cieloDeZeno: AparienciaLumi? {
         get { self[ClaveCieloDeZeno.self] }
         set { self[ClaveCieloDeZeno.self] = newValue }
+    }
+}
+
+// MARK: - Menú de entrada
+
+/// Dos maneras de entrar: con Apple (para no perder los datos al cambiar de iPhone, vía iCloud)
+/// o como invitado. En las dos, todo vive en el teléfono de la persona; ZENO no tiene servidor.
+struct MenuDeEntrada: View {
+    let alInvitado: () -> Void
+    let alApple: ((String, String?) -> Void)?
+    @State private var aviso: LocalizedStringKey?
+
+    var body: some View {
+        VStack(spacing: 14) {
+            SignInWithAppleButton(.continue) { pedido in
+                pedido.requestedScopes = [.fullName]
+            } onCompletion: { resultado in
+                switch resultado {
+                case .success(let autorizacion):
+                    guard let credencial = autorizacion.credential as? ASAuthorizationAppleIDCredential else { return }
+                    let nombre = credencial.fullName?.givenName
+                    alApple?(credencial.user, nombre)
+                case .failure(let error):
+                    // Cancelar no es un error: no se dice nada.
+                    if (error as? ASAuthorizationError)?.code == .canceled { return }
+                    withAnimation { aviso = "Entrar con Apple aún no está listo en esta versión. Puedes entrar como invitado." }
+                }
+            }
+            .signInWithAppleButtonStyle(.white)
+            .frame(width: 280, height: 50)
+            .clipShape(Capsule())
+            .shadow(color: Color.oroZeno.opacity(0.25), radius: 16)
+
+            Button(action: alInvitado) {
+                Text("Entrar como invitado")
+                    .font(.zenoTexto(.body, .medium))
+                    .foregroundStyle(Color.marfil)
+                    .frame(width: 280, height: 50)
+                    .cristal()
+            }
+            .buttonStyle(EstiloPresion())
+
+            if let aviso {
+                Text(aviso)
+                    .font(.zenoTexto(.footnote))
+                    .foregroundStyle(Color.marfil.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+                    .transition(.opacity)
+            }
+        }
+        .padding(.bottom, 24)
     }
 }

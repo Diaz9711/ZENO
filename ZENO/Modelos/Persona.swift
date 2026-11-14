@@ -28,6 +28,9 @@ final class Persona {
     var avisoDiarioProgramado: Date? = nil
 
     var creadaEn: Date
+    /// Identificador de "Iniciar sesión con Apple". nil = entró como invitado.
+    /// Sirve para reconocer a la persona y, más adelante, sincronizar con su iCloud.
+    var cuentaApple: String? = nil
 
     init(
         nombre: String,

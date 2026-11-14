@@ -11,6 +11,7 @@ struct NebulosaView: View, Animatable {
     var centro: UnitPoint = .center
 
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+    @State private var usaSensor = false
 
     private static let inicio = Date()
 
@@ -50,7 +51,7 @@ struct NebulosaView: View, Animatable {
         }
         .ignoresSafeArea()
         .accessibilityHidden(true)
-        .onAppear { if !reducirMovimiento { Inclinacion.compartida.empezar() } }
-        .onDisappear { Inclinacion.compartida.detener() }
+        .onAppear { if !reducirMovimiento { Inclinacion.compartida.empezar(); usaSensor = true } }
+        .onDisappear { if usaSensor { Inclinacion.compartida.detener(); usaSensor = false } }
     }
 }
