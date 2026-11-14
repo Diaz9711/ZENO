@@ -39,6 +39,7 @@ struct UniversoView: View {
     @AppStorage("diaCalido") private var diaCalido = ""   // terminó algo con energía baja
     @State private var llegada = false        // al abrir, el universo se acerca
     @State private var presentando = true     // al abrir: la presentación corta de ZENO
+    @State private var desplazamiento = DesplazamientoDePagina()   // lo que se desliza en Tareas y Ajustes
 
     /// Solo para elegir el botón (se abre con el argumento -galeriaBotones YES).
     private static var verGaleria: Bool {
@@ -91,8 +92,10 @@ struct UniversoView: View {
                         .rotationEffect(.degrees(viajando ? -6 : 0))
 
                     let anchoLumi = min(geo.size.width, 430) * 0.98
-                    LumiView(apariencia: apariencia, energia: energia, forma: forma, destello: destelloDeHoy)
-                        .frame(width: anchoLumi)
+                    LumiQueSeRetira(desplazamiento: desplazamiento, activo: enOtraPagina) {
+                        LumiView(apariencia: apariencia, energia: energia, forma: forma, destello: destelloDeHoy)
+                            .frame(width: anchoLumi)
+                    }
                         // Al terminar una tarea: inhala, se encoge un instante y suelta la onda.
                         .keyframeAnimator(initialValue: 1.0, trigger: celebraciones) { vista, escala in
                             vista.scaleEffect(escala)
@@ -174,6 +177,7 @@ struct UniversoView: View {
                     .transition(.opacity)
             }
         }
+        .environment(\.desplazamientoDePagina, desplazamiento)
         .sensoryFeedback(.impact(weight: .medium, intensity: 0.7), trigger: nacimientos)
         .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: momento)
         .onChange(of: paso) { _, nuevo in
@@ -276,13 +280,11 @@ struct UniversoView: View {
                         .transition(.pasoDePagina(sentido: sentido))
 
                     case .tareas:
-                        MisTareasView()
-                            .padding(.top, altoTotal * 0.185 - arriba)
+                        MisTareasView(margenSuperior: altoTotal * 0.185 - arriba)
                             .transition(.pasoDePagina(sentido: sentido))
 
                     case .ajustes:
-                        AjustesView(persona: persona)
-                            .padding(.top, altoTotal * 0.185 - arriba)
+                        AjustesView(persona: persona, margenSuperior: altoTotal * 0.185 - arriba)
                             .transition(.pasoDePagina(sentido: sentido))
                     }
 
@@ -308,6 +310,8 @@ struct UniversoView: View {
         guard destino != pagina else { return }
         sentido = destino.rawValue > pagina.rawValue ? 1 : -1
         DispatchQueue.main.async {
+            // La página nueva empieza arriba: Lumi vuelve a su tamaño junto con el cambio.
+            withAnimation(.easeOut(duration: 0.3)) { desplazamiento.valor = 0 }
             if !reducirMovimiento { viajes += 1 }
             withAnimation(reducirMovimiento ? .easeInOut(duration: 0.5)
                                             : .spring(response: 0.95, dampingFraction: 0.68)) {

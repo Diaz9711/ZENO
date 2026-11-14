@@ -425,43 +425,51 @@ struct TareaDelMomentoView: View {
 
 /// Lo pendiente, sin fechas, sin rojo y sin contadores.
 struct MisTareasView: View {
+    /// Dónde empieza el contenido, debajo de Lumi.
+    var margenSuperior: CGFloat = 0
     @Environment(\.modelContext) private var contexto
+    @Environment(\.desplazamientoDePagina) private var desplazamiento
     @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
     private var pendientes: [Tarea]
     @State private var marcando: Set<PersistentIdentifier> = []
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Etiqueta("Pendiente")
-                    Text("Mis tareas")
-                        .font(.zenoTitulo(.largeTitle))
-                        .luminoso()
+        // Todo se desliza junto, título incluido: la página es una sola pieza.
+        ScrollView {
+            VStack(spacing: 0) {
+                HStack(alignment: .firstTextBaseline) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Etiqueta("Pendiente")
+                        Text("Mis tareas")
+                            .font(.zenoTitulo(.largeTitle))
+                            .luminoso()
+                    }
+                    Spacer()
                 }
-                Spacer()
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 4)
-            .padding(.bottom, 14)
+                .padding(.horizontal, 24)
+                .padding(.top, 4)
+                .padding(.bottom, 14)
 
-            if pendientes.isEmpty {
-                Spacer()
-                Text("Nada pendiente.")
-                    .font(.zenoTitulo(.title3))
-                    .luminoso()
-                Spacer()
-            } else {
-                ScrollView {
+                if pendientes.isEmpty {
+                    Text("Nada pendiente.")
+                        .font(.zenoTitulo(.title3))
+                        .luminoso()
+                        .padding(.top, 120)
+                } else {
                     VStack(spacing: 10) {
                         ForEach(pendientes) { tarea in fila(tarea) }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 120)
                 }
-                .scrollIndicators(.hidden)
             }
+            .padding(.top, margenSuperior)
+            .padding(.bottom, 120)
+            .medirDesplazamiento(en: "tareas")
         }
+        .coordinateSpace(name: "tareas")
+        .alDesplazar(desplazamiento)
+        .fundidoSuperior(inicio: margenSuperior + 6)
+        .scrollIndicators(.hidden)
         .foregroundStyle(Color.marfil)
     }
 

@@ -4,6 +4,8 @@ import SwiftData
 /// Ajustes: lo poco que la persona decide. Aquí puede cambiar la forma de su Lumi cuando quiera.
 struct AjustesView: View {
     @Bindable var persona: Persona
+    /// Dónde empieza el contenido, debajo de Lumi. El cielo queda libre por encima.
+    var margenSuperior: CGFloat = 0
 
     @Environment(\.modelContext) private var contexto
     @State private var confirmarBorrado = false
@@ -11,6 +13,7 @@ struct AjustesView: View {
     @State private var pendientes: [(id: String, fecha: Date?)] = []
     @Query(sort: \EventoDeEnergia.fecha) private var eventos: [EventoDeEnergia]
     @AppStorage("modoPrueba") private var modoPrueba = false
+    @Environment(\.desplazamientoDePagina) private var desplazamiento
 
     var body: some View {
         let apariencia = AparienciaLumi(semilla: persona.semilla)
@@ -160,9 +163,14 @@ struct AjustesView: View {
                     .padding(.top, 6)
             }
             .padding(.horizontal, 24)
-            .padding(.top, 4)
+            .padding(.top, margenSuperior + 4)
             .padding(.bottom, 130)      // deja sitio a la barra
+            .medirDesplazamiento(en: "ajustes")
         }
+        .coordinateSpace(name: "ajustes")
+        .alDesplazar(desplazamiento)
+        // Al subir, los ajustes se funden con el cielo bajo Lumi: una sola pieza, sin corte.
+        .fundidoSuperior(inicio: margenSuperior + 6)
         .foregroundStyle(Color.marfil)
         .scrollIndicators(.hidden)
         .confirmationDialog("¿Borrar todo?", isPresented: $confirmarBorrado, titleVisibility: .visible) {
