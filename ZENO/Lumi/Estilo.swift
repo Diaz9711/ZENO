@@ -3,8 +3,13 @@ import SwiftUI
 // MARK: - Colores de ZENO
 
 extension Color {
-    /// El oro de Lumi: acentos, bordes encendidos.
-    static let oroZeno = Color(red: 1.0, green: 0.80, blue: 0.48)
+    /// El oro de ZENO: luz de estrella, pálido y metálico. Acentos y bordes encendidos.
+    /// Nunca naranja ni durazno: ese tono es de otras apps (decisión de Diaz, 14 nov 2026).
+    static let oroZeno = Color(red: 0.95, green: 0.84, blue: 0.55)
+    /// El brillo del oro: casi blanco, apenas tibio.
+    static let oroClaro = Color(red: 1.0, green: 0.96, blue: 0.82)
+    /// La sombra del oro: oro viejo, para dar volumen sin caer en naranja.
+    static let oroHondo = Color(red: 0.84, green: 0.67, blue: 0.34)
     /// Texto principal: blanco cálido, nunca blanco puro de sistema.
     static let marfil = Color(red: 1.0, green: 0.975, blue: 0.94)
 }
@@ -127,7 +132,7 @@ struct SolZeno: View {
             let r = min(size.width, size.height) / 2
             let disco = Path(ellipseIn: CGRect(x: c.x - r * 0.42, y: c.y - r * 0.42, width: r * 0.84, height: r * 0.84))
             ctx.addFilter(.shadow(color: Color.oroZeno.opacity(0.9), radius: r * 0.45))
-            ctx.fill(disco, with: .radialGradient(Gradient(colors: [.marfil, .oroZeno, Color(red: 0.98, green: 0.6, blue: 0.3)]),
+            ctx.fill(disco, with: .radialGradient(Gradient(colors: [.marfil, .oroZeno, .oroHondo]),
                                                   center: CGPoint(x: c.x - r * 0.12, y: c.y - r * 0.14),
                                                   startRadius: 0, endRadius: r * 0.5))
             let anillo = Path(ellipseIn: CGRect(x: c.x - r * 0.86, y: c.y - r * 0.86, width: r * 1.72, height: r * 1.72))
@@ -165,7 +170,7 @@ extension View {
     /// una sombra que los separa del gas y un halo dorado muy leve.
     func luminoso() -> some View {
         self
-            .foregroundStyle(LinearGradient(colors: [.marfil, Color(red: 1.0, green: 0.88, blue: 0.70)],
+            .foregroundStyle(LinearGradient(colors: [.marfil, Color(red: 0.98, green: 0.93, blue: 0.78)],
                                             startPoint: .top, endPoint: .bottom))
             .shadow(color: .black.opacity(0.5), radius: 10, y: 2)
             .shadow(color: Color.oroZeno.opacity(0.22), radius: 20)
@@ -246,7 +251,7 @@ struct InterruptorZeno: ToggleStyle {
                 ZStack(alignment: configuration.isOn ? .trailing : .leading) {
                     Capsule()
                         .fill(configuration.isOn
-                              ? AnyShapeStyle(LinearGradient(colors: [.oroZeno, Color(red: 0.98, green: 0.62, blue: 0.32)],
+                              ? AnyShapeStyle(LinearGradient(colors: [.oroClaro, .oroZeno, .oroHondo],
                                                              startPoint: .leading, endPoint: .trailing))
                               : AnyShapeStyle(Color.marfil.opacity(0.10)))
                         .overlay(Capsule().strokeBorder(Color.oroZeno.opacity(configuration.isOn ? 0 : 0.35), lineWidth: 1))

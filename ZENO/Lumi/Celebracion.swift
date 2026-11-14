@@ -52,7 +52,7 @@ struct Celebracion: Equatable {
 struct AnilloDeTiempoView: View {
     let inicio: Date
     let minutos: Double
-    var color: Color = Color(red: 1.0, green: 0.80, blue: 0.48)
+    var color: Color = .oroZeno
 
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
 

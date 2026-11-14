@@ -145,12 +145,11 @@ struct BarraZeno: View {
             pestana(.ajustes, "Ajustes", .ajustes)
 
             Button(action: alAgregar) {
-                GlifoView(glifo: .mas, color: Color(red: 0.16, green: 0.10, blue: 0.04), tamano: 20)
+                GlifoView(glifo: .mas, color: Color(red: 0.10, green: 0.09, blue: 0.16), tamano: 20)
                     .frame(width: 48, height: 48)
                     .background {
                         Circle()
-                            .fill(LinearGradient(colors: [Color(red: 1.0, green: 0.90, blue: 0.66), .oroZeno,
-                                                          Color(red: 0.96, green: 0.62, blue: 0.30)],
+                            .fill(LinearGradient(colors: [.oroClaro, .oroZeno, .oroHondo],
                                                  startPoint: .topLeading, endPoint: .bottomTrailing))
                             .shadow(color: Color.oroZeno.opacity(0.55), radius: 12)
                     }

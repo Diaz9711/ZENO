@@ -578,7 +578,7 @@ struct CampoRapido: View {
                     .foregroundStyle(Color.marfil.opacity(0.55))
                 Spacer(minLength: 0)
                 ZStack {
-                    Circle().fill(LinearGradient(colors: [Color(red: 1.0, green: 0.86, blue: 0.58), Color.oroZeno],
+                    Circle().fill(LinearGradient(colors: [.oroClaro, .oroZeno, .oroHondo],
                                                  startPoint: .top, endPoint: .bottom))
                     FlechaDibujada()
                         .stroke(Color(red: 0.12, green: 0.10, blue: 0.16),

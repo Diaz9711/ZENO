@@ -108,7 +108,7 @@ struct LaboratorioView: View {
             .buttonStyle(.plain)
         }
         .foregroundStyle(.white)
-        .tint(Color(red: 1.0, green: 0.80, blue: 0.48))
+        .tint(Color.oroZeno)
         .padding(20)
         .background(.ultraThinMaterial.opacity(0.75), in: RoundedRectangle(cornerRadius: 30, style: .continuous))
         .padding(.horizontal, 14)
