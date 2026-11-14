@@ -19,7 +19,7 @@ struct UniversoView: View {
     @State private var borrador = BorradorDeRegistro()
     @State private var lumiNacida = false
     @State private var nacimientos = 0
-    @State private var momento = Momento.presencia
+    @State private var momento = Momento.tarea   // al abrir se va directo a Hoy (decisión de Diaz)
     @State private var visita = 0            // cambia cada vez que se abre la app
     @State private var estuvoEnFondo = false
     @State private var mostrarLaboratorio = false
@@ -160,13 +160,13 @@ struct UniversoView: View {
             if ahora {
                 borrador = BorradorDeRegistro()
                 paso = .bienvenida
-                momento = .presencia
+                momento = .tarea
                 pagina = .hoy
                 withAnimation(.easeInOut(duration: 1.2)) { lumiNacida = false }
             }
         }
         .onChange(of: fase) { _, nueva in
-            // Cada vez que la persona vuelve a la app, se repite el momento de presencia.
+            // Cada vez que la persona vuelve a la app, empieza en Hoy.
             if nueva == .background {
                 estuvoEnFondo = true
                 registrarCierre()
@@ -177,7 +177,8 @@ struct UniversoView: View {
                 estuvoEnFondo = false
                 visita += 1
                 registrarApertura()
-                withAnimation(movimientoDeLumi) { momento = .presencia }
+                // Al volver se entra directo a Hoy, sin fecha ni frase.
+                withAnimation(movimientoDeLumi) { pagina = .hoy }
             }
         }
         .task {
@@ -350,7 +351,7 @@ struct UniversoView: View {
     }
 
     private func terminarRegistro() {
-        momento = .presencia
+        momento = .tarea
         visita += 1
         withAnimation(.easeInOut(duration: 0.9)) {
             contexto.insert(borrador.comoPersona())

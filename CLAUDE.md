@@ -26,7 +26,7 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 - La pantalla de hoy no debe verse vacía: `EncabezadoDeHoy` (saludo + energía en palabras) y `TarjetaDeHoy` (hechas hoy, minutos en foco, mejor hora). Solo datos de progreso, nunca pendientes ni deuda.
 - Los controles de prueba solo aparecen con Ajustes → Modo de prueba (solo en DEBUG).
 - Tipografías propias incluidas en `ZENO/Fuentes` (Google Fonts, licencia OFL en `Licencias/`): **Fraunces** para títulos (`Font.zenoTitulo`, con `cursiva:`), **Manrope** para texto (`Font.zenoTexto`), **Bebas Neue** para el logotipo (`Font.zenoMarca`). Decisión de Diaz; no volver a letras de sistema.
-- Bienvenida (decisión de Diaz, 14 nov 2026): solo el universo, el sol con su órbita y ZENO letra por letra, más el botón "Crear mi estrella". Sin frases. El aviso de que ZENO no diagnostica va en el paso del nombre. La presencia ya **no muestra la edad** (Diaz la quitó; el dato sigue en `Persona` sin usarse).
+- Bienvenida (decisión de Diaz, 14 nov 2026): solo el universo, el sol con su órbita y ZENO letra por letra, más el botón "Crear mi estrella". Sin frases. El aviso de que ZENO no diagnostica va en el paso del nombre. Al abrir la app **se entra directo a Hoy**: sin fecha, sin edad ni frase (Diaz quitó el momento de presencia; `PresenciaView` queda solo en el modo de prueba).
 - Transiciones continuas: Lumi nunca desaparece y reaparece; se mueve como objeto físico.
 - Respetar Reducir Movimiento, Dynamic Type y contraste.
 - Español e inglés con String Catalog (`Localizable.xcstrings`). El español es el idioma base.
