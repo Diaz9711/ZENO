@@ -62,7 +62,7 @@ struct UniversoView: View {
         // En Tareas y Ajustes, Lumi viaja arriba y se hace pequeña: acompaña sin estorbar.
         let enOtraPagina = enTarea && pagina != .hoy
         let centro = UnitPoint(x: 0.5, y: enOtraPagina ? 0.115 : (enTarea ? 0.245 : (enPresencia ? 0.34 : 0.33)))
-        let tamano = (enOtraPagina ? 0.36 : (enTarea ? 0.70 : 1.0)) * (escuchando ? 1.12 : 1.0)
+        let tamano = (enOtraPagina ? 0.38 : (enTarea ? 0.80 : 1.0)) * (escuchando ? 1.12 : 1.0)
         let tareaEnCurso = enTarea ? tareas.first(where: \.estaEnCurso) : nil
         let calidez = min(1, Cielo.calidez(hora: Cielo.horaActual()) + (diaCalido == Self.hoyTexto ? 0.28 : 0))
 
@@ -395,7 +395,6 @@ struct UniversoView: View {
         .foregroundStyle(.white.opacity(0.6))
         .padding(.bottom, 6)
         HStack(spacing: 20) {
-            MedidorFPS()
             Button("Ver presencia") {
                 visita += 1
                 withAnimation(movimientoDeLumi) { momento = .presencia }

@@ -251,14 +251,14 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     float2 dir = uv / max(d, 0.0001);
     bool esEsfera = forma_ > 0.5;
 
-    float brillo = mix(0.70, 1.0, energia) + 0.06 * destello;
+    float brillo = mix(0.82, 1.0, energia) + 0.06 * destello;
 
     // ── Halo (común) ──
     float ondaH = 0.62 * sin(a * lobulos + giro)
                 + 0.38 * sin(a * (lobulos - 1.0) - giro * 0.6 + desplazamiento.x);
     float gas = ruido(dir * 1.7 + desplazamiento + float2(t * 0.05, -t * 0.04)) - 0.5;
     float forma = 1.0 + profundidad * ondaH * (0.6 + 0.4 * energia) + 0.20 * gas;
-    float rHalo = mix(0.50, 0.80, energia) * (1.0 + mix(0.04, 0.10, energia) * respiro) * forma * (1.0 + 0.18 * destello);
+    float rHalo = mix(0.58, 0.80, energia) * (1.0 + mix(0.04, 0.10, energia) * respiro) * forma * (1.0 + 0.18 * destello);
     float halo = exp(-pow(d / rHalo, 1.45) * 2.0);
 
     // ── Motas en órbita ladeada (común) ──
@@ -286,7 +286,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     if (!esEsfera) {
         // ═════ ESTRELLA ═════
         float3 cClaro = mix(cNucleo, float3(1.0, 0.97, 0.90), 0.45);
-        float rN = mix(0.078, 0.108, energia) * (1.0 + 0.055 * respiro);
+        float rN = mix(0.092, 0.112, energia) * (1.0 + 0.055 * respiro);
         float x = d / rN;
         float corazon = exp(-x * x * 0.85);
         float vivo = nube(uv / rN * 0.8 + desplazamiento + float2(t * 0.04, -t * 0.03));
@@ -299,7 +299,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         // Rayos: líneas finas que se afilan hacia la punta. Cada persona tiene
         // su número (4 a 8) y su danza (laten juntos, o una ola los recorre).
         float nR = lobulos + 1.0;
-        float largo = mix(0.46, 0.80, energia) * (1.0 + 0.09 * respiro);
+        float largo = mix(0.60, 0.82, energia) * (1.0 + 0.09 * respiro);
         float rayos = 0.0;
         float rayosCortos = 0.0;
         for (int i = 0; i < 8; i++) {
@@ -337,7 +337,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         col += cClaro * corazon * (1.9 + 0.5 * (vivo - 0.5)) * brillo;
     } else {
         // ═════ ESFERA ═════
-        float rN = mix(0.200, 0.262, energia) * (1.0 + 0.040 * respiro);
+        float rN = mix(0.222, 0.262, energia) * (1.0 + 0.040 * respiro);
         float x = d / rN;
         float2 sp = uv / rN;
         float z = sqrt(max(1.0 - x * x, 0.0));
