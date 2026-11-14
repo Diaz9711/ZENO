@@ -37,8 +37,9 @@ struct AparienciaLumi: Equatable {
         var g = GeneradorDeSemilla(semilla)
 
         // — Estrella —
-        colorNucleo = Self.hsb(g.entre(0.095, 0.118), g.entre(0.30, 0.42), 1.0)
-        colorCorona = Self.hsb(g.entre(0.070, 0.100), g.entre(0.68, 0.82), 1.0)
+        colorNucleo = Self.hsb(g.entre(0.115, 0.135), g.entre(0.26, 0.36), 1.0)
+        // Oro de estrella: amarillo pálido, nunca naranja (mismo criterio que `Color.oroZeno`).
+        colorCorona = Self.hsb(g.entre(0.112, 0.132), g.entre(0.50, 0.62), 1.0)
         // El halo puede ser de cualquier tono, siempre suave.
         colorHalo = Self.hsb(g.unidad(), g.entre(0.42, 0.68), 1.0)
         lobulos = g.entero(3...7)

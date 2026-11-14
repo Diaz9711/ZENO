@@ -323,7 +323,7 @@ static float lucecitas(float2 pos, float celda, float radio, float t, float2 sem
         float granos = ruido(q * 6.5 + 3.0 * w1 + float2(t * 0.05, t * 0.04));
 
         float luz = clamp(dot(n, normalize(float3(-0.22, -0.34, 0.92))), 0.0, 1.0);
-        float3 cHondo = cCorona * float3(0.92, 0.80, 0.74);
+        float3 cHondo = cCorona * float3(0.86, 0.76, 0.66);   // oro viejo en la sombra, sin naranja
         float3 cMedio = mix(cCorona, cNucleo, 0.55);
         float3 cClaro = mix(cNucleo, float3(1.0, 0.97, 0.90), 0.55);
 
