@@ -40,23 +40,6 @@ struct AjustesView: View {
                         .opacity(0.6)
                 }
 
-                // — Presencia —
-                VStack(alignment: .leading, spacing: 12) {
-                    titulo("Al abrir")
-                    Toggle(isOn: $persona.mostrarEdad.animation()) {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("Mostrar mi edad")
-                                .font(.zenoTexto(.body))
-                            Text("Es una de las tres líneas que te traen al hoy.")
-                                .font(.zenoTexto(.footnote))
-                                .opacity(0.6)
-                        }
-                    }
-                    .toggleStyle(InterruptorZeno())
-                    .padding(16)
-                    .cristal(radio: 20)
-                }
-
                 // — Avisos —
                 VStack(alignment: .leading, spacing: 12) {
                     titulo("Avisos")

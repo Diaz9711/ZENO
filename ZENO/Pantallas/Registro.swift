@@ -128,6 +128,11 @@ struct RegistroView: View {
                 .onSubmit { if !borrador.nombreLimpio.isEmpty { ir(a: .fecha) } }
                 .padding(.horizontal, 32)
             Spacer()
+            Text("ZENO acompaña tu día. No diagnostica ni reemplaza un tratamiento.")
+                .font(.zenoTexto(.caption))
+                .multilineTextAlignment(.center)
+                .opacity(0.5)
+                .padding(.horizontal, 44)
             BotonZeno("Continuar") { ir(a: .fecha) }
                 .disabled(borrador.nombreLimpio.isEmpty)
                 .opacity(borrador.nombreLimpio.isEmpty ? 0.4 : 1)
@@ -302,12 +307,12 @@ struct BotonZeno: View {
 // MARK: - Bienvenida
 
 /// La entrada a ZENO: se llega desde el espacio. Primero el cielo, luego una luz que se enciende,
-/// el nombre letra por letra y al final la promesa. Tocar en cualquier parte lo muestra todo de una vez.
+/// y el nombre letra por letra. Nada más: el universo habla solo. Tocar en cualquier parte lo muestra todo de una vez.
 struct BienvenidaView: View {
     let alEmpezar: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
-    /// 0 nada · 1 se enciende el sol · 2 llegan las letras · 3 la promesa · 4 el botón
+    /// 0 nada · 1 se enciende el sol · 2 llegan las letras · 4 el botón
     @State private var fase = 0
     @State private var destello = false
 
@@ -336,10 +341,10 @@ struct BienvenidaView: View {
             .padding(.bottom, 30)
 
             // ZENO, letra por letra: cada una llega desenfocada y se asienta en su sitio.
-            HStack(spacing: fase >= 2 ? 18 : 42) {
+            HStack(spacing: fase >= 2 ? 22 : 48) {
                 ForEach(Array(Self.letras.enumerated()), id: \.offset) { i, letra in
                     Text(verbatim: letra)
-                        .font(.zenoMarca(54))
+                        .font(.zenoMarca(64))
                         .foregroundStyle(LinearGradient(colors: [.marfil, Color.oroZeno.opacity(0.9)],
                                                         startPoint: .top, endPoint: .bottom))
                         .blur(radius: fase >= 2 ? 0 : 10)
@@ -351,32 +356,10 @@ struct BienvenidaView: View {
             .shadow(color: Color.oroZeno.opacity(0.35), radius: 18)
             .accessibilityElement()
             .accessibilityLabel(Text(verbatim: "ZENO"))
-            .padding(.bottom, 34)
-
-            // La promesa, línea por línea.
-            VStack(spacing: 6) {
-                linea(Text("Una app que se adapta"), orden: 0)
-                linea(Text("a tu ") + Text("energía").font(.zenoTitulo(.title, .regular, cursiva: true))
-                        .foregroundStyle(Color.oroZeno) + Text(","), orden: 1)
-                linea(Text("no al revés."), orden: 2)
-            }
-            .font(.zenoTitulo(.title, .light))
-            .foregroundStyle(Color.marfil)
-            .multilineTextAlignment(.center)
-            .shadow(color: .black.opacity(0.5), radius: 10, y: 2)
-            .accessibilityElement(children: .combine)
 
             Spacer()
 
-            Group {
-                Text("ZENO acompaña tu día. No diagnostica ni reemplaza un tratamiento.")
-                    .font(.zenoTexto(.caption))
-                    .multilineTextAlignment(.center)
-                    .opacity(0.55)
-                    .padding(.horizontal, 44)
-                    .padding(.bottom, 14)
-                BotonZeno("Crear mi estrella", accion: alEmpezar)
-            }
+            BotonZeno("Crear mi estrella", accion: alEmpezar)
             .opacity(fase >= 4 ? 1 : 0)
             .offset(y: fase >= 4 ? 0 : 26)
             .allowsHitTesting(fase >= 4)
@@ -387,18 +370,10 @@ struct BienvenidaView: View {
         .task { await contar() }
     }
 
-    private func linea(_ texto: Text, orden: Int) -> some View {
-        texto
-            .blur(radius: fase >= 3 ? 0 : 8)
-            .opacity(fase >= 3 ? 1 : 0)
-            .offset(y: fase >= 3 ? 0 : 12)
-            .animation(.easeOut(duration: 1.0).delay(Double(orden) * 0.38), value: fase)
-    }
-
     /// La secuencia completa dura unos cinco segundos.
     private func contar() async {
         if reducirMovimiento { fase = 4; destello = true; return }
-        let pasos: [(Int, Double)] = [(1, 1.3), (2, 0.9), (3, 1.5), (4, 1.6)]
+        let pasos: [(Int, Double)] = [(1, 1.3), (2, 0.9), (4, 2.4)]
         for (f, espera) in pasos {
             try? await Task.sleep(for: .seconds(espera))
             guard fase < f else { continue }

@@ -46,16 +46,12 @@ struct PresenciaView: View {
         alTerminar()
     }
 
-    /// Fecha de hoy, edad (si la persona quiere verla) y la frase del día.
+    /// Fecha de hoy y la frase del día. (La edad se quitó por decisión de Diaz, 14 nov 2026.)
     static func lineas(para persona: Persona, hoy: Date = .now) -> [String] {
         var lineas: [String] = []
 
         let fecha = hoy.formatted(.dateTime.weekday(.wide).day().month(.wide))
         lineas.append(fecha.prefix(1).uppercased() + fecha.dropFirst())
-
-        if persona.mostrarEdad {
-            lineas.append(String(localized: "Tienes \(persona.edad(en: hoy)) años"))
-        }
 
         lineas.append(FraseDelDia.frase(hoy: hoy, semilla: persona.semilla))
         return lineas
