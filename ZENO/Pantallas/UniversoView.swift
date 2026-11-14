@@ -218,6 +218,12 @@ struct UniversoView: View {
             }
             #if DEBUG
             DatosDeEjemplo.cargarSiHaceFalta(en: contexto, hayPersona: !personas.isEmpty)
+            // Para las capturas automáticas: abrir directo en una página (-paginaInicial ajustes).
+            switch UserDefaults.standard.string(forKey: "paginaInicial") {
+            case "tareas": pagina = .tareas
+            case "ajustes": pagina = .ajustes
+            default: break
+            }
             #endif
             registrarApertura()
         }

@@ -27,3 +27,29 @@ jobs:
       - name: Errores
         if: failure()
         run: grep -E "error:" compilacion.log | sort -u | head -80
+      - name: Capturas en el simulador
+        run: |
+          APP=$(find . -name ZENO.app -path "*iphonesimulator*" | head -1)
+          ID=$(xcrun simctl list devices available | grep -E "iPhone 16 Pro \(" | head -1 | grep -oE "[0-9A-F-]{36}")
+          xcrun simctl boot "$ID"
+          xcrun simctl bootstatus "$ID" -b
+          xcrun simctl install "$ID" "$APP"
+          mkdir -p capturas
+          captura () {  # nombre, argumentos...
+            nombre=$1; shift
+            xcrun simctl terminate "$ID" app.zeno.ZENO 2>/dev/null || true
+            xcrun simctl launch "$ID" app.zeno.ZENO -datosDeEjemplo YES "$@"
+            sleep 11
+            xcrun simctl io "$ID" screenshot "capturas/$nombre.png"
+          }
+          captura 1-hoy
+          captura 2-tareas -paginaInicial tareas
+          captura 3-ajustes -paginaInicial ajustes
+          captura 4-ajustes-abajo -paginaInicial ajustes -bajarAjustes YES
+          captura 5-hoy-ingles -AppleLanguages "(en)" -idioma en
+          ls -la capturas
+      - uses: actions/upload-artifact@v4
+        with:
+          name: capturas
+          path: capturas/
+          retention-days: 7

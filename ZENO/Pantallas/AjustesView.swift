@@ -18,6 +18,7 @@ struct AjustesView: View {
     var body: some View {
         let apariencia = AparienciaLumi(semilla: persona.semilla)
 
+        ScrollViewReader { lector in
         ScrollView {
             VStack(alignment: .leading, spacing: 30) {
                 HStack {
@@ -161,11 +162,22 @@ struct AjustesView: View {
                     .frame(maxWidth: .infinity)
                     .multilineTextAlignment(.center)
                     .padding(.top, 6)
+                    .id("fin")
             }
             .padding(.horizontal, 24)
             .padding(.top, margenSuperior + 4)
             .padding(.bottom, 130)      // deja sitio a la barra
             .medirDesplazamiento(en: "ajustes")
+        }
+        .task {
+            #if DEBUG
+            // Para las capturas automáticas: bajar hasta el final (-bajarAjustes YES).
+            if UserDefaults.standard.bool(forKey: "bajarAjustes") {
+                try? await Task.sleep(for: .seconds(1))
+                withAnimation { lector.scrollTo("fin", anchor: .bottom) }
+            }
+            #endif
+        }
         }
         .coordinateSpace(name: "ajustes")
         .alDesplazar(desplazamiento)
