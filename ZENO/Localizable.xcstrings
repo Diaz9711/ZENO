@@ -1,7 +1,2174 @@
 {
-  "sourceLanguage" : "es",
-  "strings" : {
-
+  "sourceLanguage": "es",
+  "strings": {
+    "": {
+      "shouldTranslate": false
+    },
+    "%@ · %@": {
+      "shouldTranslate": false
+    },
+    "%lld fps": {
+      "shouldTranslate": false
+    },
+    "%lld · %@": {
+      "shouldTranslate": false
+    },
+    "1 hora antes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 hour before"
+          }
+        }
+      }
+    },
+    "10 min antes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "10 min before"
+          }
+        }
+      }
+    },
+    "A esta hora las tareas grandes suelen esperar; te propongo antes otras más ligeras.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At this hour big tasks tend to wait, so I suggest lighter ones first."
+          }
+        }
+      }
+    },
+    "A la hora": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At the time"
+          }
+        }
+      }
+    },
+    "Abrir Ajustes del iPhone": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open iPhone Settings"
+          }
+        }
+      }
+    },
+    "Activado": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On"
+          }
+        }
+      }
+    },
+    "Agregar tarea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add task"
+          }
+        }
+      }
+    },
+    "Ahora": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now"
+          }
+        }
+      }
+    },
+    "Ahora no": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not now"
+          }
+        }
+      }
+    },
+    "Ahí te propondrá lo que pide más de ti.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That's when it will suggest what asks the most of you."
+          }
+        }
+      }
+    },
+    "Ajustes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        }
+      }
+    },
+    "Al mediodía": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Around midday"
+          }
+        }
+      }
+    },
+    "Algo así suele tomarte unos %lld min.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something like this usually takes you about %lld min."
+          }
+        }
+      }
+    },
+    "Algo muy pequeño": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something very small"
+          }
+        }
+      }
+    },
+    "Algo muy pequeño (opcional)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something very small (optional)"
+          }
+        }
+      }
+    },
+    "Antes de las 6": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Before 6"
+          }
+        }
+      }
+    },
+    "Antes de las 9 de la noche": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Before 9 p.m."
+          }
+        }
+      }
+    },
+    "Apple no envió tus datos. Inténtalo otra vez o entra como invitado.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple didn't send your details. Try again or continue as a guest."
+          }
+        }
+      }
+    },
+    "Apple no pudo confirmar tu cuenta. Inténtalo otra vez en un momento.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple couldn't confirm your account. Try again in a moment."
+          }
+        }
+      }
+    },
+    "Aquí y ahora.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Here and now."
+          }
+        }
+      }
+    },
+    "Así te saludará ZENO cada día.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is how ZENO will greet you each day."
+          }
+        }
+      }
+    },
+    "Atrás": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back"
+          }
+        }
+      }
+    },
+    "Avisarme": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remind me"
+          }
+        }
+      }
+    },
+    "Aviso a las": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remind at"
+          }
+        }
+      }
+    },
+    "Avisos": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reminders"
+          }
+        }
+      }
+    },
+    "Avisos programados:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scheduled reminders:"
+          }
+        }
+      }
+    },
+    "Basta con empezar.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting is enough."
+          }
+        }
+      }
+    },
+    "Borrar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        }
+      }
+    },
+    "Borrar esta tarea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this task"
+          }
+        }
+      }
+    },
+    "Borrar mis datos": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete my data"
+          }
+        }
+      }
+    },
+    "Buenas noches": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good evening"
+          }
+        }
+      }
+    },
+    "Buenas tardes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good afternoon"
+          }
+        }
+      }
+    },
+    "Buenos días": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good morning"
+          }
+        }
+      }
+    },
+    "Cancelar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "Cargar datos de ejemplo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load sample data"
+          }
+        }
+      }
+    },
+    "Cerrar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        }
+      }
+    },
+    "Cerrar sesión": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign out"
+          }
+        }
+      }
+    },
+    "Como mucho uno, a las %lld:00, tu mejor hora. Nunca un día en que ya abriste ZENO.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At most one, at %lld:00, your best hour. Never on a day you've already opened ZENO."
+          }
+        }
+      }
+    },
+    "Con esto ZENO empieza a entender tu ritmo de energía.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This helps ZENO start to understand your energy rhythm."
+          }
+        }
+      }
+    },
+    "Conectando con Apple…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connecting to Apple…"
+          }
+        }
+      }
+    },
+    "Continuar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        }
+      }
+    },
+    "Cuando quieras, agrega una sola cosa.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whenever you like, add just one thing."
+          }
+        }
+      }
+    },
+    "Cuándo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When"
+          }
+        }
+      }
+    },
+    "Dejarla para después": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave it for later"
+          }
+        }
+      }
+    },
+    "Desactivado": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        }
+      }
+    },
+    "Descansar también es avanzar.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resting is progress too."
+          }
+        }
+      }
+    },
+    "Descanso": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest"
+          }
+        }
+      }
+    },
+    "Despacio también se llega.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slow still gets you there."
+          }
+        }
+      }
+    },
+    "Después de esa hora, ZENO te pedirá menos.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After that, ZENO will ask less of you."
+          }
+        }
+      }
+    },
+    "Después de la 1": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After 1"
+          }
+        }
+      }
+    },
+    "Después de las 10": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After 10"
+          }
+        }
+      }
+    },
+    "Día y hora": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Day and time"
+          }
+        }
+      }
+    },
+    "Editar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        }
+      }
+    },
+    "El dictado no está disponible ahora. Puedes escribir.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dictation isn't available right now. You can type instead."
+          }
+        }
+      }
+    },
+    "Ella es Lumi.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is Lumi."
+          }
+        }
+      }
+    },
+    "Empezar ya es mucho.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting is already a lot."
+          }
+        }
+      }
+    },
+    "Empieza por lo más pequeño.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start with the smallest thing."
+          }
+        }
+      }
+    },
+    "En curso": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In progress"
+          }
+        }
+      }
+    },
+    "En foco": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In focus"
+          }
+        }
+      }
+    },
+    "Energía": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energy"
+          }
+        }
+      }
+    },
+    "Energía %lld · de prueba": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energy %lld · test"
+          }
+        }
+      }
+    },
+    "Energía %lld · real": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energy %lld · real"
+          }
+        }
+      }
+    },
+    "Energía alta": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High energy"
+          }
+        }
+      }
+    },
+    "Energía baja": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low energy"
+          }
+        }
+      }
+    },
+    "Energía media": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium energy"
+          }
+        }
+      }
+    },
+    "Entrar como invitado": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue as guest"
+          }
+        }
+      }
+    },
+    "Entrar con Apple aún no está listo en esta versión. Puedes entrar como invitado.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in with Apple isn't ready in this version yet. You can continue as a guest."
+          }
+        }
+      }
+    },
+    "Entraste como invitado.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're signed in as a guest."
+          }
+        }
+      }
+    },
+    "Entraste con tu cuenta de Apple.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're signed in with your Apple Account."
+          }
+        }
+      }
+    },
+    "Entre las 11 y la 1": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Between 11 and 1"
+          }
+        }
+      }
+    },
+    "Entre las 6 y las 8": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Between 6 and 8"
+          }
+        }
+      }
+    },
+    "Entre las 8 y las 10": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Between 8 and 10"
+          }
+        }
+      }
+    },
+    "Entre las 9 y las 11": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Between 9 and 11"
+          }
+        }
+      }
+    },
+    "Enviar un aviso de prueba en 10 segundos": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send a test reminder in 10 seconds"
+          }
+        }
+      }
+    },
+    "Es el momento que elegiste. Lumi te acompaña.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It's the moment you chose. Lumi is with you."
+          }
+        }
+      }
+    },
+    "Es tu mejor momento del día. Una sola cosa, si quieres.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It's your best moment of the day. Just one thing, if you like."
+          }
+        }
+      }
+    },
+    "Escribe una tarea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write a task"
+          }
+        }
+      }
+    },
+    "Escribe una tarea…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write a task…"
+          }
+        }
+      }
+    },
+    "Esfera": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sphere"
+          }
+        }
+      }
+    },
+    "Este momento es tuyo.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This moment is yours."
+          }
+        }
+      }
+    },
+    "Este teléfono no puede dictar en tu idioma sin enviar tu voz fuera. Puedes escribir.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This phone can't take dictation in your language without sending your voice elsewhere. You can type instead."
+          }
+        }
+      }
+    },
+    "Estrella": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Star"
+          }
+        }
+      }
+    },
+    "Estrella de %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@'s star"
+          }
+        }
+      }
+    },
+    "Estás aquí. Eso ya cuenta.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're here. That already counts."
+          }
+        }
+      }
+    },
+    "Estás justo donde toca.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're right where you need to be."
+          }
+        }
+      }
+    },
+    "Fecha de nacimiento": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Date of birth"
+          }
+        }
+      }
+    },
+    "Forma de Lumi": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lumi's shape"
+          }
+        }
+      }
+    },
+    "Guardar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        }
+      }
+    },
+    "Hechas hoy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done today"
+          }
+        }
+      }
+    },
+    "Hora del día": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time of day"
+          }
+        }
+      }
+    },
+    "Hoy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today"
+          }
+        }
+      }
+    },
+    "Hoy cuenta, sea como sea.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today counts, however it goes."
+          }
+        }
+      }
+    },
+    "Hoy descansa, mañana atacamos": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest today, tackle it tomorrow"
+          }
+        }
+      }
+    },
+    "Hoy empieza ahora.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today starts now."
+          }
+        }
+      }
+    },
+    "Hoy es suficiente.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today is enough."
+          }
+        }
+      }
+    },
+    "Hoy puedes ser amable contigo.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today you can be kind to yourself."
+          }
+        }
+      }
+    },
+    "Hoy solo una cosa.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Just one thing today."
+          }
+        }
+      }
+    },
+    "Hoy, con calma.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today, gently."
+          }
+        }
+      }
+    },
+    "Idioma": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
+          }
+        }
+      }
+    },
+    "Ignorados seguidos: %lld · En pausa: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignored in a row: %lld · Paused: %@"
+          }
+        }
+      }
+    },
+    "Laboratorio": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lab"
+          }
+        }
+      }
+    },
+    "Listo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        }
+      }
+    },
+    "Listo. Mantén presionada a Lumi y habla.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All set. Press and hold Lumi and speak."
+          }
+        }
+      }
+    },
+    "Lo de ayer ya pasó. Hoy es hoy.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yesterday is done. Today is today."
+          }
+        }
+      }
+    },
+    "Lo intentamos más tarde.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We'll try again later."
+          }
+        }
+      }
+    },
+    "Lo pequeño suma.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small things add up."
+          }
+        }
+      }
+    },
+    "Lo que puedas, como puedas.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whatever you can, however you can."
+          }
+        }
+      }
+    },
+    "Los colores y el movimiento son solo tuyos; la forma la eliges tú.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The colors and movement are yours alone; you choose the shape."
+          }
+        }
+      }
+    },
+    "Los dejé en pausa porque parecía que no hacían falta.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I paused them because it seemed you didn't need them."
+          }
+        }
+      }
+    },
+    "Lumi": {
+      "shouldTranslate": false
+    },
+    "Lumi sigue aquí.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lumi is still here."
+          }
+        }
+      }
+    },
+    "Lumi, tu estrella": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lumi, your star"
+          }
+        }
+      }
+    },
+    "Mantén presionada la tarea cuando termines": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Press and hold the task when you finish"
+          }
+        }
+      }
+    },
+    "Mantén presionado para dictar una tarea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Press and hold to dictate a task"
+          }
+        }
+      }
+    },
+    "Mantén presionado para marcarla como terminada": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Press and hold to mark it as done"
+          }
+        }
+      }
+    },
+    "Marcar como hecha": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mark as done"
+          }
+        }
+      }
+    },
+    "Mientras más uses ZENO, más te conoceré: a qué horas rindes, cuánto te toman las cosas y qué prefieres dejar para después.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The more you use ZENO, the better I'll know you: when you do your best work, how long things take you, and what you'd rather leave for later."
+          }
+        }
+      }
+    },
+    "Mis tareas": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My tasks"
+          }
+        }
+      }
+    },
+    "Modo de prueba": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test mode"
+          }
+        }
+      }
+    },
+    "Nació contigo, %@. Nadie más tiene una igual.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "She was born with you, %@. No one else has one like her."
+          }
+        }
+      }
+    },
+    "Nada pendiente.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing pending."
+          }
+        }
+      }
+    },
+    "Ninguno": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        }
+      }
+    },
+    "No encuentro un micrófono. Puedes escribir.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I can't find a microphone. You can type instead."
+          }
+        }
+      }
+    },
+    "No hace falta que sea perfecto.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It doesn't have to be perfect."
+          }
+        }
+      }
+    },
+    "No hay prisa.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There's no rush."
+          }
+        }
+      }
+    },
+    "No pude escucharte esta vez. Puedes escribir.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I couldn't hear you this time. You can type instead."
+          }
+        }
+      }
+    },
+    "No se pudo entrar con Apple. Revisa tu conexión o entra como invitado.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't sign in with Apple. Check your connection or continue as a guest."
+          }
+        }
+      }
+    },
+    "No tienes nada pendiente": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You have nothing pending"
+          }
+        }
+      }
+    },
+    "No tienes que poder con todo.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You don't have to handle everything."
+          }
+        }
+      }
+    },
+    "No vas tarde.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're not late."
+          }
+        }
+      }
+    },
+    "Opcional. Si la hora pasa, no pasa nada.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional. If the time passes, that's okay."
+          }
+        }
+      }
+    },
+    "Otra hora": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other time"
+          }
+        }
+      }
+    },
+    "Para avisarte, permite las notificaciones de ZENO en los Ajustes del iPhone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To remind you, allow ZENO's notifications in iPhone Settings."
+          }
+        }
+      }
+    },
+    "Para hablarle a Lumi, activa el micrófono y el dictado en Ajustes. También puedes escribir.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To talk to Lumi, turn on the microphone and dictation in Settings. You can also type."
+          }
+        }
+      }
+    },
+    "Para recibirlos, permite las notificaciones de ZENO en los Ajustes del iPhone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To get them, allow ZENO's notifications in iPhone Settings."
+          }
+        }
+      }
+    },
+    "Paso %lld de 6": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Step %lld of 6"
+          }
+        }
+      }
+    },
+    "Pendiente": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pending"
+          }
+        }
+      }
+    },
+    "Por ahora, nada": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing for now"
+          }
+        }
+      }
+    },
+    "Por la mañana": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the morning"
+          }
+        }
+      }
+    },
+    "Por la noche": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At night"
+          }
+        }
+      }
+    },
+    "Por la tarde": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the afternoon"
+          }
+        }
+      }
+    },
+    "Primer paso": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First step"
+          }
+        }
+      }
+    },
+    "Primer paso de dos minutos": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Two-minute first step"
+          }
+        }
+      }
+    },
+    "Primer paso de: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First step of: %@"
+          }
+        }
+      }
+    },
+    "Primer paso: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First step: %@"
+          }
+        }
+      }
+    },
+    "Probar otra estrella": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try another star"
+          }
+        }
+      }
+    },
+    "Puedes cambiarla cuando quieras en Ajustes.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can change it anytime in Settings."
+          }
+        }
+      }
+    },
+    "Quedan %lld minutos": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld minutes left"
+          }
+        }
+      }
+    },
+    "Quiero hacer algo igual": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I want to do something anyway"
+          }
+        }
+      }
+    },
+    "Qué quieres hacer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you want to do"
+          }
+        }
+      }
+    },
+    "Repetir registro": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redo sign-up"
+          }
+        }
+      }
+    },
+    "Respira. Ya llegaste.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Breathe. You made it."
+          }
+        }
+      }
+    },
+    "Saltar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip"
+          }
+        }
+      }
+    },
+    "Se acerca algo que planeaste. Sin prisa.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something you planned is coming up. No rush."
+          }
+        }
+      }
+    },
+    "Se borran tu estrella, tus tareas y tu historial de energía. No se puede deshacer.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This deletes your star, your tasks and your energy history. It can't be undone."
+          }
+        }
+      }
+    },
+    "Sesión": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session"
+          }
+        }
+      }
+    },
+    "Si te apetece, Lumi tiene algo pequeño para ti.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If you feel like it, Lumi has something small for you."
+          }
+        }
+      }
+    },
+    "Sin apuro. Lumi te acompaña.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hurry. Lumi is with you."
+          }
+        }
+      }
+    },
+    "Sin aviso": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No reminder"
+          }
+        }
+      }
+    },
+    "Sin correo ni contraseña: todo se queda en tu teléfono.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No email or password: everything stays on your phone."
+          }
+        }
+      }
+    },
+    "Solo lo siguiente.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Just the next thing."
+          }
+        }
+      }
+    },
+    "Solo te avisaré de lo que tú programes, sin sonido.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I'll only remind you of what you schedule, silently."
+          }
+        }
+      }
+    },
+    "Sueles terminar más cosas entre las %lld:00 y las %lld:00. Ahí te propongo lo que pide más de ti.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You tend to get the most done between %lld:00 and %lld:00. That's when I suggest what asks the most of you."
+          }
+        }
+      }
+    },
+    "También puedes mantener presionada a Lumi y hablar.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can also press and hold Lumi and speak."
+          }
+        }
+      }
+    },
+    "Tareas": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tasks"
+          }
+        }
+      }
+    },
+    "Te escucho…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I'm listening…"
+          }
+        }
+      }
+    },
+    "Terminado, sin prisa": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time's up, no rush"
+          }
+        }
+      }
+    },
+    "Terminé": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I'm done"
+          }
+        }
+      }
+    },
+    "Tiempo de la tarea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Task time"
+          }
+        }
+      }
+    },
+    "Toca la tarea para empezar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap the task to start"
+          }
+        }
+      }
+    },
+    "Toca para empezar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap to start"
+          }
+        }
+      }
+    },
+    "Todo vive solo en este teléfono. Sin cuentas, sin servidores.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything lives only on this phone. No accounts, no servers."
+          }
+        }
+      }
+    },
+    "Tu Lumi": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Lumi"
+          }
+        }
+      }
+    },
+    "Tu energía está baja, y está bien.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your energy is low, and that's okay."
+          }
+        }
+      }
+    },
+    "Tu energía manda. Escúchala.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your energy leads. Listen to it."
+          }
+        }
+      }
+    },
+    "Tu energía suele estar alta ahora. Lumi te acompaña.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your energy is usually high now. Lumi is with you."
+          }
+        }
+      }
+    },
+    "Tu estrella nace de tu nombre y tu fecha. Nadie más tiene una igual.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your star is born from your name and your date. No one else has one like it."
+          }
+        }
+      }
+    },
+    "Tu estrella, tus tareas y tu historial se quedan guardados en este teléfono. Para volver, entra de nuevo.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your star, your tasks and your history stay saved on this phone. To come back, just sign in again."
+          }
+        }
+      }
+    },
+    "Tu iPhone no pudo mostrar la entrada con Apple. Inténtalo otra vez.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your iPhone couldn't show Sign in with Apple. Try again."
+          }
+        }
+      }
+    },
+    "Tu mejor hora": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your best hour"
+          }
+        }
+      }
+    },
+    "Tu nombre": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your name"
+          }
+        }
+      }
+    },
+    "Tu ritmo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your rhythm"
+          }
+        }
+      }
+    },
+    "Tu ritmo está bien.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your pace is fine."
+          }
+        }
+      }
+    },
+    "Tu tarea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your task"
+          }
+        }
+      }
+    },
+    "Tus datos": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your data"
+          }
+        }
+      }
+    },
+    "Tus datos siguen solo en este teléfono": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your data stays only on this phone"
+          }
+        }
+      }
+    },
+    "Un aviso amable al día": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One gentle reminder a day"
+          }
+        }
+      }
+    },
+    "Un buen rato para una sola cosa.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A good time for just one thing."
+          }
+        }
+      }
+    },
+    "Un momento a la vez.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One moment at a time."
+          }
+        }
+      }
+    },
+    "Un paso pequeño también es un paso.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A small step is still a step."
+          }
+        }
+      }
+    },
+    "Una cosa a la vez.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One thing at a time."
+          }
+        }
+      }
+    },
+    "Una sola frase": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Just one sentence"
+          }
+        }
+      }
+    },
+    "Una tarea chica te toma unos %lld minutos.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A small task takes you about %lld minutes."
+          }
+        }
+      }
+    },
+    "Una tarea grande te toma unos %lld minutos.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A big task takes you about %lld minutes."
+          }
+        }
+      }
+    },
+    "Una tarea mediana te toma unos %lld minutos.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A medium task takes you about %lld minutes."
+          }
+        }
+      }
+    },
+    "Vas a tu paso, y está bien.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You go at your own pace, and that's fine."
+          }
+        }
+      }
+    },
+    "Vas en racha · ¿una más?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're on a roll · one more?"
+          }
+        }
+      }
+    },
+    "Ver presencia": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View presence"
+          }
+        }
+      }
+    },
+    "Volver a recibirlos": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn them back on"
+          }
+        }
+      }
+    },
+    "Vuelvo a proponerte algo a las %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I'll suggest something again at %@."
+          }
+        }
+      }
+    },
+    "ZENO": {
+      "shouldTranslate": false
+    },
+    "ZENO acompaña tu día. No diagnostica ni reemplaza un tratamiento.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ZENO keeps you company through the day. It doesn't diagnose or replace treatment."
+          }
+        }
+      }
+    },
+    "alta": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "high"
+          }
+        }
+      }
+    },
+    "baja": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "low"
+          }
+        }
+      }
+    },
+    "media": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "medium"
+          }
+        }
+      }
+    },
+    "· con aviso": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· with reminder"
+          }
+        }
+      }
+    },
+    "¿A qué hora se te acaba la energía?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When does your energy run out?"
+          }
+        }
+      }
+    },
+    "¿A qué hora sueles despertar?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What time do you usually wake up?"
+          }
+        }
+      }
+    },
+    "¿Borrar esta tarea?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this task?"
+          }
+        }
+      }
+    },
+    "¿Borrar todo?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete everything?"
+          }
+        }
+      }
+    },
+    "¿Cerrar sesión?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign out?"
+          }
+        }
+      }
+    },
+    "¿Cuál es el primer paso de dos minutos?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What's the two-minute first step?"
+          }
+        }
+      }
+    },
+    "¿Cuándo naciste?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When were you born?"
+          }
+        }
+      }
+    },
+    "¿Cómo quieres verla?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How would you like to see her?"
+          }
+        }
+      }
+    },
+    "¿Cómo te llamas?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What's your name?"
+          }
+        }
+      }
+    },
+    "¿En qué momento tienes más energía?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When do you have the most energy?"
+          }
+        }
+      }
+    },
+    "¿Qué quieres hacer?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What do you want to do?"
+          }
+        }
+      }
+    }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

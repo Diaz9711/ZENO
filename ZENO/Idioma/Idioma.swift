@@ -43,14 +43,19 @@ enum Idioma: String, CaseIterable, Identifiable {
     }
 
     /// Las traducciones del idioma elegido (la carpeta `xx.lproj` dentro de la app).
-    var paquete: Bundle {
-        Bundle.main.path(forResource: rawValue, ofType: "lproj").flatMap(Bundle.init(path:)) ?? .main
+    /// El español es el idioma base: sus frases son las del código y no tiene carpeta propia.
+    var paquete: Bundle? {
+        Bundle.main.path(forResource: rawValue, ofType: "lproj").flatMap(Bundle.init(path:))
     }
 
     /// Para textos que no son `Text` de SwiftUI (avisos, frases armadas en código):
     /// salen del catálogo en el idioma elegido, no en el del teléfono.
     static func texto(_ clave: String.LocalizationValue) -> String {
         let idioma = actual
-        return String(localized: clave, bundle: idioma.paquete, locale: idioma.locale)
+        guard let paquete = idioma.paquete else {
+            // Idioma base: una tabla que no existe devuelve la frase original (con sus datos ya puestos).
+            return String(localized: clave, table: "Base", bundle: .main, locale: idioma.locale)
+        }
+        return String(localized: clave, bundle: paquete, locale: idioma.locale)
     }
 }

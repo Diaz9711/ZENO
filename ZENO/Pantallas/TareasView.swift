@@ -24,6 +24,8 @@ struct TareaDelMomentoView: View {
     @Binding var editando: Bool
 
     @Environment(\.modelContext) private var contexto
+    /// Leído para que, al cambiar de idioma, también se redibujen las frases armadas en código.
+    @Environment(\.locale) private var idiomaElegido
     @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
     private var pendientes: [Tarea]
 
@@ -153,7 +155,7 @@ struct TareaDelMomentoView: View {
             Text("Por ahora, nada")
                 .font(.zenoTitulo(.title3))
                 .luminoso()
-            Text(vuelveA.map { "Vuelvo a proponerte algo a las \($0.formatted(date: .omitted, time: .shortened))." }
+            Text(vuelveA.map { Idioma.texto("Vuelvo a proponerte algo a las \($0.formatted(date: .omitted, time: .shortened)).") }
                  ?? Idioma.texto("Lo intentamos más tarde."))
                 .font(.zenoTexto(.footnote))
                 .opacity(0.65)
@@ -269,7 +271,7 @@ struct TareaDelMomentoView: View {
                 botonChico("Listo", fuerte: true) { guardarTarea(conPaso: true) }
                     .disabled(limpio(primerPaso).isEmpty)
             }
-            Text("\(limpio(frase))")
+            Text(verbatim: limpio(frase))
                 .font(.zenoTexto(.footnote))
                 .opacity(0.55)
                 .padding(.horizontal, 32)

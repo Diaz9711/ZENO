@@ -17,15 +17,25 @@ struct ZENOApp: App {
             if UserDefaults.standard.bool(forKey: "generarIcono") {
                 IconoDeLaApp()
             } else {
-                UniversoView()
-                    .preferredColorScheme(.dark)
+                RaizDeZeno()
             }
             #else
-            UniversoView()
-                .preferredColorScheme(.dark)
+            RaizDeZeno()
             #endif
         }
         // Todo se guarda en el teléfono. Sin cuentas ni servidor.
         .modelContainer(for: [Persona.self, Tarea.self, EventoDeEnergia.self])
+    }
+}
+
+/// El universo en el idioma que la persona eligió (la primera vez, el de su teléfono).
+/// Cambiarlo en Ajustes cambia todos los textos al momento, sin reiniciar ni perder a Lumi.
+struct RaizDeZeno: View {
+    @AppStorage(Idioma.clave) private var idioma = Idioma.actual.rawValue
+
+    var body: some View {
+        UniversoView()
+            .environment(\.locale, (Idioma(rawValue: idioma) ?? .espanol).locale)
+            .preferredColorScheme(.dark)
     }
 }

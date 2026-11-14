@@ -1,6 +1,6 @@
 # ZENO — dónde vamos (para empezar una conversación nueva)
 
-Última actualización: 14 nov 2026. Repositorio privado: https://github.com/Diaz9711/ZENO (rama `main`).
+Última actualización: 14 nov 2026 (tarde). Repositorio privado: https://github.com/Diaz9711/ZENO (rama `main`).
 
 ## Cómo empezar la próxima conversación
 Abre una sesión nueva en la carpeta `~/ZENO` y escribe:
@@ -28,13 +28,22 @@ Las reglas que nunca se rompen están en `CLAUDE.md`. Este archivo solo cuenta e
 - **Botón principal:** píldora dorada limpia 280 × 50 (aprobado). En Hoy no hay botón: **tocar la tarea la empieza, mantenerla presionada la termina** (probado).
 - **Sin texto de energía** en Hoy: la energía solo se ve en la luz.
 
+## Hecho el 14 nov 2026 (tras probar en el iPhone de Diaz), pendiente de su aprobación
+1. **Estrella** más nítida: núcleo con borde nítido, rayos finos, menos neblina y un centelleo sutil por semilla (`Comparaciones/estrella-antes-despues.jpg`).
+2. **Fluidez**: `Ritmo.contenido` para páginas y secciones, sin desenfoque animado, Lumi a 60 cuadros (vistas previas a 30), sin animación doble en la barra. Hay que juzgar los 60 fps en el iPhone, el simulador no sirve para eso.
+3. **Ajustes y Tareas**: el scroll ya no corta; degradado arriba y abajo y Lumi se encoge y apaga al deslizar.
+4. **Idiomas**: selector en Ajustes, catálogo completo español/inglés (221 textos), detección del idioma del teléfono la primera vez.
+5. **Cerebro**: `Aprendizaje` (duración real, horas fuertes, lo que pospone) + sección "Tu ritmo".
+6. **Tareas con día, hora y aviso** y editor de tarea.
+7. **Sesión**: carga y errores claros en el menú de entrada; Cerrar sesión en Ajustes.
+- Atajos de prueba (solo DEBUG): `-sinPresentacion YES`, `-paginaInicial 0|1|2`, `-formaDePrueba 0|1`, `-idioma es|en`, `-modoPrueba YES`.
+
 ## Pendiente (en este orden)
 1. **Probar en el iPhone de Diaz** (gratis con su Apple ID, hay que reinstalar cada 7 días). Le di los pasos: conectar y confiar; en Xcode, Signing & Capabilities → Team → su Apple ID (Personal Team); Modo desarrollador en el iPhone; ▶ Run; confiar en el desarrollador en Ajustes → General → VPN y gestión de dispositivos. Comprobar con `xcrun devicectl list devices`. Si el identificador `app.zeno.ZENO` no está disponible, cambiarlo por uno único.
 2. **Fluidez** (medir en el iPhone, con números antes y después, mostrando los fps solo en la consola):
    - el gas del cielo a media resolución, con estrellas, lucecitas y cometa nítidos;
-   - limitar los cuadros por segundo de Lumi (hoy sin límite: a 120 Hz el shader corre 120 veces por segundo);
-   - que el brillo de la tarea anime la opacidad de un resplandor fijo, no el radio de la sombra.
-3. **Inglés:** traducir toda la app en `Localizable.xcstrings` (casi vacío). Luego una fila "Idioma" en Ajustes que abra la página de ZENO en los ajustes del iPhone. Probar con `-AppleLanguages "(en)"`.
+   - ~~limitar los cuadros de Lumi~~ y ~~brillo de la tarea por opacidad~~ hechos.
+3. ~~Inglés~~ hecho (selector propio dentro de ZENO).
 4. **"Cómo funciona ZENO":** sección con el respaldo científico sobre TDAH (tareas pequeñas, energía, ceguera del tiempo, sin culpa) con fuentes reales verificadas. Diaz preguntó por "respaldo médico": se le explicó que un certificado oficial (FDA o CE) no se logra con código; lo útil es este respaldo científico, la categoría Salud en App Store y que un profesional de TDAH pruebe la app.
 5. **iCloud y "Continuar con Apple" de verdad:** cuando Diaz tenga la cuenta de desarrollador de pago (aún no la tiene). Activar las capacidades "Sign in with Apple" e iCloud y sincronizar SwiftData con CloudKit.
 6. **Fase 7 (avisos):** construida, falta que Diaz la apruebe.

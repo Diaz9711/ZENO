@@ -11,6 +11,7 @@ struct AjustesView: View {
     @State private var confirmarBorrado = false
     @State private var confirmarSalida = false
     @AppStorage(Sesion.clave) private var sesionAbierta = true
+    @AppStorage(Idioma.clave) private var idioma = Idioma.actual.rawValue
     @State private var permisoDenegado = false
     @State private var pendientes: [(id: String, fecha: Date?)] = []
     @Query(sort: \EventoDeEnergia.fecha) private var eventos: [EventoDeEnergia]
@@ -42,6 +43,36 @@ struct AjustesView: View {
                     Text("Los colores y el movimiento son solo tuyos; la forma la eliges tú.")
                         .font(.zenoTexto(.footnote))
                         .opacity(0.6)
+                }
+
+                // — Idioma —
+                VStack(alignment: .leading, spacing: 12) {
+                    titulo("Idioma")
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 10)], spacing: 10) {
+                        ForEach(Idioma.allCases) { opcion in
+                            let elegido = idioma == opcion.rawValue
+                            Button {
+                                cambiarIdioma(a: opcion)
+                            } label: {
+                                HStack {
+                                    Text(verbatim: opcion.nombre)
+                                        .font(.zenoTexto(.body, elegido ? .semibold : .medium))
+                                    Spacer()
+                                    ZStack {
+                                        Circle().strokeBorder(Color.oroZeno.opacity(elegido ? 1 : 0.45), lineWidth: 1.2)
+                                        if elegido { Circle().fill(Color.oroZeno).padding(5) }
+                                    }
+                                    .frame(width: 20, height: 20)
+                                }
+                                .padding(.horizontal, 16)
+                                .frame(height: 52)
+                                .cristal(radio: 16, activo: elegido)
+                            }
+                            .buttonStyle(EstiloPresion())
+                            .accessibilityAddTraits(elegido ? .isSelected : [])
+                        }
+                    }
+                    .sensoryFeedback(.selection, trigger: idioma)
                 }
 
                 // — Avisos —
@@ -277,6 +308,16 @@ struct AjustesView: View {
                     pendientes = []
                 }
             })
+    }
+
+    /// Cambia el idioma de toda la app al momento y reescribe los avisos ya programados en el nuevo idioma.
+    private func cambiarIdioma(a nuevo: Idioma) {
+        guard idioma != nuevo.rawValue else { return }
+        withAnimation(Ritmo.contenido) { idioma = nuevo.rawValue }
+        Task {
+            if persona.notificacionesActivas { await Avisos.programar(persona, eventos: eventos) }
+            await AvisosDeTareas.sincronizar(contexto)
+        }
     }
 
     /// Cierra la sesión sin borrar nada. Mientras esté cerrada no llega ningún aviso.

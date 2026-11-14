@@ -29,9 +29,9 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 - Los controles de prueba solo aparecen con Ajustes → Modo de prueba (solo en DEBUG).
 - Tipografías propias incluidas en `ZENO/Fuentes` (Google Fonts, licencia OFL en `Licencias/`): **Fraunces** para títulos (`Font.zenoTitulo`, con `cursiva:`), **Manrope** para texto (`Font.zenoTexto`), **Bebas Neue** para el logotipo (`Font.zenoMarca`). Decisión de Diaz; no volver a letras de sistema.
 - Bienvenida (decisión de Diaz, 14 nov 2026): solo el universo, el sol con su órbita y ZENO letra por letra; la primera vez, el menú "Continuar con Apple" / "Entrar como invitado". Sin frases. El aviso de que ZENO no diagnostica va en el paso del nombre. Cada vez que se abre la app sale la **presentación corta** (universo, sol y ZENO, unos 5,5 s, sin botón; tocar la salta) y luego se entra directo a Hoy: sin fecha, sin edad ni frase (Diaz quitó el momento de presencia; `PresenciaView` queda solo en el modo de prueba).
-- Transiciones continuas: Lumi nunca desaparece y reaparece; se mueve como objeto físico.
+- Transiciones continuas: Lumi nunca desaparece y reaparece; se mueve como objeto físico. Contenido con `Ritmo.contenido` (resorte corto, solo movimiento y opacidad, sin desenfoque animado); Lumi y el cielo con `Ritmo.lumi`. En Tareas y Ajustes el scroll pasa por degradados (`bordesFundidos`) y Lumi se retira al deslizar (`RetiradaAlDeslizar`).
 - Respetar Reducir Movimiento, Dynamic Type y contraste.
-- Español e inglés con String Catalog (`Localizable.xcstrings`). El español es el idioma base.
+- Español e inglés con String Catalog (`Localizable.xcstrings`). El español es el idioma base. **Selector de idioma en Ajustes** (`Idioma/Idioma.swift`): la primera vez se toma el del teléfono y se guarda (`@AppStorage("idioma")`); la raíz `RaizDeZeno` pone `.environment(\.locale)`. Textos fuera de `Text` (avisos, frases armadas) siempre con `Idioma.texto(...)`, nunca `String(localized:)` a secas. Para añadir un idioma: un caso en `Idioma` y traducir en el catálogo.
 - ZENO no diagnostica ni reemplaza tratamiento.
 
 ## Código
@@ -51,7 +51,10 @@ xcodebuild -project ZENO.xcodeproj -scheme ZENO -destination 'platform=iOS Simul
 - `UniversoView` es la raíz: el cielo y Lumi viven ahí y nunca se destruyen; el contenido (registro, casa, y luego presencia y tareas) va encima. No crear otra LumiView por pantalla.
 
 - Dictado por voz: **solo reconocimiento dentro del teléfono** (`requiresOnDeviceRecognition`); si el idioma no lo permite, se avisa y se escribe. La voz nunca sale del dispositivo.
-- Tamaño de tarea: `ClasificadorDeTamano`, regla simple por palabras clave. La tarea del momento por ahora es la más antigua; la elección por energía llega en la Fase 5.
+- Tamaño de tarea: `ClasificadorDeTamano`, regla simple por palabras clave.
+- Tareas con **día, hora y aviso opcionales** (pedido de Diaz, 14 nov 2026): `Tarea.fechaPlaneada`, `avisoMinutosAntes` (0, 10, 60) o `avisoPersonalizado`. Nunca "vencida" ni roja. `AvisosDeTareas.sincronizar` borra y reprograma todos los avisos `zeno.tarea.*` al crear, editar, terminar, borrar, abrir la app y cambiar de idioma. El aviso no lleva el texto de la tarea ni sonido. Tocar una tarea en Mis tareas abre `EditorDeTarea` (página, no hoja). Lo planeado para ±30 min va primero en Hoy; lo de otro día no se propone hoy.
+- Aprendizaje (`Energia/Aprendizaje.swift`, funciones puras sobre `EventoDeEnergia`, que ahora guarda `tamanoCrudo`): duración real por tamaño (mediana, desde 3 muestras) para el anillo, horas en que más termina, tamaños que pospone por franja (van al final de la fila). Ajustes → "Tu ritmo" lo cuenta. Nunca se muestra como culpa.
+- Sesión (`Modelos/Sesion.swift`, `@AppStorage("sesionAbierta")`): Ajustes → Cerrar sesión no borra datos, apaga los avisos y vuelve al menú de entrada. Sin servidor no hay correo ni contraseña.
 
 - Energía: `MotorDeEnergia` (funciones puras). Puntaje = curva base del cronotipo + lo aprendido por franja horaria + ajuste de hoy; todo se recalcula desde el historial `EventoDeEnergia`. Niveles: baja < 34, media 34–66, alta ≥ 67. "Ahora no" pospone esa tarea 90 minutos. Lumi y la nebulosa usan el puntaje real.
 - Celebración y anillo: `Lumi/Celebracion.swift`. Anillo de tiempo según `Tarea.minutosPrevistos` (primer paso 2, chica 5, mediana 15, grande 25 min); al acabarse no hay alarma. Al terminar: Lumi inhala, onda de luz de 1,5 s y ola háptica (Core Haptics). Grande: onda más amplia y Lumi más brillante el resto del día. Tres seguidas: giro lento. Con energía baja: el cielo se calienta ese día.

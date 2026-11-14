@@ -13,7 +13,8 @@ final class Dictado {
     var aviso: String?
 
     private let motor = AVAudioEngine()
-    private let reconocedor = SFSpeechRecognizer()
+    /// En el idioma que la persona eligió en ZENO (no el del teléfono).
+    private var reconocedor: SFSpeechRecognizer? { SFSpeechRecognizer(locale: Idioma.actual.locale) }
     private var peticion: SFSpeechAudioBufferRecognitionRequest?
     private var reconocimiento: SFSpeechRecognitionTask?
     private var quiereEscuchar = false
