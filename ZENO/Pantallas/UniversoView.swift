@@ -174,6 +174,7 @@ struct UniversoView: View {
                     .transition(.opacity)
             }
         }
+        .environment(\.cieloDeZeno, apariencia)
         .sensoryFeedback(.impact(weight: .medium, intensity: 0.7), trigger: nacimientos)
         .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: momento)
         .onChange(of: paso) { _, nuevo in
@@ -439,8 +440,8 @@ struct GaleriaDeBotones: View {
     var body: some View {
         VStack(spacing: 34) {
             Spacer()
-            // Colores de la nebulosa: 1 oro · 2 oro sobre noche · 3 luz de luna.
-            ForEach(1...3, id: \.self) { n in
+            // Colores de la nebulosa: 0 el cielo de la persona · 1 oro · 2 oro sobre noche · 3 luz de luna.
+            ForEach(0...3, id: \.self) { n in
                 VStack(spacing: 10) {
                     Text(verbatim: "\(n)")
                         .font(.zenoTitulo(.title, .regular))

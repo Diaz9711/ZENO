@@ -399,7 +399,8 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
 // ───────── Botón nebulosa ─────────
 // Un trozo de cielo con forma de nube: gas azul con hilos de oro, bordes deshilachados
 // (no hay contorno duro) y una luz tibia detrás del texto. `luz` sube al tocar.
-[[ stitchable ]] half4 nebulosaBoton(float2 pos, half4 color, float2 tam, float t, float luz, float paleta) {
+[[ stitchable ]] half4 nebulosaBoton(float2 pos, half4 color, float2 tam, float t, float luz,
+                                     float3 hondo, float3 nube, float3 oro) {
     float2 uv = (pos - tam * 0.5) / (tam.y * 0.5);
     float largo = max(tam.x / tam.y - 1.0, 0.0);
     float2 q = float2(max(abs(uv.x) - largo, 0.0), uv.y);
@@ -417,23 +418,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     alfa *= smoothstep(0.98, 0.78, length(q));
 
     // Los mismos azules del cielo de ZENO, un poco más hondos: el botón es un trozo de ese cielo.
-    // Paletas: 0 azul del cielo · 1 oro · 2 oro sobre noche · 3 luz de luna.
-    float3 hondo = float3(0.11, 0.14, 0.32);
-    float3 nube = float3(0.24, 0.29, 0.58);
-    float3 oro = float3(0.95, 0.84, 0.55);
-    if (paleta > 0.5 && paleta < 1.5) {          // oro: gas dorado con sombras de oro viejo
-        hondo = float3(0.36, 0.26, 0.10);
-        nube = float3(0.86, 0.70, 0.40);
-        oro = float3(1.0, 0.95, 0.80);
-    } else if (paleta > 1.5 && paleta < 2.5) {   // oro sobre noche: hondo azul, nube dorada
-        hondo = float3(0.08, 0.09, 0.20);
-        nube = float3(0.72, 0.58, 0.32);
-        oro = float3(1.0, 0.92, 0.72);
-    } else if (paleta > 2.5) {                   // luz de luna: plata tibia, casi marfil
-        hondo = float3(0.22, 0.23, 0.30);
-        nube = float3(0.78, 0.78, 0.82);
-        oro = float3(1.0, 0.95, 0.85);
-    }
+    // Los colores llegan de afuera: por defecto, los mismos de la nebulosa de la persona.
     float3 col = mix(hondo, nube, smoothstep(0.30, 0.90, n));
     col += oro * pow(hilos, 4.0) * (0.22 + 0.28 * luz);
     // Una luz tibia en el núcleo que se aviva al respirar y al tocar.
@@ -446,4 +431,44 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
 
     alfa *= mix(0.70, 0.95, n);
     return half4(half3(col * alfa), half(alfa));
+}
+
+// ───────── Borde de galaxia ─────────
+// El botón principal (elección de Diaz): un anillo de gas y estrellas que gira despacio
+// alrededor de la palabra. Arriba fluye hacia un lado y abajo hacia el otro, como una galaxia.
+// Dentro, un vidrio oscuro muy leve para que el texto se lea. `luz` sube al respirar y al tocar.
+[[ stitchable ]] half4 galaxiaBorde(float2 pos, half4 color, float2 tam, float t, float luz,
+                                    float3 hondo, float3 nube, float3 oro) {
+    float2 uv = (pos - tam * 0.5) / (tam.y * 0.5);
+    float largo = max(tam.x / tam.y - 1.0, 0.0);
+    float2 q = float2(max(abs(uv.x) - largo, 0.0), uv.y);
+    float dCapsula = length(q) - 0.66;
+
+    // El gas corre a lo largo del borde: arriba hacia la derecha, abajo hacia la izquierda.
+    float sentido = uv.y < 0.0 ? 1.0 : -1.0;
+    float2 p = float2(uv.x * 1.1 + sentido * t * 0.10, uv.y * 1.6);
+    float2 w = float2(gasN(p + 3.1, 3), gasN(p + 7.7, 3));
+    float n = gasN(p + 1.3 * w, 3);
+    float hilos = crestas(p * 1.8 + 1.4 * w + 2.0);
+
+    // El anillo: más grueso donde hay más gas, con un resplandor suave alrededor.
+    float ancho = 0.07 + 0.11 * n;
+    float d = abs(dCapsula + (n - 0.5) * 0.06);
+    float anillo = exp(-(d * d) / (ancho * ancho));
+    float halo = exp(-(d * d) / (ancho * ancho * 9.0)) * 0.30;
+
+    float3 col = mix(nube, nube * 1.45 + 0.05, smoothstep(0.35, 0.85, n));
+    col = mix(col, oro, pow(hilos, 3.0) * (0.45 + 0.35 * luz));
+    col *= 0.85 + 0.45 * luz;
+    float chispas = estrellas(pos, 7.0, 0.16, 0.5, t, float2(3.0, 5.0));
+    col += float3(1.0, 0.97, 0.9) * chispas * 1.4 * (anillo + halo);
+
+    float brillo = clamp(anillo * 0.95 + halo, 0.0, 1.0);
+    // Dentro, vidrio de noche muy leve.
+    float dentro = 1.0 - smoothstep(-0.06, 0.02, dCapsula);
+    float3 vidrio = hondo * 0.55;
+    float alfa = max(brillo, dentro * 0.42);
+    float3 res = mix(vidrio * dentro * 0.42, col, brillo);
+    alfa *= smoothstep(1.0, 0.86, length(q));
+    return half4(half3(res * smoothstep(1.0, 0.86, length(q))), half(alfa));
 }

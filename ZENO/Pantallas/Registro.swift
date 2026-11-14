@@ -1,4 +1,5 @@
 import SwiftUI
+import simd
 
 /// Los pasos del registro, en orden. Una sola cosa por pantalla.
 enum PasoDeRegistro: Int, Comparable {
@@ -301,14 +302,33 @@ private struct CuerpoDeLuz: View {
     let compacto: Bool
     let variante: Int
     let paleta: Int
+    @Environment(\.cieloDeZeno) private var cielo
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     @Environment(\.isEnabled) private var activo
     @State private var ondas = 0
     @State private var respira = false
 
     private var esOro: Bool { variante == 1 }
-    /// Letra oscura cuando el fondo es claro (oro macizo, nebulosa de oro o de luna).
-    private var letraOscura: Bool { esOro || (variante == 3 && (paleta == 1 || paleta == 3)) }
+    /// La galaxia (estilo 3) va sin flecha: solo la palabra (pedido de Diaz).
+    private var conFlecha: Bool { variante != 3 }
+
+    /// Paleta 0: los colores de la nebulosa de la persona (elección de Diaz). 1–3 quedan para comparar.
+    private var colores: (hondo: SIMD3<Float>, nube: SIMD3<Float>, oro: SIMD3<Float>) {
+        switch paleta {
+        case 1: return (SIMD3(0.36, 0.26, 0.10), SIMD3(0.86, 0.70, 0.40), SIMD3(1.0, 0.95, 0.80))
+        case 2: return (SIMD3(0.08, 0.09, 0.20), SIMD3(0.72, 0.58, 0.32), SIMD3(1.0, 0.92, 0.72))
+        case 3: return (SIMD3(0.22, 0.23, 0.30), SIMD3(0.78, 0.78, 0.82), SIMD3(1.0, 0.95, 0.85))
+        default:
+            guard let cielo else {
+                return (SIMD3(0.11, 0.14, 0.32), SIMD3(0.24, 0.29, 0.58), SIMD3(0.95, 0.84, 0.55))
+            }
+            // Como se ve el cielo de verdad: la nube, iluminada por el resplandor que rodea a Lumi.
+            let nube = simd_mix(cielo.colorNube, cielo.colorBrasa, SIMD3(repeating: 0.35)) * 1.12
+            return (cielo.colorNube * 0.62, nube, simd_mix(cielo.colorBrasa, cielo.colorOro, SIMD3(repeating: 0.5)))
+        }
+    }
+    /// Letra oscura solo sobre el oro macizo; en la galaxia el interior es vidrio oscuro.
+    private var letraOscura: Bool { esOro }
 
     var body: some View {
         let presionado = configuration.isPressed
@@ -322,7 +342,8 @@ private struct CuerpoDeLuz: View {
                                        : AnyShapeStyle(LinearGradient(colors: [.oroClaro, .oroZeno],
                                                                       startPoint: .top, endPoint: .bottom)))
                 .shadow(color: letraOscura ? .white.opacity(0.35) : .black.opacity(0.5), radius: 4)
-                .padding(.leading, compacto ? 18 : 26)
+                .padding(.leading, conFlecha ? (compacto ? 18 : 26) : 0)
+            if conFlecha {
             ZStack {
                 // La onda: un anillo de luz que sale del círculo, como cuando Lumi celebra.
                 Circle()
@@ -352,8 +373,29 @@ private struct CuerpoDeLuz: View {
             .frame(width: circulo, height: circulo)
             .offset(x: presionado && !reducirMovimiento ? 3 : 0)
             .padding(.trailing, 5)
+            }
         }
-        .frame(minWidth: compacto ? nil : 190, minHeight: alto)
+        .padding(.horizontal, conFlecha ? 0 : (compacto ? 26 : 40))
+        // Sin flecha, la onda sale de toda la palabra.
+        .background {
+            if !conFlecha {
+                Capsule()
+                    .stroke(Color.oroClaro, lineWidth: 1.2)
+                    .keyframeAnimator(initialValue: OndaDeBoton(), trigger: ondas) { vista, v in
+                        vista.scaleEffect(x: 1 + (v.escala - 1) * 0.18, y: 1 + (v.escala - 1) * 0.6).opacity(v.opacidad)
+                    } keyframes: { _ in
+                        KeyframeTrack(\.escala) {
+                            CubicKeyframe(1.0, duration: 0.01)
+                            CubicKeyframe(2.4, duration: 0.8)
+                        }
+                        KeyframeTrack(\.opacidad) {
+                            CubicKeyframe(0.7, duration: 0.01)
+                            CubicKeyframe(0, duration: 0.8)
+                        }
+                    }
+            }
+        }
+        .frame(minWidth: compacto ? nil : (conFlecha ? 190 : 170), minHeight: alto)
         .background { fondo(presionado: presionado) }
         .scaleEffect(presionado ? 0.975 : 1)
         .opacity(activo ? 1 : 0.4)
@@ -393,15 +435,17 @@ private struct CuerpoDeLuz: View {
             TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: reducirMovimiento)) { linea in
                 GeometryReader { geo in
                     Rectangle()
-                        .colorEffect(ShaderLibrary.nebulosaBoton(
+                        .colorEffect(ShaderLibrary.galaxiaBorde(
                             .float2(geo.size),
                             .float(linea.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1000)),
                             .float(presionado ? 1 : (respira ? 0.55 : 0.15)),
-                            .float(Double(paleta))))
+                            .float3(colores.hondo.x, colores.hondo.y, colores.hondo.z),
+                            .float3(colores.nube.x, colores.nube.y, colores.nube.z),
+                            .float3(colores.oro.x, colores.oro.y, colores.oro.z)))
                 }
             }
-            .padding(.horizontal, compacto ? -16 : -24)
-            .padding(.vertical, compacto ? -12 : -18)
+            .padding(.horizontal, compacto ? -14 : -20)
+            .padding(.vertical, compacto ? -12 : -16)
             .shadow(color: Color.oroZeno.opacity(presionado ? 0.35 : (respira ? 0.18 : 0.08)), radius: 18)
             .allowsHitTesting(false)
 
@@ -570,5 +614,19 @@ struct ElipseDesdeArriba: Shape {
             if i == 0 { p.move(to: punto) } else { p.addLine(to: punto) }
         }
         return p
+    }
+}
+
+// MARK: - El cielo de la persona, al alcance de los botones
+
+private struct ClaveCieloDeZeno: EnvironmentKey {
+    static let defaultValue: AparienciaLumi? = nil
+}
+
+extension EnvironmentValues {
+    /// La apariencia del cielo actual: el botón nebulosa usa sus mismos colores.
+    var cieloDeZeno: AparienciaLumi? {
+        get { self[ClaveCieloDeZeno.self] }
+        set { self[ClaveCieloDeZeno.self] = newValue }
     }
 }
