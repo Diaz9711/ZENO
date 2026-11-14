@@ -76,11 +76,14 @@ extension View {
         background {
             let forma = RoundedRectangle(cornerRadius: radio, style: .continuous)
             ZStack {
-                forma.fill(.ultraThinMaterial).opacity(0.6)
+                // Vidrio teñido del azul del cielo, no gris de sistema: es un trozo de noche.
                 forma.fill(LinearGradient(
-                    colors: [Color.marfil.opacity(fuerte || activo ? 0.17 : 0.08),
-                             Color.marfil.opacity(fuerte || activo ? 0.05 : 0.015)],
+                    colors: [Color(red: 0.16, green: 0.20, blue: 0.38).opacity(0.62),
+                             Color(red: 0.06, green: 0.08, blue: 0.18).opacity(0.72)],
                     startPoint: .top, endPoint: .bottom))
+                forma.fill(LinearGradient(
+                    colors: [Color.marfil.opacity(fuerte || activo ? 0.12 : 0.06), .clear],
+                    startPoint: .top, endPoint: .center))
                 forma.strokeBorder(LinearGradient(
                     colors: [Color.oroZeno.opacity(activo ? 0.95 : (fuerte ? 0.6 : 0.32)),
                              Color.marfil.opacity(0.06),

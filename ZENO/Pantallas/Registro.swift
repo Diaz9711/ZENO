@@ -114,20 +114,25 @@ struct RegistroView: View {
     private var bienvenida: some View {
         VStack(spacing: 18) {
             Spacer()
-            MarcaZeno(tamano: 54)
-                .padding(.bottom, 14)
-            Text("Una app que se adapta a tu energía,\nno al revés.")
-                .font(.zenoTitulo(.title3, cursiva: true))
-                .luminoso()
+            MarcaZeno(tamano: 46)
+                .padding(.bottom, 26)
+            // La promesa de ZENO, con la palabra que importa en oro.
+            (Text("Una app que se adapta\na tu ").foregroundStyle(Color.marfil)
+             + Text("energía").font(.zenoTitulo(.title, .regular, cursiva: true)).foregroundStyle(Color.oroZeno)
+             + Text(",\nno al revés.").foregroundStyle(Color.marfil))
+                .font(.zenoTitulo(.title, .light))
                 .multilineTextAlignment(.center)
-                .opacity(0.9)
+                .lineSpacing(4)
+                .shadow(color: .black.opacity(0.5), radius: 10, y: 2)
+                .shadow(color: Color.oroZeno.opacity(0.22), radius: 20)
+                .padding(.horizontal, 28)
             Spacer()
             Text("ZENO acompaña tu día. No diagnostica ni reemplaza un tratamiento.")
-                .font(.zenoTexto(.footnote))
+                .font(.zenoTexto(.caption))
                 .multilineTextAlignment(.center)
-                .opacity(0.65)
-                .padding(.horizontal, 36)
-            BotonZeno("Empezar") { ir(a: .nombre) }
+                .opacity(0.55)
+                .padding(.horizontal, 44)
+            BotonZeno("Crear mi estrella") { ir(a: .nombre) }
         }
     }
 
@@ -262,25 +267,56 @@ struct RegistroView: View {
     }
 }
 
-/// El botón principal de ZENO: uno solo por pantalla.
+/// El botón principal de ZENO: uno solo por pantalla, y es lo único hecho de luz.
+/// Oro de estrella con tinta oscura y una flecha en su propio círculo: se ve que se toca.
 struct BotonZeno: View {
     let titulo: LocalizedStringKey
+    /// 0 a 1. Con energía baja el botón brilla menos: invita, no grita.
+    var intensidad: Double
     let accion: () -> Void
 
-    init(_ titulo: LocalizedStringKey, accion: @escaping () -> Void) {
+    init(_ titulo: LocalizedStringKey, intensidad: Double = 1, accion: @escaping () -> Void) {
         self.titulo = titulo
+        self.intensidad = intensidad
         self.accion = accion
     }
 
+    static let tinta = Color(red: 0.09, green: 0.08, blue: 0.15)
+
     var body: some View {
         Button(action: accion) {
-            Text(titulo)
-                .font(.zenoTexto(.body, .medium))
-                .tracking(0.6)
-                .foregroundStyle(Color.marfil)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 17)
-                .cristal(fuerte: true)
+            HStack(spacing: 12) {
+                Text(titulo)
+                    .font(.zenoTexto(.body, .bold))
+                    .tracking(0.4)
+                    .foregroundStyle(Self.tinta)
+                    .padding(.leading, 26)
+                Spacer(minLength: 8)
+                ZStack {
+                    Circle().fill(Self.tinta.opacity(0.92))
+                    FlechaDibujada()
+                        .stroke(Color.oroClaro, style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round))
+                        .frame(width: 15, height: 12)
+                }
+                .frame(width: 42, height: 42)
+                .padding(.trailing, 7)
+            }
+            .frame(maxWidth: .infinity, minHeight: 56)
+            .background {
+                let forma = Capsule()
+                ZStack {
+                    forma.fill(LinearGradient(colors: [.oroClaro, .oroZeno, .oroHondo],
+                                              startPoint: .topLeading, endPoint: .bottomTrailing))
+                    // Un reflejo arriba: el oro parece metal pulido, no un color plano.
+                    forma.fill(LinearGradient(colors: [.white.opacity(0.35), .clear],
+                                              startPoint: .top, endPoint: .center))
+                        .padding(1.5)
+                    forma.strokeBorder(Color.oroClaro.opacity(0.9), lineWidth: 0.8)
+                }
+                .saturation(0.75 + 0.25 * intensidad)
+                .brightness(-0.10 * (1 - intensidad))
+                .shadow(color: Color.oroZeno.opacity(0.18 + 0.27 * intensidad), radius: 18, y: 4)
+            }
         }
         .buttonStyle(EstiloPresion())
         .padding(.horizontal, 28)

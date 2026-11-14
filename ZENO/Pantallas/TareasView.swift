@@ -120,12 +120,12 @@ struct TareaDelMomentoView: View {
 
             Spacer().frame(height: 6)
             if enCurso == tarea.persistentModelID {
-                BotonZeno("Terminé") { terminar(tarea) }
+                BotonZeno("Terminé", intensidad: intensidadDelBoton) { terminar(tarea) }
                 Button("Dejarla para después") { ahoraNo(tarea) }
                     .font(.zenoTexto(.body))
                     .opacity(0.75)
             } else {
-                BotonZeno("Empezar") { empezar(tarea) }
+                BotonZeno("Empezar", intensidad: intensidadDelBoton) { empezar(tarea) }
                 Button("Ahora no") { ahoraNo(tarea) }
                     .font(.zenoTexto(.body))
                     .opacity(0.75)
@@ -191,6 +191,9 @@ struct TareaDelMomentoView: View {
         }
         .padding(.bottom, 92)      // deja sitio a la barra
     }
+
+    /// Con energía baja el botón brilla menos; nunca desaparece.
+    private var intensidadDelBoton: Double { 0.55 + 0.45 * min(max(puntaje / 70, 0), 1) }
 
     /// El campo para escribir aparece cuando no hay una tarea en marcha ni descanso:
     /// así la pantalla sigue teniendo una sola acción principal.
@@ -578,15 +581,14 @@ struct CampoRapido: View {
                     .foregroundStyle(Color.marfil.opacity(0.55))
                 Spacer(minLength: 0)
                 ZStack {
-                    Circle().fill(LinearGradient(colors: [.oroClaro, .oroZeno, .oroHondo],
-                                                 startPoint: .top, endPoint: .bottom))
+                    // Discreta a propósito: lo único hecho de luz en Hoy es el botón principal.
+                    Circle().strokeBorder(Color.oroZeno.opacity(0.45), lineWidth: 1)
                     FlechaDibujada()
-                        .stroke(Color(red: 0.12, green: 0.10, blue: 0.16),
+                        .stroke(Color.oroZeno,
                                 style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round))
                         .frame(width: 14, height: 12)
                 }
                 .frame(width: 34, height: 34)
-                .shadow(color: Color.oroZeno.opacity(0.45), radius: 10)
             }
             .padding(.leading, 20)
             .padding(.trailing, 7)
