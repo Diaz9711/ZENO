@@ -299,7 +299,7 @@ private struct CuerpoDeLuz: View {
             configuration.label
                 .font(.zenoTexto(compacto ? .subheadline : .body, .bold))
                 .tracking(0.4)
-                .foregroundStyle(BotonZeno.tinta)
+                .foregroundStyle(LinearGradient(colors: [.oroClaro, .oroZeno], startPoint: .top, endPoint: .bottom))
                 .padding(.leading, compacto ? 18 : 26)
             ZStack {
                 // La onda: un anillo de luz que sale del círculo, como cuando Lumi celebra.
@@ -317,7 +317,7 @@ private struct CuerpoDeLuz: View {
                             CubicKeyframe(0, duration: 0.75)
                         }
                     }
-                Circle().fill(BotonZeno.tinta.opacity(0.92))
+                Circle().strokeBorder(Color.oroZeno.opacity(presionado ? 0.9 : 0.55), lineWidth: 1)
                 FlechaDibujada()
                     .stroke(Color.oroClaro, style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round))
                     .frame(width: circulo * 0.36, height: circulo * 0.29)
@@ -329,15 +329,43 @@ private struct CuerpoDeLuz: View {
         }
         .frame(minWidth: compacto ? nil : 190, minHeight: alto)
         .background {
+            // Cristal de noche con borde de luz dorada (elección de Diaz).
             let forma = Capsule()
             ZStack {
-                forma.fill(LinearGradient(colors: [.oroClaro, .oroZeno, .oroHondo],
-                                          startPoint: .topLeading, endPoint: .bottomTrailing))
-                // Un reflejo arriba: el oro parece metal pulido, no un color plano.
-                forma.fill(LinearGradient(colors: [.white.opacity(presionado ? 0.5 : 0.35), .clear],
-                                          startPoint: .top, endPoint: .center))
-                    .padding(1.5)
-                forma.strokeBorder(Color.oroClaro.opacity(0.9), lineWidth: 0.8)
+                forma.fill(LinearGradient(colors: [Color(red: 0.17, green: 0.20, blue: 0.38).opacity(0.78),
+                                                   Color(red: 0.06, green: 0.08, blue: 0.18).opacity(0.86)],
+                                          startPoint: .top, endPoint: .bottom))
+                // El oro se refleja apenas en el vidrio, más al tocar.
+                forma.fill(RadialGradient(colors: [Color.oroZeno.opacity(presionado ? 0.26 : 0.12), .clear],
+                                          center: .top, startRadius: 0, endRadius: 120))
+                forma.strokeBorder(LinearGradient(colors: [.oroClaro, Color.oroZeno.opacity(0.55), .oroClaro],
+                                                  startPoint: .leading, endPoint: .trailing),
+                                   lineWidth: presionado ? 1.6 : 1.2)
+                // Una luz que recorre el borde de vez en cuando: "empieza" (pedido de Diaz).
+                if !compacto && !reducirMovimiento {
+                    forma.strokeBorder(lineWidth: 2.2)
+                        .foregroundStyle(.clear)
+                        .keyframeAnimator(initialValue: -0.25, repeating: true) { vista, giro in
+                            vista.overlay {
+                                forma.strokeBorder(
+                                    AngularGradient(stops: [
+                                        .init(color: .clear, location: 0),
+                                        .init(color: .clear, location: 0.80),
+                                        .init(color: Color.oroClaro, location: 0.95),
+                                        .init(color: .white, location: 0.985),
+                                        .init(color: .clear, location: 1)
+                                    ], center: .center, angle: .degrees(360 * giro)),
+                                    lineWidth: 2.2)
+                                .opacity(giro < 0 ? 0 : 1)
+                                .blur(radius: 0.6)
+                            }
+                        } keyframes: { _ in
+                            KeyframeTrack {
+                                LinearKeyframe(-0.25, duration: 3.2)            // reposo
+                                CubicKeyframe(1.0, duration: 2.0)                // la luz da la vuelta
+                            }
+                        }
+                }
             }
             .saturation(0.75 + 0.25 * intensidad)
             .brightness(-0.10 * (1 - intensidad) + (presionado ? 0.05 : 0))

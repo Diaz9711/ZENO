@@ -260,8 +260,8 @@ struct BarraZeno: View {
 
 // MARK: - Encabezado y tarjeta de hoy
 
-/// Arriba de la pantalla: el saludo según la hora y, debajo, una línea tranquila sobre la energía.
-/// Sin cápsulas ni barras: Lumi y el cielo ya muestran la energía con su luz.
+/// Arriba de la pantalla: el saludo según la hora y el nombre.
+/// La energía no se escribe: Lumi y el cielo la muestran con su luz (decisión de Diaz).
 struct EncabezadoDeHoy: View {
     let nombre: String
     let puntaje: Double
@@ -277,12 +277,6 @@ struct EncabezadoDeHoy: View {
                 Text(nombre)
                     .font(.zenoTitulo(.title2, .regular, cursiva: true))
                     .luminoso()
-                Text(nivel)
-                    .font(.zenoTexto(.footnote))
-                    .foregroundStyle(Color.marfil.opacity(0.62))
-                    .padding(.top, 2)
-                    .contentTransition(.opacity)
-                    .animation(.easeInOut(duration: 1.2), value: MotorDeEnergia.nivel(puntaje))
             }
             Spacer()
         }
@@ -294,14 +288,6 @@ struct EncabezadoDeHoy: View {
         case 5..<12: "Buenos días"
         case 12..<20: "Buenas tardes"
         default: "Buenas noches"
-        }
-    }
-
-    private var nivel: LocalizedStringKey {
-        switch MotorDeEnergia.nivel(puntaje) {
-        case .alta: "Tu energía está alta."
-        case .media: "Tu energía va a medias."
-        case .baja: "Tu energía está baja. Vamos despacio."
         }
     }
 }
