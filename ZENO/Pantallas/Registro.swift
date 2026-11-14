@@ -259,7 +259,7 @@ struct BotonZeno: View {
     /// Para la galería: fuerza un color de nebulosa. Si es nil, usa el elegido.
     var paleta: Int?
     let accion: () -> Void
-    @AppStorage("estiloBoton") private var elegido = 3   // nebulosa: elección de Diaz
+    @AppStorage("estiloBoton2") private var elegido = 4   // oro con órbita: elección de Diaz
     @AppStorage("colorNebulosaBoton") private var paletaElegida = 0
 
     init(_ titulo: LocalizedStringKey, intensidad: Double = 1, compacto: Bool = false,
@@ -280,7 +280,8 @@ struct BotonZeno: View {
         }
         .buttonStyle(EstiloLuz(intensidad: intensidad, compacto: compacto, variante: variante ?? elegido,
                                paleta: paleta ?? paletaElegida))
-        .padding(.bottom, compacto ? 0 : 16)
+        .padding(.vertical, compacto ? 0 : 8)
+        .padding(.bottom, compacto ? 0 : 12)
     }
 }
 
@@ -308,7 +309,7 @@ private struct CuerpoDeLuz: View {
     @State private var ondas = 0
     @State private var respira = false
 
-    private var esOro: Bool { variante == 1 }
+    private var esOro: Bool { variante == 1 || variante == 4 }
     /// La galaxia (estilo 3) va sin flecha: solo la palabra (pedido de Diaz).
     private var conFlecha: Bool { variante != 3 }
 
@@ -397,6 +398,9 @@ private struct CuerpoDeLuz: View {
         }
         .frame(minWidth: compacto ? nil : (conFlecha ? 190 : 170), minHeight: alto)
         .background { fondo(presionado: presionado) }
+        // Estilo 4: una órbita como la del sol de ZENO; la mitad de atrás pasa detrás del oro.
+        .background { if variante == 4 && !compacto { OrbitaDelBoton(mitad: .atras, vueltas: ondas) } }
+        .overlay { if variante == 4 && !compacto { OrbitaDelBoton(mitad: .adelante, vueltas: ondas) } }
         .scaleEffect(presionado ? 0.975 : 1)
         .opacity(activo ? 1 : 0.4)
         .animation(.spring(response: 0.3, dampingFraction: 0.62), value: presionado)
@@ -415,7 +419,7 @@ private struct CuerpoDeLuz: View {
     private func fondo(presionado: Bool) -> some View {
         let forma = Capsule()
         switch variante {
-        case 1:
+        case 1, 4:
             // Oro: píldora de metal pulido.
             ZStack {
                 forma.fill(LinearGradient(colors: [.oroClaro, .oroZeno, .oroHondo],
@@ -464,6 +468,66 @@ private struct CuerpoDeLuz: View {
             }
             .shadow(color: Color.oroZeno.opacity(respira ? 0.30 : 0.12), radius: respira ? 18 : 10, y: -2)
         }
+    }
+}
+
+/// La órbita del botón: una elipse fina y ladeada con una lunita, como la del logotipo.
+/// Quieta mientras nadie toca; con cada toque la luna da una vuelta completa.
+private struct OrbitaDelBoton: View {
+    enum Mitad { case atras, adelante }
+    let mitad: Mitad
+    let vueltas: Int
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+
+    var body: some View {
+        GeometryReader { geo in
+            let r = CGRect(origin: .zero, size: geo.size)
+            ZStack {
+                ArcoDeElipse(desde: mitad == .atras ? .pi : 0, hasta: mitad == .atras ? 2 * .pi : .pi)
+                    .stroke(LinearGradient(colors: [Color.oroZeno.opacity(0.08), Color.oroClaro.opacity(0.75),
+                                                    Color.oroZeno.opacity(0.08)],
+                                           startPoint: .leading, endPoint: .trailing),
+                            lineWidth: 1)
+                if mitad == .adelante {
+                    Color.clear
+                        .keyframeAnimator(initialValue: 0.0, trigger: vueltas) { vista, giro in
+                            let a = 0.55 + giro
+                            vista.overlay {
+                                Circle()
+                                    .fill(Color.oroClaro)
+                                    .frame(width: 5, height: 5)
+                                    .shadow(color: Color.oroZeno, radius: 4)
+                                    .position(x: r.midX + r.width / 2 * cos(a), y: r.midY + r.height / 2 * sin(a))
+                            }
+                        } keyframes: { _ in
+                            KeyframeTrack {
+                                CubicKeyframe(0, duration: 0.01)
+                                CubicKeyframe(reducirMovimiento ? 0 : 2 * .pi, duration: 1.1)
+                            }
+                        }
+                }
+            }
+        }
+        .padding(.horizontal, -30)
+        .padding(.vertical, -15)
+        .rotationEffect(.degrees(-7))
+        .allowsHitTesting(false)
+    }
+}
+
+/// Un trozo de elipse entre dos ángulos (0 = derecha, π/2 = abajo).
+struct ArcoDeElipse: Shape {
+    var desde: Double
+    var hasta: Double
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        let pasos = 64
+        for i in 0...pasos {
+            let a = desde + (hasta - desde) * Double(i) / Double(pasos)
+            let punto = CGPoint(x: r.midX + r.width / 2 * cos(a), y: r.midY + r.height / 2 * sin(a))
+            if i == 0 { p.move(to: punto) } else { p.addLine(to: punto) }
+        }
+        return p
     }
 }
 

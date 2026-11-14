@@ -440,15 +440,8 @@ struct GaleriaDeBotones: View {
     var body: some View {
         VStack(spacing: 34) {
             Spacer()
-            // Colores de la nebulosa: 0 el cielo de la persona · 1 oro · 2 oro sobre noche · 3 luz de luna.
-            ForEach(0...3, id: \.self) { n in
-                VStack(spacing: 10) {
-                    Text(verbatim: "\(n)")
-                        .font(.zenoTitulo(.title, .regular))
-                        .foregroundStyle(Color.oroZeno)
-                    BotonZeno("Empezar", variante: 3, paleta: n) {}
-                }
-            }
+            // El botón tal como está elegido ahora.
+            BotonZeno("Empezar") {}
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
