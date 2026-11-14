@@ -190,9 +190,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     float apertura = 3.4 - 0.8 * energia - 1.0 * calidez;
     float calor = exp(-d * d * apertura);
     float velo = 0.74 + 0.44 * n + 0.30 * hilo;
-    // Cerca de la estrella el resplandor se entibia con su oro: la luz se siente cálida, no lila.
-    float3 cCalor = mix(cBrasa, cOro, 0.42);
-    col = mix(col, cCalor, clamp(calor * velo * mix(0.30, 0.58, calidez) * luzE, 0.0, 1.0));
+    col = mix(col, cBrasa, clamp(calor * velo * mix(0.30, 0.58, calidez) * luzE, 0.0, 1.0));
     col += cOro * pow(calor, 2.4) * velo * mix(0.10, 0.24, energia) * mix(0.70, 1.0, calidez);
     col += cBrasa * 0.05 * calidez * dens;
 
@@ -258,7 +256,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
                 + 0.38 * sin(a * (lobulos - 1.0) - giro * 0.6 + desplazamiento.x);
     float gas = ruido(dir * 1.7 + desplazamiento + float2(t * 0.05, -t * 0.04)) - 0.5;
     float forma = 1.0 + profundidad * ondaH * (0.6 + 0.4 * energia) + 0.20 * gas;
-    float rHalo = mix(0.58, 0.80, energia) * (1.0 + mix(0.04, 0.10, energia) * respiro) * forma * (1.0 + 0.18 * destello);
+    float rHalo = mix(0.58, 0.80, energia) * (1.0 + mix(0.04, 0.10, energia) * respiro) * forma;
     float halo = exp(-pow(d / rHalo, 1.45) * 2.0);
 
     // ── Motas en órbita ladeada (común) ──
@@ -279,7 +277,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         motas += (0.8 * exp(-dm * dm / 0.00014) + 0.22 * exp(-dm * dm / 0.0020)) * pulso * cerca;
     }
 
-    float3 col = cHalo * halo * mix(0.40, 0.60, energia) * (1.0 + 0.55 * destello);
+    float3 col = cHalo * halo * mix(0.40, 0.60, energia);
     float disco = 0.0;
     float3 esfera = float3(0.0);
 
@@ -299,7 +297,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         // Rayos: líneas finas que se afilan hacia la punta. Cada persona tiene
         // su número (4 a 8) y su danza (laten juntos, o una ola los recorre).
         float nR = lobulos + 1.0;
-        float largo = mix(0.60, 0.82, energia) * (1.0 + 0.09 * respiro);
+        float largo = mix(0.60, 0.82, energia) * (1.0 + 0.09 * respiro) * (1.0 + 0.22 * destello);
         float rayos = 0.0;
         float rayosCortos = 0.0;
         for (int i = 0; i < 8; i++) {
@@ -329,8 +327,8 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         float brasa = pow(nube(dir * 5.5 + desplazamiento + float2(t * 0.05, giro)), 3.0) * exp(-x * 0.55) * 2.2;
 
         col += mix(cHalo, cCorona, 0.35) * velo * mix(0.02, 0.10, energia);
-        col += cCorona * medio * 1.05 * brillo * (1.0 + 0.35 * destello);
-        col += mix(cNucleo, cCorona, 0.40) * pegado * 0.95 * brillo;
+        col += cCorona * medio * 1.05 * brillo;
+        col += mix(cNucleo, cCorona, 0.40) * pegado * 0.95 * brillo * (1.0 + 0.30 * destello);
         col += cCorona * brasa * 0.20 * brillo;
         col += mix(mix(cClaro, cCorona, 0.30), cHalo, 0.15) * rayos * 0.95 * brillo;
         col += mix(mix(cClaro, cCorona, 0.40), cHalo, 0.20) * rayosCortos * 0.60 * brillo;
@@ -379,8 +377,8 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         float velo = exp(-pow((d - rHalo * 0.84) / 0.075, 2.0)) * (0.4 + 0.6 * fil);
 
         col += mix(cHalo, cCorona, 0.35) * velo * mix(0.02, 0.10, energia);
-        col += cCorona * medio * 0.95 * brillo * (1.0 + 0.35 * destello);
-        col += mix(cNucleo, cCorona, 0.35) * pegado * 0.95 * brillo;
+        col += cCorona * medio * 0.95 * brillo;
+        col += mix(cNucleo, cCorona, 0.35) * pegado * 0.95 * brillo * (1.0 + 0.30 * destello);
     }
 
     col = 1.0 - exp(-col * 1.20);                   // curva suave: no se quema
@@ -396,4 +394,37 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     col = clamp(col, 0.0, 1.0);
     float alfa = max(disco * margen, max(col.r, max(col.g, col.b)));
     return half4(half3(col), half(alfa));
+}
+
+// ───────── Botón nebulosa ─────────
+// Un trozo de cielo con forma de nube: gas azul con hilos de oro, bordes deshilachados
+// (no hay contorno duro) y una luz tibia detrás del texto. `luz` sube al tocar.
+[[ stitchable ]] half4 nebulosaBoton(float2 pos, half4 color, float2 tam, float t, float luz) {
+    float2 uv = (pos - tam * 0.5) / (tam.y * 0.5);
+    float largo = max(tam.x / tam.y - 1.0, 0.0);
+    float2 q = float2(max(abs(uv.x) - largo, 0.0), uv.y);
+    float dCapsula = length(q) - 0.70;
+
+    float2 p = uv * 0.85 + float2(t * 0.03, -t * 0.018);
+    float2 w = float2(gasN(p + 3.1, 3), gasN(p + 7.7, 3));
+    float n = gasN(p + 1.2 * w, 3);
+    float hilos = crestas(p * 1.5 + 1.2 * w + 2.0);
+
+    // El borde lo dibuja el propio gas: más denso, llega más lejos.
+    float borde = dCapsula - (n - 0.45) * 0.40;
+    float alfa = 1.0 - smoothstep(-0.12, 0.26, borde);
+    // Nunca toca el borde del lienzo: se desvanece antes, como una nube de verdad.
+    alfa *= smoothstep(0.98, 0.78, length(q));
+
+    float3 hondo = float3(0.07, 0.09, 0.22);
+    float3 nube = float3(0.27, 0.32, 0.62);
+    float3 oro = float3(0.95, 0.84, 0.55);
+    float3 col = mix(hondo, nube, smoothstep(0.32, 0.78, n));
+    col += oro * pow(hilos, 3.0) * (0.30 + 0.25 * luz);
+    float2 c = uv * float2(0.30, 1.0);
+    col += oro * (0.22 + 0.30 * luz) * exp(-dot(c, c) * 1.4);
+    col += float3(1.0, 0.96, 0.9) * estrellas(pos, 9.0, 0.10, 0.55, t, float2(3.0, 5.0)) * 0.8;
+
+    alfa *= mix(0.80, 1.0, n);
+    return half4(half3(col * alfa), half(alfa));
 }

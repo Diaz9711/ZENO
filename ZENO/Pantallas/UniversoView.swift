@@ -40,6 +40,15 @@ struct UniversoView: View {
     @State private var llegada = false        // al abrir, el universo se acerca
     @State private var presentando = true     // al abrir: la presentación corta de ZENO
 
+    /// Solo para elegir el botón (se abre con el argumento -galeriaBotones YES).
+    private static var verGaleria: Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "galeriaBotones")
+        #else
+        false
+        #endif
+    }
+
     /// El cielo antes de que exista la persona: tranquilo, sin dueño todavía.
     private static let semillaNeutra = Semilla(nombre: "zeno", anio: 2026, mes: 1, dia: 1)
 
@@ -146,7 +155,11 @@ struct UniversoView: View {
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
 
-            if let persona {
+            if Self.verGaleria {
+                #if DEBUG
+                GaleriaDeBotones()
+                #endif
+            } else if let persona {
                 if presentando {
                     // Cada vez que se abre: el universo, el sol y ZENO. Sin botón; sigue sola.
                     BienvenidaView(conBoton: false) {
@@ -419,3 +432,25 @@ struct UniversoView: View {
         .preferredColorScheme(.dark)
         .modelContainer(for: [Persona.self, Tarea.self, EventoDeEnergia.self], inMemory: true)
 }
+
+#if DEBUG
+/// Solo para elegir: los tres estilos del botón principal sobre el cielo real.
+struct GaleriaDeBotones: View {
+    var body: some View {
+        VStack(spacing: 34) {
+            Spacer()
+            ForEach(1...3, id: \.self) { n in
+                VStack(spacing: 10) {
+                    Text(verbatim: "\(n)")
+                        .font(.zenoTitulo(.title, .regular))
+                        .foregroundStyle(Color.oroZeno)
+                    BotonZeno("Empezar", variante: n) {}
+                }
+            }
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black.opacity(0.15))
+    }
+}
+#endif

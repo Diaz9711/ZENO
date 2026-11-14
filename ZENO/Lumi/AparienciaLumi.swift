@@ -19,7 +19,6 @@ struct AparienciaLumi: Equatable {
     var colorCoronaVecino: SIMD3<Float>
     var colorNucleoVecino: SIMD3<Float>
     var periodoDeLuz: Double        // segundos que tarda en ir y volver
-    var familiaDeLuz: Int           // 0 miel · 1 oro rosa · 2 champán · 3 luz de vela
     var lobulos: Int                // forma del halo
     var profundidadLobulo: Double
     var sentidoDeGiro: Double       // +1 o -1
@@ -75,27 +74,10 @@ struct AparienciaLumi: Equatable {
         giroOrbita = g.entre(0, .pi)
         ritmoDeFlote = g.entre(0.55, 1.45)
 
-        // — Luz propia — (al final del todo: así no cambia nada de lo calculado antes)
-        // Cuatro familias cálidas, a los lados del naranja y nunca dentro de él.
-        let familias: [(tono: Double, sat: Double)] = [
-            (0.128, 0.60),   // oro miel
-            (0.985, 0.30),   // oro rosa
-            (0.118, 0.34),   // champán
-            (0.105, 0.24)    // luz de vela, casi blanca
-        ]
-        familiaDeLuz = min(g.entero(0...3), 3)
-        let f = familias[familiaDeLuz]
-        let tonoLuz = f.tono + g.entre(-0.008, 0.008)
-        let sat = f.sat * g.entre(0.92, 1.08)
-        colorCorona = Self.hsb(tonoLuz, sat, 1.0)
-        colorNucleo = Self.hsb(tonoLuz, sat * 0.45, 1.0)
-        // El vecino es un poco más cálido y más lleno: hacia ahí respira la luz.
-        let paso = g.entre(0.014, 0.022) * (g.unidad() < 0.5 ? -1 : 1)
-        colorCoronaVecino = Self.hsb(tonoLuz + paso, min(sat * 1.18, 0.7), 1.0)
-        colorNucleoVecino = Self.hsb(tonoLuz + paso, sat * 0.55, 1.0)
-        periodoDeLuz = g.entre(55, 110)
-        // El halo conserva el color propio de cada persona, entibiado por su luz.
-        colorHalo = simd_mix(colorHalo, colorCorona, SIMD3(repeating: 0.5))
+        // — Luz viva — sin sorteos nuevos: el oro aprobado respira hacia un oro un poco más cálido.
+        colorCoronaVecino = Self.hsb(0.108, 0.62, 1.0)
+        colorNucleoVecino = Self.hsb(0.112, 0.34, 1.0)
+        periodoDeLuz = 70 + 40 * Double(desplazamiento.x) / 60
     }
 
     /// Tono, saturación y brillo (0–1) a rojo, verde y azul.
