@@ -36,8 +36,9 @@ struct UniversoView: View {
     @State private var celebracion = Celebracion()
     @State private var celebraciones = 0
     @State private var vueltas = 0.0          // giros lentos de Lumi (tres tareas seguidas)
-    @AppStorage("diaCalido") private var diaCalido = ""
-    @State private var llegada = false        // la primera vez, el universo se acerca   // terminó algo con energía baja
+    @AppStorage("diaCalido") private var diaCalido = ""   // terminó algo con energía baja
+    @State private var llegada = false        // al abrir, el universo se acerca
+    @State private var presentando = true     // al abrir: la presentación corta de ZENO
 
     /// El cielo antes de que exista la persona: tranquilo, sin dueño todavía.
     private static let semillaNeutra = Semilla(nombre: "zeno", anio: 2026, mes: 1, dia: 1)
@@ -48,7 +49,9 @@ struct UniversoView: View {
         let semilla = persona?.semilla ?? (paso.yaNacio ? borrador.semilla : Self.semillaNeutra)
         let apariencia = AparienciaLumi(semilla: semilla)
         let forma = persona?.formaDeLumi ?? borrador.forma
-        let hayLumi = persona != nil || lumiNacida
+        // Al abrir, Lumi aún no está: nace del sol de la presentación cuando esta termina.
+        let hayLumi = (persona != nil && !presentando) || lumiNacida
+        let viajando = (enRegistro || presentando) && !llegada
         // El puntaje de energía real: cronotipo + comportamiento en la app.
         let puntaje = energiaDePrueba ?? persona.map { MotorDeEnergia.puntaje(persona: $0, eventos: eventos, ahora: ahora) } ?? 72
         let energia = hayLumi ? puntaje / 100 : 0.30
@@ -75,8 +78,8 @@ struct UniversoView: View {
                         .id(semilla)
                         .transition(.opacity)
                         // Bienvenida: la cámara viaja hacia el cielo, que gira apenas al llegar.
-                        .scaleEffect(enRegistro && !llegada ? 1.55 : 1)
-                        .rotationEffect(.degrees(enRegistro && !llegada ? -6 : 0))
+                        .scaleEffect(viajando ? 1.55 : 1)
+                        .rotationEffect(.degrees(viajando ? -6 : 0))
 
                     let anchoLumi = min(geo.size.width, 430) * 0.98
                     LumiView(apariencia: apariencia, energia: energia, forma: forma, destello: destelloDeHoy)
@@ -128,7 +131,7 @@ struct UniversoView: View {
             .ignoresSafeArea(.keyboard)
 
             // Al llegar, el espacio está casi a oscuras y se va aclarando.
-            if enRegistro {
+            if enRegistro || presentando {
                 Color(red: 0.01, green: 0.015, blue: 0.05)
                     .opacity(llegada ? 0 : 0.92)
                     .ignoresSafeArea()
@@ -144,7 +147,15 @@ struct UniversoView: View {
                 .allowsHitTesting(false)
 
             if let persona {
-                contenido(de: persona, puntaje: puntaje)
+                if presentando {
+                    // Cada vez que se abre: el universo, el sol y ZENO. Sin botón; sigue sola.
+                    BienvenidaView(conBoton: false) {
+                        withAnimation(movimientoDeLumi) { presentando = false }
+                    }
+                    .transition(.desenfoque)
+                } else {
+                    contenido(de: persona, puntaje: puntaje)
+                }
             } else {
                 RegistroView(paso: $paso, borrador: $borrador, lumiNacida: lumiNacida, alTerminar: terminarRegistro)
                     .transition(.opacity)
@@ -182,8 +193,9 @@ struct UniversoView: View {
             }
         }
         .task {
-            if reducirMovimiento || !enRegistro {
+            if reducirMovimiento {
                 llegada = true
+                presentando = false
             } else {
                 withAnimation(.easeOut(duration: 4.2)) { llegada = true }
             }
@@ -351,6 +363,7 @@ struct UniversoView: View {
     }
 
     private func terminarRegistro() {
+        presentando = false
         momento = .tarea
         visita += 1
         withAnimation(.easeInOut(duration: 0.9)) {

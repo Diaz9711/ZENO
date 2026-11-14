@@ -309,7 +309,10 @@ struct BotonZeno: View {
 /// La entrada a ZENO: se llega desde el espacio. Primero el cielo, luego una luz que se enciende,
 /// y el nombre letra por letra. Nada más: el universo habla solo. Tocar en cualquier parte lo muestra todo de una vez.
 struct BienvenidaView: View {
+    /// Con botón: la primera vez, antes del registro. Sin botón: cada vez que se abre, y sigue sola.
+    var conBoton = true
     let alEmpezar: () -> Void
+    @State private var terminada = false
 
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     /// 0 nada · 1 se enciende el sol · 2 llegan las letras · 4 el botón
@@ -360,9 +363,9 @@ struct BienvenidaView: View {
             Spacer()
 
             BotonZeno("Crear mi estrella", accion: alEmpezar)
-            .opacity(fase >= 4 ? 1 : 0)
+            .opacity(conBoton && fase >= 4 ? 1 : 0)
             .offset(y: fase >= 4 ? 0 : 26)
-            .allowsHitTesting(fase >= 4)
+            .allowsHitTesting(conBoton && fase >= 4)
         }
         .contentShape(Rectangle())
         .onTapGesture { mostrarTodo() }
@@ -372,17 +375,29 @@ struct BienvenidaView: View {
 
     /// La secuencia completa dura unos cinco segundos.
     private func contar() async {
-        if reducirMovimiento { fase = 4; destello = true; return }
-        let pasos: [(Int, Double)] = [(1, 1.3), (2, 0.9), (4, 2.4)]
+        if reducirMovimiento { fase = 4; destello = true; if !conBoton { terminar() }; return }
+        let pasos: [(Int, Double)] = conBoton ? [(1, 1.3), (2, 0.9), (4, 2.4)] : [(1, 0.9), (2, 0.7)]
         for (f, espera) in pasos {
             try? await Task.sleep(for: .seconds(espera))
             guard fase < f else { continue }
             withAnimation(.spring(response: 1.1, dampingFraction: 0.8)) { fase = f }
             if f == 1 { withAnimation(.easeOut(duration: 1.6)) { destello = true } }
         }
+        if !conBoton {
+            try? await Task.sleep(for: .seconds(1.7))
+            terminar()
+        }
+    }
+
+    /// Solo una vez: pasa a la pantalla principal.
+    private func terminar() {
+        guard !terminada else { return }
+        terminada = true
+        alEmpezar()
     }
 
     private func mostrarTodo() {
+        if !conBoton { terminar(); return }
         guard fase < 4 else { return }
         withAnimation(.easeOut(duration: 0.6)) { fase = 4; destello = true }
     }
