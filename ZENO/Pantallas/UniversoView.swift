@@ -265,6 +265,8 @@ struct UniversoView: View {
             withAnimation(reducirMovimiento ? .easeInOut(duration: 0.5)
                                             : .spring(response: 0.95, dampingFraction: 0.68)) {
                 pagina = destino
+                // Si se estaba escribiendo en Hoy, al salir la barra vuelve siempre.
+                if destino != .hoy { editando = false }
             }
         }
     }

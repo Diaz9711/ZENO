@@ -73,72 +73,105 @@ extension View {
 
 enum Glifo { case hoy, tareas, ajustes, mas }
 
-/// Trazos finos y redondeados, con el mismo grosor y un punto de luz: una sola familia.
+/// Trazos finos con luz propia: el metal va de casi blanco a oro, y cada glifo tiene
+/// un punto encendido con su halo. Una sola familia, hecha de cosas del cielo.
 struct GlifoView: View {
     let glifo: Glifo
     var color: Color = .marfil
     var acento: Color = .oroZeno
+    /// La página elegida: el glifo se enciende un poco más.
+    var activo: Bool = false
     var tamano: CGFloat = 24
 
     var body: some View {
         Canvas { ctx, size in
             let s = min(size.width, size.height)
             let c = CGPoint(x: size.width / 2, y: size.height / 2)
-            let trazo = StrokeStyle(lineWidth: s * 0.068, lineCap: .round, lineJoin: .round)
+            let trazo = StrokeStyle(lineWidth: s * 0.056, lineCap: .round, lineJoin: .round)
+            let fino = StrokeStyle(lineWidth: s * 0.034, lineCap: .round, lineJoin: .round)
             func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: c.x + (x - 0.5) * s, y: c.y + (y - 0.5) * s) }
+            // El trazo brilla arriba a la izquierda, como si Lumi lo iluminara.
+            let metal = GraphicsContext.Shading.linearGradient(
+                Gradient(colors: [activo ? Color.oroClaro : color, color.opacity(activo ? 0.95 : 0.72)]),
+                startPoint: p(0.1, 0.05), endPoint: p(0.9, 0.95))
+            func circulo(_ centro: CGPoint, _ r: CGFloat) -> Path {
+                Path(ellipseIn: CGRect(x: centro.x - r, y: centro.y - r, width: r * 2, height: r * 2))
+            }
+            /// Un punto de luz: halo suave, cuerpo dorado y un brillo blanco diminuto.
+            func luz(_ centro: CGPoint, _ r: CGFloat) {
+                let halo = r * (activo ? 3.4 : 2.6)
+                ctx.fill(circulo(centro, halo), with: .radialGradient(
+                    Gradient(colors: [acento.opacity(activo ? 0.55 : 0.32), acento.opacity(0)]),
+                    center: centro, startRadius: 0, endRadius: halo))
+                ctx.fill(circulo(centro, r), with: .radialGradient(
+                    Gradient(colors: [.oroClaro, acento]), center: CGPoint(x: centro.x - r * 0.3, y: centro.y - r * 0.3),
+                    startRadius: 0, endRadius: r * 1.3))
+            }
+            /// Destello de cuatro puntas con lados curvos.
+            func destello(_ centro: CGPoint, _ r: CGFloat, hundido: CGFloat = 0.20) -> Path {
+                var d = Path()
+                let puntas = [CGPoint(x: centro.x, y: centro.y - r), CGPoint(x: centro.x + r, y: centro.y),
+                              CGPoint(x: centro.x, y: centro.y + r), CGPoint(x: centro.x - r, y: centro.y)]
+                d.move(to: puntas[0])
+                for i in 1...4 {
+                    d.addQuadCurve(to: puntas[i % 4],
+                                   control: centro.desplazado(hacia: puntos(medio: puntas[i - 1], puntas[i % 4]), factor: hundido))
+                }
+                d.closeSubpath()
+                return d
+            }
 
             switch glifo {
             case .hoy:
-                // Un destello de cuatro puntas con lados curvos: Lumi en pequeño.
-                var estrella = Path()
-                let puntas = [p(0.5, 0.08), p(0.92, 0.5), p(0.5, 0.92), p(0.08, 0.5)]
-                estrella.move(to: puntas[0])
-                for i in 1...4 {
-                    estrella.addQuadCurve(to: puntas[i % 4], control: p(0.5, 0.5).applying(.identity)
-                        .desplazado(hacia: puntos(medio: puntas[i - 1], puntas[i % 4]), factor: 0.16))
-                }
-                estrella.closeSubpath()
-                ctx.fill(estrella, with: .color(acento.opacity(0.22)))
-                ctx.stroke(estrella, with: .color(color), style: trazo)
-                ctx.fill(Path(ellipseIn: CGRect(x: c.x - s * 0.07, y: c.y - s * 0.07, width: s * 0.14, height: s * 0.14)),
-                         with: .color(acento))
+                // Lumi en pequeño: un destello grande, su corazón de luz y una chispa que lo acompaña.
+                let estrella = destello(p(0.46, 0.54), s * 0.40)
+                ctx.fill(estrella, with: .radialGradient(
+                    Gradient(colors: [acento.opacity(activo ? 0.42 : 0.24), acento.opacity(0.04)]),
+                    center: p(0.46, 0.54), startRadius: 0, endRadius: s * 0.40))
+                ctx.stroke(estrella, with: metal, style: trazo)
+                luz(p(0.46, 0.54), s * 0.060)
+                ctx.fill(destello(p(0.86, 0.16), s * 0.115, hundido: 0.12), with: .color(activo ? .oroClaro : color.opacity(0.9)))
 
             case .tareas:
-                // Tres líneas; la primera ya tiene su círculo encendido.
-                for (i, y) in [0.26, 0.5, 0.74].enumerated() {
+                // Tres líneas que se apagan hacia la derecha; la primera ya tiene su punto encendido.
+                for (i, y) in [0.24, 0.5, 0.76].enumerated() {
                     var linea = Path()
-                    linea.move(to: p(0.38, y))
-                    linea.addLine(to: p(i == 2 ? 0.74 : 0.9, y))
-                    ctx.stroke(linea, with: .color(color), style: trazo)
-                    let r = s * 0.075
-                    let punto = Path(ellipseIn: CGRect(x: p(0.16, y).x - r, y: p(0.16, y).y - r, width: r * 2, height: r * 2))
+                    let fin = [0.92, 0.80, 0.66][i]
+                    linea.move(to: p(0.36, y))
+                    linea.addLine(to: p(fin, y))
+                    ctx.stroke(linea, with: .linearGradient(
+                        Gradient(colors: [activo ? Color.oroClaro : color, color.opacity(0.35)]),
+                        startPoint: p(0.36, y), endPoint: p(fin, y)), style: trazo)
                     if i == 0 {
-                        ctx.fill(punto, with: .color(acento))
+                        luz(p(0.15, y), s * 0.075)
                     } else {
-                        ctx.stroke(punto, with: .color(color.opacity(0.85)), lineWidth: s * 0.055)
+                        ctx.stroke(circulo(p(0.15, y), s * 0.068), with: .color(color.opacity(0.8)), style: fino)
                     }
                 }
 
             case .ajustes:
-                // Una órbita ladeada con su estrella y una luna.
-                var orbita = Path(ellipseIn: CGRect(x: -s * 0.44, y: -s * 0.19, width: s * 0.88, height: s * 0.38))
-                orbita = orbita.applying(CGAffineTransform(rotationAngle: -.pi / 7))
-                    .applying(CGAffineTransform(translationX: c.x, y: c.y))
-                ctx.stroke(orbita, with: .color(color), style: trazo)
-                ctx.fill(Path(ellipseIn: CGRect(x: c.x - s * 0.13, y: c.y - s * 0.13, width: s * 0.26, height: s * 0.26)),
-                         with: .color(acento))
-                let luna = p(0.86, 0.27)
-                ctx.fill(Path(ellipseIn: CGRect(x: luna.x - s * 0.06, y: luna.y - s * 0.06, width: s * 0.12, height: s * 0.12)),
-                         with: .color(color))
+                // Un pequeño sistema: la estrella, su órbita ladeada, una órbita lejana y una luna.
+                func orbita(_ ancho: CGFloat, _ alto: CGFloat) -> Path {
+                    Path(ellipseIn: CGRect(x: -s * ancho / 2, y: -s * alto / 2, width: s * ancho, height: s * alto))
+                        .applying(CGAffineTransform(rotationAngle: -.pi / 7))
+                        .applying(CGAffineTransform(translationX: c.x, y: c.y))
+                }
+                ctx.stroke(orbita(1.02, 0.56), with: .color(color.opacity(0.28)), style: fino)
+                ctx.stroke(orbita(0.86, 0.36), with: metal, style: trazo)
+                luz(c, s * 0.115)
+                let luna = p(0.855, 0.285)
+                ctx.fill(circulo(luna, s * 0.058), with: .color(activo ? .oroClaro : color))
+                ctx.fill(circulo(p(0.10, 0.80), s * 0.030), with: .color(color.opacity(0.7)))
 
             case .mas:
                 var cruz = Path()
-                cruz.move(to: p(0.5, 0.2)); cruz.addLine(to: p(0.5, 0.8))
-                cruz.move(to: p(0.2, 0.5)); cruz.addLine(to: p(0.8, 0.5))
-                ctx.stroke(cruz, with: .color(color), style: StrokeStyle(lineWidth: s * 0.085, lineCap: .round))
+                cruz.move(to: p(0.5, 0.18)); cruz.addLine(to: p(0.5, 0.82))
+                cruz.move(to: p(0.18, 0.5)); cruz.addLine(to: p(0.82, 0.5))
+                ctx.stroke(cruz, with: .color(color), style: StrokeStyle(lineWidth: s * 0.078, lineCap: .round))
             }
         }
         .frame(width: tamano, height: tamano)
+        .shadow(color: acento.opacity(activo ? 0.55 : 0), radius: 6)
     }
 
     private func puntos(medio a: CGPoint, _ b: CGPoint) -> CGPoint {
@@ -197,7 +230,7 @@ struct BarraZeno: View {
             withAnimation(.spring(response: 0.9, dampingFraction: 0.74)) { pagina = destino }
         } label: {
             HStack(spacing: 7) {
-                GlifoView(glifo: glifo, tamano: 22)
+                GlifoView(glifo: glifo, activo: activa, tamano: 24)
                 if activa {
                     Text(titulo)
                         .font(.zenoTexto(.subheadline, .semibold))
