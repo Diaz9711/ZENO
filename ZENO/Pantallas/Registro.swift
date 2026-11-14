@@ -256,7 +256,7 @@ struct BotonZeno: View {
     /// Para la galería: fuerza un estilo. Si es nil, usa el elegido.
     var variante: Int?
     let accion: () -> Void
-    @AppStorage("estiloBoton") private var elegido = 2
+    @AppStorage("estiloBoton") private var elegido = 3   // nebulosa: elección de Diaz
 
     init(_ titulo: LocalizedStringKey, intensidad: Double = 1, compacto: Bool = false,
          variante: Int? = nil, accion: @escaping () -> Void) {
@@ -389,8 +389,9 @@ private struct CuerpoDeLuz: View {
                             .float(presionado ? 1 : (respira ? 0.55 : 0.15))))
                 }
             }
-            .padding(.horizontal, -22)
-            .padding(.vertical, -16)
+            .padding(.horizontal, compacto ? -16 : -24)
+            .padding(.vertical, compacto ? -12 : -18)
+            .shadow(color: Color.oroZeno.opacity(presionado ? 0.35 : (respira ? 0.18 : 0.08)), radius: 18)
             .allowsHitTesting(false)
 
         default:

@@ -412,19 +412,24 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
 
     // El borde lo dibuja el propio gas: más denso, llega más lejos.
     float borde = dCapsula - (n - 0.45) * 0.40;
-    float alfa = 1.0 - smoothstep(-0.12, 0.26, borde);
+    float alfa = 1.0 - smoothstep(-0.20, 0.30, borde);
     // Nunca toca el borde del lienzo: se desvanece antes, como una nube de verdad.
     alfa *= smoothstep(0.98, 0.78, length(q));
 
-    float3 hondo = float3(0.07, 0.09, 0.22);
-    float3 nube = float3(0.27, 0.32, 0.62);
+    // Los mismos azules del cielo de ZENO, un poco más hondos: el botón es un trozo de ese cielo.
+    float3 hondo = float3(0.11, 0.14, 0.32);
+    float3 nube = float3(0.24, 0.29, 0.58);
     float3 oro = float3(0.95, 0.84, 0.55);
-    float3 col = mix(hondo, nube, smoothstep(0.32, 0.78, n));
-    col += oro * pow(hilos, 3.0) * (0.30 + 0.25 * luz);
+    float3 col = mix(hondo, nube, smoothstep(0.30, 0.90, n));
+    col += oro * pow(hilos, 4.0) * (0.22 + 0.28 * luz);
+    // Una luz tibia en el núcleo que se aviva al respirar y al tocar.
     float2 c = uv * float2(0.30, 1.0);
-    col += oro * (0.22 + 0.30 * luz) * exp(-dot(c, c) * 1.4);
+    col += oro * (0.10 + 0.22 * luz) * exp(-dot(c, c) * 1.8);
+    // Borde de luz donde el gas se adelgaza: la nube se recorta sola sobre el cielo.
+    float orilla = smoothstep(-0.10, 0.08, borde) * (1.0 - smoothstep(0.08, 0.26, borde));
+    col += mix(nube, oro, 0.4) * orilla * (0.10 + 0.14 * luz);
     col += float3(1.0, 0.96, 0.9) * estrellas(pos, 9.0, 0.10, 0.55, t, float2(3.0, 5.0)) * 0.8;
 
-    alfa *= mix(0.80, 1.0, n);
+    alfa *= mix(0.70, 0.95, n);
     return half4(half3(col * alfa), half(alfa));
 }
