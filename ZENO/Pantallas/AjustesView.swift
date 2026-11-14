@@ -191,7 +191,7 @@ struct AjustesView: View {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) { persona.formaDeLumi = forma }
         } label: {
             VStack(spacing: 6) {
-                LumiView(apariencia: apariencia, energia: 0.75, forma: forma)
+                LumiView(apariencia: apariencia, energia: 0.75, forma: forma, cuadros: 30)
                     .frame(height: 130)
                     .clipped()
                 Text(forma == .estrella ? "Estrella" : "Esfera")

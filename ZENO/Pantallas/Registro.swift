@@ -121,7 +121,7 @@ struct RegistroView: View {
 
     private func ir(a nuevo: PasoDeRegistro) {
         escribiendo = false
-        withAnimation(.easeInOut(duration: 0.55)) { paso = nuevo }
+        withAnimation(Ritmo.contenido) { paso = nuevo }
     }
 
     @ViewBuilder

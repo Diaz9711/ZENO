@@ -84,6 +84,8 @@ struct UniversoView: View {
                                  energia: energia,
                                  calidez: calidez,
                                  centro: centro)
+                        // El calor del cielo sigue a Lumi con su mismo resorte.
+                        .animation(reducirMovimiento ? .easeInOut(duration: 0.4) : Ritmo.lumi, value: pagina)
                         .id(semilla)
                         .transition(.opacity)
                         // Bienvenida: la cámara viaja hacia el cielo, que gira apenas al llegar.
@@ -120,6 +122,8 @@ struct UniversoView: View {
                         .opacity(hayLumi ? 1 : 0)
                         .position(x: geo.size.width * centro.x,
                                   y: geo.size.height * centro.y)
+                        // Lumi viaja con su propio resorte, aunque el contenido cambie más rápido.
+                        .animation(reducirMovimiento ? .easeInOut(duration: 0.4) : Ritmo.lumi, value: pagina)
 
                     if let tarea = tareaEnCurso, let inicio = tarea.empezadaEn {
                         AnilloDeTiempoView(inicio: inicio, minutos: tarea.minutosPrevistos)
@@ -309,8 +313,7 @@ struct UniversoView: View {
         sentido = destino.rawValue > pagina.rawValue ? 1 : -1
         DispatchQueue.main.async {
             if !reducirMovimiento { viajes += 1 }
-            withAnimation(reducirMovimiento ? .easeInOut(duration: 0.5)
-                                            : .spring(response: 0.95, dampingFraction: 0.68)) {
+            withAnimation(reducirMovimiento ? .easeInOut(duration: 0.3) : Ritmo.contenido) {
                 pagina = destino
                 // Si se estaba escribiendo en Hoy, al salir la barra vuelve siempre.
                 if destino != .hoy { editando = false }

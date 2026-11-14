@@ -326,7 +326,7 @@ struct TareaDelMomentoView: View {
         escribiendo = false
         if modo == .ver {
             frase = ""
-            withAnimation(.easeInOut(duration: 0.4)) { modo = .agregar }
+            withAnimation(Ritmo.contenido) { modo = .agregar }
         }
         dictado.empezar()
     }
@@ -342,14 +342,14 @@ struct TareaDelMomentoView: View {
         frase = ""
         primerPaso = ""
         dictado.aviso = nil
-        withAnimation(.easeInOut(duration: 0.4)) { modo = .agregar }
+        withAnimation(Ritmo.contenido) { modo = .agregar }
         enfocarPronto()
     }
 
     /// El campo nuevo tarda un instante en existir; el teclado se le da cuando ya está en pantalla.
     private func enfocarPronto() {
         escribiendo = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             if modo != .ver { escribiendo = true }
         }
     }
@@ -357,7 +357,7 @@ struct TareaDelMomentoView: View {
     private func cerrarAgregar() {
         toques += 1
         escribiendo = false
-        withAnimation(.easeInOut(duration: 0.4)) { modo = .ver }
+        withAnimation(Ritmo.contenido) { modo = .ver }
     }
 
     private func guardarFrase() {
@@ -366,7 +366,7 @@ struct TareaDelMomentoView: View {
         if ClasificadorDeTamano.tamano(de: frase) == .grande {
             // Tarea grande: Lumi pregunta por el primer paso.
             primerPaso = ""
-            withAnimation(.easeInOut(duration: 0.4)) { modo = .primerPaso }
+            withAnimation(Ritmo.contenido) { modo = .primerPaso }
             enfocarPronto()
         } else {
             guardarTarea(conPaso: false)
@@ -385,7 +385,7 @@ struct TareaDelMomentoView: View {
         escribiendo = false
         frase = ""
         primerPaso = ""
-        withAnimation(.easeInOut(duration: 0.4)) { modo = .ver }
+        withAnimation(Ritmo.contenido) { modo = .ver }
     }
 
     /// Guarda un evento en el historial. La tarea se enlaza después de insertar, para que siempre quede guardada.
@@ -638,8 +638,15 @@ private struct TareaTocable: View {
         .padding(.horizontal, 32)
         .padding(.vertical, 12)
         // Sin empezar, la tarea respira una luz dorada: "empieza". Al mantenerla, se enciende.
-        .shadow(color: Color.oroZeno.opacity(presionando ? 0.85 : (!enCurso && respira ? 0.55 : 0.12)),
-                radius: presionando ? 28 : (!enCurso && respira ? 22 : 10))
+        // El resplandor es una capa fija; solo cambia su opacidad (barato para la GPU).
+        .background {
+            Titular(texto: tarea.textoVisible)
+                .padding(.horizontal, 32)
+                .colorMultiply(.oroZeno)
+                .blur(radius: 18)
+                .opacity(presionando ? 0.95 : (!enCurso && respira ? 0.6 : 0.15))
+                .accessibilityHidden(true)
+        }
         .scaleEffect(presionando ? 1.04 : 1)
         .contentShape(Rectangle())
         .onTapGesture { if !enCurso { alEmpezar() } }

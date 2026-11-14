@@ -16,6 +16,9 @@ struct LumiView: View, Animatable {
     var forma: FormaDeLumi = .estrella
     /// Brillo extra (0–1): Lumi queda más luminosa después de una tarea difícil.
     var destello: Double = 0
+    /// Cuadros por segundo. 60 bastan para la estrella grande (en un iPhone de 120 Hz el shader
+    /// corría el doble sin que se notara); las vistas previas pequeñas van a 30.
+    var cuadros: Double = 60
 
     // Permite que la energía cambie poco a poco con `withAnimation`.
     var animatableData: Double {
@@ -42,7 +45,7 @@ struct LumiView: View, Animatable {
     }
 
     var body: some View {
-        TimelineView(.animation(paused: reducirMovimiento)) { linea in
+        TimelineView(.animation(minimumInterval: 1 / cuadros, paused: reducirMovimiento)) { linea in
             let m = reloj.avanzar(hasta: linea.date,
                                   energia: energia,
                                   apariencia: apariencia,

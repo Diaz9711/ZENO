@@ -132,9 +132,19 @@ struct MarcaZeno: View {
 /// El sol de la marca, dibujado: núcleo dorado y un anillo fino de luz.
 struct SolZeno: View {
     var body: some View {
+        // El lienzo es el doble de grande que el sol: así su resplandor no se corta en un cuadrado.
+        GeometryReader { geo in
+            lienzo
+                .frame(width: geo.size.width * 2, height: geo.size.height * 2)
+                .position(x: geo.size.width / 2, y: geo.size.height / 2)
+        }
+        .allowsHitTesting(false)
+    }
+
+    private var lienzo: some View {
         Canvas { ctx, size in
             let c = CGPoint(x: size.width / 2, y: size.height / 2)
-            let r = min(size.width, size.height) / 2
+            let r = min(size.width, size.height) / 4
             let disco = Path(ellipseIn: CGRect(x: c.x - r * 0.42, y: c.y - r * 0.42, width: r * 0.84, height: r * 0.84))
             ctx.addFilter(.shadow(color: Color.oroZeno.opacity(0.9), radius: r * 0.45))
             ctx.fill(disco, with: .radialGradient(Gradient(colors: [.marfil, .oroZeno, .oroHondo]),

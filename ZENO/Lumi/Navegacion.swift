@@ -8,11 +8,19 @@ private struct Desenfoque: ViewModifier {
     let activo: Bool
     func body(content: Content) -> some View {
         content
-            .blur(radius: activo ? 16 : 0)
+            // Solo transformación y opacidad (sin desenfoque animado): fluido a 60–120 cuadros.
             .opacity(activo ? 0 : 1)
-            .scaleEffect(activo ? 0.955 : 1)
-            .offset(y: activo ? 18 : 0)
+            .scaleEffect(activo ? 0.97 : 1)
+            .offset(y: activo ? 12 : 0)
     }
+}
+
+/// El ritmo común de ZENO: el contenido cambia rápido y suave; Lumi viaja con su propio resorte, más lento.
+enum Ritmo {
+    /// Páginas, secciones y contenido: rápido y sin rebote.
+    static let contenido = Animation.spring(response: 0.38, dampingFraction: 0.9)
+    /// Lumi y el cielo: un objeto físico, con un poco de inercia.
+    static let lumi = Animation.spring(response: 0.75, dampingFraction: 0.74)
 }
 
 extension AnyTransition {
@@ -30,10 +38,9 @@ private struct PasoLateral: ViewModifier {
     func body(content: Content) -> some View {
         let fuera = lado != 0
         content
-            .blur(radius: fuera && !reducirMovimiento ? 14 : 0)
             .opacity(fuera ? 0 : 1)
-            .scaleEffect(fuera && !reducirMovimiento ? 0.93 : 1)
-            .offset(x: reducirMovimiento ? 0 : lado * 84)
+            .scaleEffect(fuera && !reducirMovimiento ? 0.97 : 1)
+            .offset(x: reducirMovimiento ? 0 : lado * 44)
     }
 }
 
@@ -54,11 +61,10 @@ private struct Aparece: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .blur(radius: visible || reducirMovimiento ? 0 : 12)
             .opacity(visible ? 1 : 0)
-            .offset(y: visible || reducirMovimiento ? 0 : 30)
+            .offset(y: visible || reducirMovimiento ? 0 : 14)
             .onAppear {
-                withAnimation(.spring(response: 0.75, dampingFraction: 0.82).delay(0.12 + 0.11 * Double(orden))) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.9).delay(0.04 + 0.06 * Double(orden))) {
                     visible = true
                 }
             }
@@ -227,7 +233,8 @@ struct BarraZeno: View {
     private func pestana(_ destino: Pagina, _ titulo: LocalizedStringKey, _ glifo: Glifo) -> some View {
         let activa = pagina == destino
         return Button {
-            withAnimation(.spring(response: 0.9, dampingFraction: 0.74)) { pagina = destino }
+            // La animación la pone `ir(a:)` en UniversoView: una sola, no dos encimadas.
+            pagina = destino
         } label: {
             HStack(spacing: 7) {
                 GlifoView(glifo: glifo, activo: activa, tamano: 24)
