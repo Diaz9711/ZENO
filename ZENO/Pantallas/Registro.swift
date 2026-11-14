@@ -293,16 +293,16 @@ private struct CuerpoDeLuz: View {
 
     var body: some View {
         let presionado = configuration.isPressed
-        let alto: CGFloat = compacto ? 40 : 50
-        HStack(spacing: compacto ? 8 : 12) {
+        let alto: CGFloat = compacto ? 40 : 52
+        let circulo = alto - 10
+        HStack(spacing: compacto ? 10 : 16) {
             configuration.label
                 .font(.zenoTexto(compacto ? .subheadline : .body, .bold))
                 .tracking(0.4)
                 .foregroundStyle(BotonZeno.tinta)
-                .padding(.leading, compacto ? 26 : 38)     // la cola del cometa
-            // La cabeza del cometa: el punto más brillante, con la flecha.
+                .padding(.leading, compacto ? 18 : 26)
             ZStack {
-                // La onda: un anillo de luz que sale de la cabeza, como cuando Lumi celebra.
+                // La onda: un anillo de luz que sale del círculo, como cuando Lumi celebra.
                 Circle()
                     .stroke(Color.oroClaro, lineWidth: 1.5)
                     .keyframeAnimator(initialValue: OndaDeBoton(), trigger: ondas) { vista, v in
@@ -317,30 +317,27 @@ private struct CuerpoDeLuz: View {
                             CubicKeyframe(0, duration: 0.75)
                         }
                     }
-                Circle()
-                    .fill(RadialGradient(colors: [.white, .oroClaro, .oroZeno],
-                                         center: UnitPoint(x: 0.4, y: 0.38), startRadius: 0, endRadius: alto * 0.62))
-                    .shadow(color: Color.oroClaro.opacity(presionado ? 0.95 : 0.6), radius: presionado ? 16 : 10)
+                Circle().fill(BotonZeno.tinta.opacity(0.92))
                 FlechaDibujada()
-                    .stroke(BotonZeno.tinta, style: StrokeStyle(lineWidth: 1.9, lineCap: .round, lineJoin: .round))
-                    .frame(width: alto * 0.32, height: alto * 0.26)
+                    .stroke(Color.oroClaro, style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round))
+                    .frame(width: circulo * 0.36, height: circulo * 0.29)
                     .offset(x: presionado && !reducirMovimiento ? 3 : 0)
             }
-            .frame(width: alto, height: alto)
+            .frame(width: circulo, height: circulo)
+            .offset(x: presionado && !reducirMovimiento ? 3 : 0)
+            .padding(.trailing, 5)
         }
-        .frame(height: alto)
+        .frame(minWidth: compacto ? nil : 190, minHeight: alto)
         .background {
-            let forma = FormaDeCometa()
+            let forma = Capsule()
             ZStack {
-                // La cola: oro viejo en la punta que se enciende hacia la cabeza.
-                forma.fill(LinearGradient(colors: [Color.oroHondo.opacity(0.85), .oroZeno, .oroClaro],
-                                          startPoint: .leading, endPoint: .trailing))
-                // Estelas finas a lo largo de la cola.
-                forma.fill(LinearGradient(colors: [.white.opacity(presionado ? 0.42 : 0.28), .clear],
+                forma.fill(LinearGradient(colors: [.oroClaro, .oroZeno, .oroHondo],
+                                          startPoint: .topLeading, endPoint: .bottomTrailing))
+                // Un reflejo arriba: el oro parece metal pulido, no un color plano.
+                forma.fill(LinearGradient(colors: [.white.opacity(presionado ? 0.5 : 0.35), .clear],
                                           startPoint: .top, endPoint: .center))
                     .padding(1.5)
-                forma.stroke(LinearGradient(colors: [Color.oroClaro.opacity(0.1), Color.oroClaro.opacity(0.9)],
-                                            startPoint: .leading, endPoint: .trailing), lineWidth: 0.8)
+                forma.strokeBorder(Color.oroClaro.opacity(0.9), lineWidth: 0.8)
             }
             .saturation(0.75 + 0.25 * intensidad)
             .brightness(-0.10 * (1 - intensidad) + (presionado ? 0.05 : 0))
@@ -354,34 +351,6 @@ private struct CuerpoDeLuz: View {
             if ahora && !reducirMovimiento { ondas += 1 }
         }
         .sensoryFeedback(.impact(weight: .light, intensity: 0.55), trigger: presionado) { _, ahora in ahora }
-    }
-}
-
-/// La silueta del botón principal: un cometa. Cabeza redonda a la derecha
-/// y una cola que se afina hacia la izquierda, con la punta apenas redondeada.
-struct FormaDeCometa: Shape {
-    func path(in r: CGRect) -> Path {
-        let h = r.height
-        let radio = h / 2
-        let centro = CGPoint(x: r.maxX - radio, y: r.midY)
-        let punta = h * 0.17                       // medio grosor de la cola en su extremo
-        var p = Path()
-        p.move(to: CGPoint(x: r.minX + punta, y: r.midY - punta))
-        // Borde de arriba: la cola se ensancha suave hasta la cabeza.
-        p.addCurve(to: CGPoint(x: centro.x, y: r.minY),
-                   control1: CGPoint(x: r.minX + r.width * 0.42, y: r.midY - punta * 1.25),
-                   control2: CGPoint(x: centro.x - r.width * 0.22, y: r.minY))
-        // La cabeza.
-        p.addArc(center: centro, radius: radio, startAngle: .degrees(-90), endAngle: .degrees(90), clockwise: false)
-        // Borde de abajo, de vuelta a la punta.
-        p.addCurve(to: CGPoint(x: r.minX + punta, y: r.midY + punta),
-                   control1: CGPoint(x: centro.x - r.width * 0.22, y: r.maxY),
-                   control2: CGPoint(x: r.minX + r.width * 0.42, y: r.midY + punta * 1.25))
-        // La punta, redondeada.
-        p.addArc(center: CGPoint(x: r.minX + punta, y: r.midY), radius: punta,
-                 startAngle: .degrees(90), endAngle: .degrees(270), clockwise: false)
-        p.closeSubpath()
-        return p
     }
 }
 
