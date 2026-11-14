@@ -98,6 +98,6 @@ enum FraseDelDia {
     static func frase(hoy: Date = .now, semilla: Semilla, calendario: Calendar = .current) -> String {
         let dia = calendario.ordinality(of: .day, in: .era, for: hoy) ?? 0
         let indice = (dia + Int(semilla.valor % 97)) % frases.count
-        return String(localized: frases[indice])
+        return Idioma.texto(frases[indice])
     }
 }

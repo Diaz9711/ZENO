@@ -31,6 +31,7 @@ struct TareaDelMomentoView: View {
     @State private var frase = ""
     @State private var primerPaso = ""
     @State private var quiereAlgoIgual = false
+    @State private var plan = BorradorDePlan()
     @State private var dictado = Dictado()
     @State private var toques = 0
     @FocusState private var escribiendo: Bool
@@ -127,7 +128,7 @@ struct TareaDelMomentoView: View {
 
         case .descanso:
             Etiqueta("Descanso")
-            Titular(texto: String(localized: "Hoy descansa, mañana atacamos"), tamano: .title)
+            Titular(texto: Idioma.texto("Hoy descansa, mañana atacamos"), tamano: .title)
                 .padding(.horizontal, 32)
             Text("Tu energía está baja, y está bien.")
                 .font(.zenoTexto(.footnote))
@@ -145,12 +146,12 @@ struct TareaDelMomentoView: View {
                 .font(.zenoTitulo(.title3))
                 .luminoso()
             Text(vuelveA.map { "Vuelvo a proponerte algo a las \($0.formatted(date: .omitted, time: .shortened))." }
-                 ?? String(localized: "Lo intentamos más tarde."))
+                 ?? Idioma.texto("Lo intentamos más tarde."))
                 .font(.zenoTexto(.footnote))
                 .opacity(0.65)
 
         case .nadaPendiente:
-            Titular(texto: String(localized: "No tienes nada pendiente"), tamano: .title)
+            Titular(texto: Idioma.texto("No tienes nada pendiente"), tamano: .title)
                 .padding(.horizontal, 32)
             Text("Cuando quieras, agrega una sola cosa.")
                 .font(.zenoTexto(.footnote))
@@ -231,12 +232,15 @@ struct TareaDelMomentoView: View {
                 .font(.zenoTitulo(.title2))
                 .luminoso()
             campo($frase, sugerencia: "Una sola frase")
+            PlanDeTareaView(plan: $plan)
+                .padding(.horizontal, 28)
+                .onChange(of: plan.conFecha) { _, si in if si { escribiendo = false } }
             HStack(spacing: 12) {
                 botonChico("Cancelar", fuerte: false) { cerrarAgregar() }
                 botonChico("Guardar", fuerte: true) { guardarFrase() }
                     .disabled(limpio(frase).isEmpty)
             }
-            Text(dictado.aviso ?? String(localized: "También puedes mantener presionada a Lumi y hablar."))
+            Text(dictado.aviso ?? Idioma.texto("También puedes mantener presionada a Lumi y hablar."))
                 .font(.zenoTexto(.footnote))
                 .multilineTextAlignment(.center)
                 .opacity(0.6)
@@ -381,6 +385,9 @@ struct TareaDelMomentoView: View {
                           tamano: ClasificadorDeTamano.tamano(de: titulo),
                           primerPaso: conPaso && !paso.isEmpty ? paso : nil)
         contexto.insert(tarea)
+        plan.aplicar(a: tarea)
+        plan = BorradorDePlan()
+        Task { await AvisosDeTareas.sincronizar(contexto) }
         toques += 1
         escribiendo = false
         frase = ""
@@ -413,6 +420,7 @@ struct TareaDelMomentoView: View {
             tarea.terminadaEn = .now
             quiereAlgoIgual = false
         }
+        Task { await AvisosDeTareas.sincronizar(contexto) }
     }
 
     /// "Ahora no" nunca es un fracaso: la app aprende que esta hora no era, y lo intenta más tarde.
@@ -431,9 +439,34 @@ struct MisTareasView: View {
     @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
     private var pendientes: [Tarea]
     @State private var marcando: Set<PersistentIdentifier> = []
+    /// La tarea que se está editando: la página cambia a su editor, dentro del mismo universo.
+    @State private var editando: Tarea?
 
     var body: some View {
         ScrollView {
+            if let tarea = editando {
+                EditorDeTarea(tarea: tarea) {
+                    withAnimation(Ritmo.contenido) { editando = nil }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, arriba + 4)
+                .padding(.bottom, 120)
+                .informaDesplazamiento()
+                .transition(.desenfoque)
+            } else {
+                lista
+                    .transition(.desenfoque)
+            }
+        }
+        .coordinateSpace(name: "pagina")
+        .bordesFundidos(arriba: arriba)
+        .scrollIndicators(.hidden)
+        .scrollDismissesKeyboard(.interactively)
+        .foregroundStyle(Color.marfil)
+        .onAppear { Desplazamiento.compartido.valor = 0 }
+    }
+
+    private var lista: some View {
             VStack(spacing: 0) {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 6) {
@@ -462,12 +495,6 @@ struct MisTareasView: View {
             .padding(.top, arriba + 4)
             .padding(.bottom, 120)
             .informaDesplazamiento()
-        }
-        .coordinateSpace(name: "pagina")
-        .bordesFundidos(arriba: arriba)
-        .scrollIndicators(.hidden)
-        .foregroundStyle(Color.marfil)
-        .onAppear { Desplazamiento.compartido.valor = 0 }
     }
 
     private func fila(_ tarea: Tarea) -> some View {
@@ -481,6 +508,7 @@ struct MisTareasView: View {
                     contexto.insert(evento)
                     evento.tarea = tarea
                     withAnimation(.easeInOut(duration: 0.4)) { tarea.terminadaEn = .now }
+                    Task { await AvisosDeTareas.sincronizar(contexto) }
                 }
             } label: {
                 ZStack {
@@ -507,16 +535,23 @@ struct MisTareasView: View {
                         .font(.zenoTexto(.footnote))
                         .opacity(0.6)
                 }
+                EtiquetaDePlan(tarea: tarea)
             }
             Spacer(minLength: 0)
         }
+        // Tocar la tarea la abre para editarla (día, hora, aviso).
+        .contentShape(Rectangle())
+        .onTapGesture { withAnimation(Ritmo.contenido) { editando = tarea } }
+        .accessibilityAction(named: Text("Editar")) { editando = tarea }
         .padding(.horizontal, 18)
         .padding(.vertical, 16)
         .cristal(radio: 20)
         .opacity(hecha ? 0.55 : 1)
         .contextMenu {
+            Button("Editar") { withAnimation(Ritmo.contenido) { editando = tarea } }
             Button("Borrar", role: .destructive) {
                 withAnimation { contexto.delete(tarea) }
+                Task { await AvisosDeTareas.sincronizar(contexto) }
             }
         }
     }

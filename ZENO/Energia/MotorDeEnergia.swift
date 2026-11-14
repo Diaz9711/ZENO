@@ -133,8 +133,23 @@ enum MotorDeEnergia {
         let rechazadas = Set(eventos
             .filter { $0.tipo == .ahoraNo && ahora.timeIntervalSince($0.fecha) < 90 * 60 }
             .compactMap { $0.tarea?.persistentModelID })
-        let disponibles = pendientes.filter { !rechazadas.contains($0.persistentModelID) }
-        guard !disponibles.isEmpty else { return .masTarde }
+        let calendario = Calendar.current
+        let manana = calendario.startOfDay(for: ahora).addingTimeInterval(86_400)
+        // Lo planeado para otro día no se propone hoy.
+        let disponibles = pendientes.filter {
+            !rechazadas.contains($0.persistentModelID) && ($0.fechaPlaneada.map { $0 < manana } ?? true)
+        }
+        guard !disponibles.isEmpty else {
+            return pendientes.allSatisfy({ $0.fechaPlaneada.map { $0 >= manana } ?? false }) ? .nadaPendiente : .masTarde
+        }
+
+        // Lo que la persona planeó para este rato va primero, sin importar la energía:
+        // ella ya decidió. (Si su hora pasó, vuelve a la cola normal, sin reproche.)
+        if let planeada = disponibles
+            .filter({ t in t.fechaPlaneada.map { abs($0.timeIntervalSince(ahora)) < 30 * 60 } ?? false })
+            .min(by: { ($0.fechaPlaneada ?? ahora) < ($1.fechaPlaneada ?? ahora) }) {
+            return .tarea(planeada)
+        }
 
         func primera(_ tamanos: TamanoDeTarea...) -> Tarea? {
             for tamano in tamanos {

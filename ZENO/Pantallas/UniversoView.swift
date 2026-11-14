@@ -363,7 +363,10 @@ struct UniversoView: View {
         abiertaDesde = .now
         guard let persona = personas.first else { return }
         contexto.insert(EventoDeEnergia(tipo: .abrioLaApp))
-        Task { await Avisos.alAbrir(persona, eventos: eventos) }
+        Task {
+            await Avisos.alAbrir(persona, eventos: eventos)
+            await AvisosDeTareas.sincronizar(contexto)
+        }
     }
 
     /// Abrir y cerrar sin hacer nada también es una señal (sin juicio: solo cuenta para la energía).

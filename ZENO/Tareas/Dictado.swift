@@ -36,9 +36,9 @@ final class Dictado {
             AVAudioApplication.requestRecordPermission { micro in
                 DispatchQueue.main.async {
                     if estado == .authorized && micro {
-                        self.aviso = String(localized: "Listo. Mantén presionada a Lumi y habla.")
+                        self.aviso = Idioma.texto("Listo. Mantén presionada a Lumi y habla.")
                     } else {
-                        self.aviso = String(localized: "Para hablarle a Lumi, activa el micrófono y el dictado en Ajustes. También puedes escribir.")
+                        self.aviso = Idioma.texto("Para hablarle a Lumi, activa el micrófono y el dictado en Ajustes. También puedes escribir.")
                     }
                 }
             }
@@ -60,12 +60,12 @@ final class Dictado {
 
     private func iniciar() {
         guard let reconocedor, reconocedor.isAvailable else {
-            aviso = String(localized: "El dictado no está disponible ahora. Puedes escribir.")
+            aviso = Idioma.texto("El dictado no está disponible ahora. Puedes escribir.")
             return
         }
         // Privacidad: solo dictado dentro del teléfono.
         guard reconocedor.supportsOnDeviceRecognition else {
-            aviso = String(localized: "Este teléfono no puede dictar en tu idioma sin enviar tu voz fuera. Puedes escribir.")
+            aviso = Idioma.texto("Este teléfono no puede dictar en tu idioma sin enviar tu voz fuera. Puedes escribir.")
             return
         }
 
@@ -77,7 +77,7 @@ final class Dictado {
             let entrada = motor.inputNode
             let formato = entrada.outputFormat(forBus: 0)
             guard formato.sampleRate > 0, formato.channelCount > 0 else {
-                aviso = String(localized: "No encuentro un micrófono. Puedes escribir.")
+                aviso = Idioma.texto("No encuentro un micrófono. Puedes escribir.")
                 return
             }
 
@@ -100,7 +100,7 @@ final class Dictado {
                 DispatchQueue.main.async { self?.texto = frase }
             }
         } catch {
-            aviso = String(localized: "No pude escucharte esta vez. Puedes escribir.")
+            aviso = Idioma.texto("No pude escucharte esta vez. Puedes escribir.")
             detener()
         }
     }

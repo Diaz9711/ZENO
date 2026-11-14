@@ -99,7 +99,7 @@ enum Avisos {
         persona.avisoDiarioProgramado = plan.diario
         if let fecha = plan.sigueAqui {
             try? await centro.add(peticion(idSigueAqui, fecha: fecha,
-                                           texto: String(localized: "Lumi sigue aquí.")))
+                                           texto: Idioma.texto("Lumi sigue aquí.")))
         }
     }
 
@@ -127,7 +127,9 @@ enum Avisos {
     static func desactivar(_ persona: Persona) {
         persona.notificacionesActivas = false
         persona.avisoDiarioProgramado = nil
-        cancelarTodo()
+        // Solo los avisos diarios: los de las tareas los pidió la persona y siguen.
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [idDiario, idSigueAqui])
+        UserDefaults.standard.removeObject(forKey: claveTocado)
     }
 
     /// Volver a encender el aviso diario después de una pausa.
@@ -153,7 +155,7 @@ enum Avisos {
     // MARK: Pruebas (Modo de prueba)
 
     static func enviarPrueba(en segundos: TimeInterval = 10) async {
-        let contenido = contenido(String(localized: "Es tu mejor momento del día. Una sola cosa, si quieres."))
+        let contenido = contenido(Idioma.texto("Es tu mejor momento del día. Una sola cosa, si quieres."))
         let disparo = UNTimeIntervalNotificationTrigger(timeInterval: segundos, repeats: false)
         try? await UNUserNotificationCenter.current()
             .add(UNNotificationRequest(identifier: idPrueba, content: contenido, trigger: disparo))
@@ -171,10 +173,10 @@ enum Avisos {
     /// Frases amables que cambian según el día. Nunca el texto de una tarea, nunca números.
     private static func frase(para fecha: Date) -> String {
         let frases = [
-            String(localized: "Es tu mejor momento del día. Una sola cosa, si quieres."),
-            String(localized: "Tu energía suele estar alta ahora. Lumi te acompaña."),
-            String(localized: "Un buen rato para una sola cosa."),
-            String(localized: "Si te apetece, Lumi tiene algo pequeño para ti.")
+            Idioma.texto("Es tu mejor momento del día. Una sola cosa, si quieres."),
+            Idioma.texto("Tu energía suele estar alta ahora. Lumi te acompaña."),
+            Idioma.texto("Un buen rato para una sola cosa."),
+            Idioma.texto("Si te apetece, Lumi tiene algo pequeño para ti.")
         ]
         let dia = Calendar.current.ordinality(of: .day, in: .era, for: fecha) ?? 0
         return frases[dia % frases.count]
@@ -208,9 +210,11 @@ final class CentroDeAvisos: NSObject, UNUserNotificationCenterDelegate {
         Avisos.registrarToque()
     }
 
-    /// Con ZENO abierta no hace falta avisar (salvo el aviso de prueba).
+    /// Con ZENO abierta no hace falta el aviso diario (sí el de prueba y los de tareas).
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
-        notification.request.identifier == Avisos.idPrueba ? [.banner, .list] : []
+        // Los avisos de tareas sí se muestran: la persona los pidió para esa hora.
+        let id = notification.request.identifier
+        return id == Avisos.idPrueba || id.hasPrefix(AvisosDeTareas.prefijo) ? [.banner, .list] : []
     }
 }

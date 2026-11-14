@@ -117,9 +117,9 @@ struct LaboratorioView: View {
 
     private var nivel: String {
         switch energia {
-        case ..<34: String(localized: "baja")
-        case ..<67: String(localized: "media")
-        default: String(localized: "alta")
+        case ..<34: Idioma.texto("baja")
+        case ..<67: Idioma.texto("media")
+        default: Idioma.texto("alta")
         }
     }
 
