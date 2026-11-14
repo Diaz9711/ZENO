@@ -101,7 +101,7 @@ struct SeparadorLujo: View {
 
 // MARK: - Iconos finos (una sola familia, trazo de 1,1 pt)
 
-enum IconoLujo { case calendario, reloj, papelera, campana, cerrar, mas, atras, check }
+enum IconoLujo { case calendario, reloj, papelera, campana, cerrar, mas, atras, check, ojo, ojoCerrado, cara, llave }
 
 struct IconoFino: View {
     let icono: IconoLujo
@@ -146,6 +146,25 @@ struct IconoFino: View {
                 camino.move(to: p(0.62, 0.2)); camino.addLine(to: p(0.32, 0.5)); camino.addLine(to: p(0.62, 0.8))
             case .check:
                 camino.move(to: p(0.2, 0.52)); camino.addLine(to: p(0.42, 0.72)); camino.addLine(to: p(0.8, 0.3))
+            case .ojo, .ojoCerrado:
+                camino.move(to: p(0.08, 0.5))
+                camino.addQuadCurve(to: p(0.92, 0.5), control: p(0.5, 0.12))
+                camino.addQuadCurve(to: p(0.08, 0.5), control: p(0.5, 0.88))
+                camino.addEllipse(in: CGRect(x: 0.39 * s, y: 0.39 * s, width: 0.22 * s, height: 0.22 * s))
+                if icono == .ojoCerrado { camino.move(to: p(0.16, 0.84)); camino.addLine(to: p(0.84, 0.16)) }
+            case .cara:
+                // Un marco de Face ID dibujado: cuatro esquinas, ojos y sonrisa.
+                for (x, y, dx, dy) in [(0.12, 0.12, 1.0, 1.0), (0.88, 0.12, -1.0, 1.0), (0.12, 0.88, 1.0, -1.0), (0.88, 0.88, -1.0, -1.0)] {
+                    camino.move(to: p(x, y + 0.2 * dy)); camino.addLine(to: p(x, y)); camino.addLine(to: p(x + 0.2 * dx, y))
+                }
+                camino.move(to: p(0.36, 0.38)); camino.addLine(to: p(0.36, 0.46))
+                camino.move(to: p(0.64, 0.38)); camino.addLine(to: p(0.64, 0.46))
+                camino.move(to: p(0.36, 0.64)); camino.addQuadCurve(to: p(0.64, 0.64), control: p(0.5, 0.74))
+            case .llave:
+                camino.addEllipse(in: CGRect(x: 0.12 * s, y: 0.32 * s, width: 0.36 * s, height: 0.36 * s))
+                camino.move(to: p(0.48, 0.5)); camino.addLine(to: p(0.88, 0.5))
+                camino.move(to: p(0.76, 0.5)); camino.addLine(to: p(0.76, 0.64))
+                camino.move(to: p(0.86, 0.5)); camino.addLine(to: p(0.86, 0.6))
             }
             ctx.stroke(camino, with: .color(color), style: StrokeStyle(lineWidth: trazo, lineCap: .round, lineJoin: .round))
         }
@@ -220,7 +239,7 @@ struct BotonPrimarioLujo: View {
     }
 }
 
-private struct EtiquetaPrimaria: View {
+struct EtiquetaPrimaria: View {
     let titulo: LocalizedStringKey
     let ancho: CGFloat?
     @Environment(\.isEnabled) private var activo

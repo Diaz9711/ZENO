@@ -127,6 +127,8 @@ struct SelectorDeFecha: View {
 struct RuedaDeValores: View {
     let valores: [Int]
     @Binding var seleccion: Int
+    /// Cómo se escribe cada valor (por defecto, dos cifras: 07, 15).
+    var texto: (Int) -> String = { String(format: "%02d", $0) }
     private let alto: CGFloat = 44
     @State private var arrastre: CGFloat = 0
 
@@ -142,7 +144,7 @@ struct RuedaDeValores: View {
             VStack(spacing: 0) {
                 ForEach(valores.indices, id: \.self) { i in
                     let elegido = i == indiceVisible
-                    Text(verbatim: String(format: "%02d", valores[i]))
+                    Text(verbatim: texto(valores[i]))
                         .font(.zenoTitulo(.title2, elegido ? .regular : .light))
                         .foregroundStyle(elegido ? Lujo.oro : Lujo.marfil.opacity(0.45))
                         .frame(maxWidth: .infinity)
@@ -167,7 +169,7 @@ struct RuedaDeValores: View {
             })
         .sensoryFeedback(.selection, trigger: indiceVisible)
         .accessibilityElement()
-        .accessibilityValue(Text(verbatim: String(format: "%02d", seleccion)))
+        .accessibilityValue(Text(verbatim: texto(seleccion)))
         .accessibilityAdjustableAction { direccion in
             switch direccion {
             case .increment: seleccion = valores[min(indice + 1, valores.count - 1)]

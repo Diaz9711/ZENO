@@ -56,8 +56,11 @@ struct MisTareasView: View {
                     .transition(.desenfoque)
                 } else {
                     dia_
+                        .padding(.top, 4)
                         .padding(.horizontal, 20)
-                        .padding(.top, arriba + 4)
+                        // La hoja casi transparente se desliza con el contenido: sin líneas fijas.
+                        .background(alignment: .top) { HojaDeFondo().padding(.top, -14) }
+                        .padding(.top, arriba)
                         .padding(.bottom, 210)       // sitio para la tira de la semana y la barra
                         .informaDesplazamiento()
                         .transition(.desenfoque)

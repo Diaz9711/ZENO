@@ -38,6 +38,13 @@ Las reglas que nunca se rompen están en `CLAUDE.md`. Este archivo solo cuenta e
 7. **Sesión**: carga y errores claros en el menú de entrada; Cerrar sesión en Ajustes.
 - Atajos de prueba (solo DEBUG): `-sinPresentacion YES`, `-paginaInicial 0|1|2`, `-formaDePrueba 0|1`, `-idioma es|en`, `-modoPrueba YES`.
 
+## Hecho el 14 nov 2026 (noche): dirección LUXURY
+- Parada 1 aprobada: estrella versión 4 (más definida, mismos colores), presentación intacta, "Editar tarea" luxury.
+- Parada 2 aprobada: Hoy con tarjetas, Tareas como vista del día, barra luxury, entradas en cascada, hoja casi transparente.
+- Parte D: clave local con Face ID (crear, entrar, mostrar/ocultar, errores claros, espera tras 5 fallos, recuperar, cambiar y quitar en Ajustes); Ajustes, registro (fecha con ruedas propias), menú de entrada y "escribir tarea" con el sistema luxury; confirmaciones en hojas propias. 265 textos en español e inglés; permisos (Face ID, micrófono, voz) también traducidos.
+- Atajos DEBUG nuevos: `-lumiQuieta YES`, `-energiaFija 70`, `-abrirEditor YES`, `-claveDePrueba xxxxxx`, `-sesionCerrada YES`.
+- Falta por juzgar en el iPhone: fluidez a 60 fps, centelleo de la estrella, Face ID real.
+
 ## Pendiente (en este orden)
 1. **Probar en el iPhone de Diaz** (gratis con su Apple ID, hay que reinstalar cada 7 días). Le di los pasos: conectar y confiar; en Xcode, Signing & Capabilities → Team → su Apple ID (Personal Team); Modo desarrollador en el iPhone; ▶ Run; confiar en el desarrollador en Ajustes → General → VPN y gestión de dispositivos. Comprobar con `xcrun devicectl list devices`. Si el identificador `app.zeno.ZENO` no está disponible, cambiarlo por uno único.
 2. **Fluidez** (medir en el iPhone, con números antes y después, mostrando los fps solo en la consola):

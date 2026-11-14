@@ -227,13 +227,10 @@ struct RegistroView: View {
 
     private var fecha: some View {
         pantalla("¿Cuándo naciste?", razon: "Tu estrella nace de tu nombre y tu fecha. Nadie más tiene una igual.") {
-            DatePicker("Fecha de nacimiento", selection: $borrador.fecha, in: ...Date.now, displayedComponents: .date)
-                .datePickerStyle(.wheel)
-                .labelsHidden()
-                .colorScheme(.dark)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
-                .cristal(radio: Self.radio)
+            // Ruedas propias de día, mes y año (sin la rueda del sistema).
+            FechaDeNacimiento(fecha: $borrador.fecha)
+                .padding(.vertical, 8)
+                .tarjetaLujo()
         } pie: {
             BotonZeno("Continuar") { ir(a: .despertar) }
         }
@@ -253,7 +250,7 @@ struct RegistroView: View {
                     } label: {
                         FilaDeOpcion(titulo: opcion.0, elegida: false)
                     }
-                    .buttonStyle(EstiloPresion())
+                    .buttonStyle(EstiloLujo(conReflejo: false))
                 }
             }
         } pie: {
@@ -315,7 +312,7 @@ struct RegistroView: View {
         } label: {
             FilaDeOpcion(titulo: titulo, elegida: borrador.forma == valor)
         }
-        .buttonStyle(EstiloPresion())
+        .buttonStyle(EstiloLujo(conReflejo: false))
         .sensoryFeedback(.selection, trigger: borrador.forma)
     }
 }
@@ -328,18 +325,19 @@ private struct FilaDeOpcion: View {
     var body: some View {
         HStack {
             Text(titulo)
-                .font(.zenoTexto(.body, .medium))
-                .foregroundStyle(Color.marfil)
+                .font(.zenoTexto(.body))
+                .foregroundStyle(elegida ? Lujo.oro : Lujo.marfil)
             Spacer()
             ZStack {
-                Circle().strokeBorder(Color.oroZeno.opacity(elegida ? 1 : 0.45), lineWidth: 1.2)
-                if elegida { Circle().fill(Color.oroZeno).padding(5) }
+                Circle().strokeBorder(Lujo.oro.opacity(elegida ? 0.9 : 0.4), lineWidth: 0.9)
+                if elegida { Circle().fill(Lujo.oro).padding(6) }
             }
-            .frame(width: 22, height: 22)
+            .frame(width: 20, height: 20)
         }
         .padding(.horizontal, 20)
         .frame(height: 58)
-        .cristal(radio: RegistroView.radio, activo: elegida)
+        .background(RoundedRectangle(cornerRadius: RegistroView.radio, style: .continuous).fill(Lujo.marfil.opacity(0.035)))
+        .cantoPulido(radio: RegistroView.radio, oro: elegida)
         .contentShape(Rectangle())
         .accessibilityAddTraits(elegida ? .isSelected : [])
     }
@@ -352,11 +350,11 @@ private struct ProgresoDeRegistro: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(Color.marfil.opacity(0.14))
+                Capsule().fill(Lujo.marfil.opacity(0.12))
                 Capsule()
-                    .fill(LinearGradient(colors: [.oroClaro, .oroZeno], startPoint: .leading, endPoint: .trailing))
+                    .fill(LinearGradient(colors: [Lujo.oroLuz, Lujo.oro], startPoint: .leading, endPoint: .trailing))
                     .frame(width: geo.size.width * CGFloat(actual) / CGFloat(max(total, 1)))
-                    .animation(.spring(response: 0.6, dampingFraction: 0.85), value: actual)
+                    .animation(Lujo.curva(0.6), value: actual)
             }
         }
     }
@@ -393,7 +391,7 @@ struct BotonZeno: View {
         Button(action: accion) {
             EtiquetaDeBoton(titulo: titulo, compacto: compacto)
         }
-        .buttonStyle(EstiloPresion())
+        .buttonStyle(EstiloLujo(conReflejo: false))
     }
 }
 
@@ -403,19 +401,8 @@ private struct EtiquetaDeBoton: View {
     @Environment(\.isEnabled) private var activo
 
     var body: some View {
-        Text(titulo)
-            .font(.zenoTexto(compacto ? .subheadline : .body, .semibold))
-            .tracking(0.3)
-            .foregroundStyle(BotonZeno.tinta)
-            .frame(width: compacto ? nil : 280, height: compacto ? 42 : 50)
-            .padding(.horizontal, compacto ? 26 : 0)
-            .background(
-                Capsule().fill(LinearGradient(colors: [.oroClaro, .oroZeno],
-                                              startPoint: .top, endPoint: .bottom))
-            )
-            .overlay(Capsule().strokeBorder(Color.white.opacity(0.35), lineWidth: 0.6))
-            .opacity(activo ? 1 : 0.35)
-            .animation(.easeInOut(duration: 0.25), value: activo)
+        // El primario de lujo: oro champán cepillado, esquinas de 16 y mayúsculas espaciadas.
+        EtiquetaPrimaria(titulo: titulo, ancho: compacto ? nil : 256)
     }
 }
 
@@ -430,6 +417,8 @@ struct BienvenidaView: View {
     let alEmpezar: () -> Void
     /// Entrar con Apple: identificador de la cuenta y, si Apple lo da, el nombre.
     var alEntrarConApple: ((String, String?) -> Void)? = nil
+    /// La persona ya existe y vuelve tras cerrar sesión (si tiene clave, se le pide).
+    var vuelve = false
     @State private var terminada = false
 
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
@@ -480,10 +469,15 @@ struct BienvenidaView: View {
 
             Spacer()
 
-            MenuDeEntrada(alInvitado: alEmpezar, alApple: alEntrarConApple, conLineaDeAyuda: conBoton)
-                .opacity(conBoton && fase >= 4 ? 1 : 0)
-                .offset(y: fase >= 4 ? 0 : 26)
-                .allowsHitTesting(conBoton && fase >= 4)
+            if conBoton {
+                MenuDeEntrada(vuelve: vuelve, alEntrar: alEmpezar, alApple: alEntrarConApple)
+                    .opacity(fase >= 4 ? 1 : 0)
+                    .offset(y: fase >= 4 ? 0 : 26)
+                    .allowsHitTesting(fase >= 4)
+            } else {
+                // La presentación de cada día: el mismo hueco que tenía el menú oculto (intocable).
+                Color.clear.frame(height: 138)
+            }
         }
         .contentShape(Rectangle())
         // Tocar salta la presentación; cuando ya terminó, el toque es solo de los botones
@@ -569,107 +563,6 @@ struct ElipseDesdeArriba: Shape {
     }
 }
 
-// MARK: - Menú de entrada
-
-/// Dos maneras de entrar: con Apple (para no perder los datos al cambiar de iPhone, vía iCloud)
-/// o como invitado. En las dos, todo vive en el teléfono de la persona; ZENO no tiene servidor,
-/// por eso no hay correo ni contraseña que recordar.
-struct MenuDeEntrada: View {
-    let alInvitado: () -> Void
-    let alApple: ((String, String?) -> Void)?
-    /// Sin la línea de ayuda, el menú ocupa lo mismo que antes: así la presentación de cada día
-    /// (que lleva el menú oculto) conserva exactamente su composición.
-    var conLineaDeAyuda = true
-    @State private var aviso: LocalizedStringKey?
-    @State private var cargando = false
-    @State private var entrando = false
-
-    var body: some View {
-        VStack(spacing: 14) {
-            SignInWithAppleButton(.continue) { pedido in
-                pedido.requestedScopes = [.fullName]
-                withAnimation(Ritmo.contenido) { cargando = true; aviso = nil }
-            } onCompletion: { resultado in
-                withAnimation(Ritmo.contenido) { cargando = false }
-                switch resultado {
-                case .success(let autorizacion):
-                    guard let credencial = autorizacion.credential as? ASAuthorizationAppleIDCredential else {
-                        withAnimation { aviso = "Apple no envió tus datos. Inténtalo otra vez o entra como invitado." }
-                        return
-                    }
-                    entrando = true
-                    alApple?(credencial.user, credencial.fullName?.givenName)
-                case .failure(let error):
-                    withAnimation(Ritmo.contenido) { aviso = Self.mensaje(para: error) }
-                }
-            }
-            .signInWithAppleButtonStyle(.white)
-            .frame(width: 280, height: 50)
-            .clipShape(Capsule())
-            .shadow(color: Color.oroZeno.opacity(0.25), radius: 16)
-            .opacity(cargando ? 0.55 : 1)
-            .allowsHitTesting(!cargando && !entrando)
-            .accessibilityHint(Text("Tus datos siguen solo en este teléfono"))
-
-            Button {
-                guard !entrando else { return }
-                entrando = true
-                alInvitado()
-            } label: {
-                Text("Entrar como invitado")
-                    .font(.zenoTexto(.body, .medium))
-                    .foregroundStyle(Color.marfil)
-                    .frame(width: 280, height: 50)
-                    .cristal()
-            }
-            .buttonStyle(EstiloPresion())
-            .disabled(cargando)
-
-            if conLineaDeAyuda || cargando || aviso != nil {
-            Group {
-                if cargando {
-                    HStack(spacing: 10) {
-                        PuntoQueRespira()
-                        Text("Conectando con Apple…")
-                    }
-                } else if let aviso {
-                    Text(aviso)
-                } else {
-                    Text("Sin correo ni contraseña: todo se queda en tu teléfono.")
-                        .opacity(0.7)
-                }
-            }
-            .font(.zenoTexto(.footnote))
-            .foregroundStyle(Color.marfil.opacity(0.75))
-            .multilineTextAlignment(.center)
-            .padding(.horizontal, 40)
-            .frame(minHeight: 36)
-            .transition(.opacity)
-            }
-        }
-        .padding(.bottom, 24)
-        .sensoryFeedback(.error, trigger: aviso != nil) { _, hay in hay }
-    }
-
-    /// Un mensaje claro para cada error de Apple. Cancelar no es un error: no se dice nada.
-    static func mensaje(para error: Error) -> LocalizedStringKey? {
-        guard let codigo = (error as? ASAuthorizationError)?.code else {
-            return "No se pudo entrar con Apple. Revisa tu conexión o entra como invitado."
-        }
-        switch codigo {
-        case .canceled:
-            return nil
-        case .failed, .invalidResponse:
-            return "Apple no pudo confirmar tu cuenta. Inténtalo otra vez en un momento."
-        case .notHandled, .notInteractive:
-            return "Tu iPhone no pudo mostrar la entrada con Apple. Inténtalo otra vez."
-        default:
-            // Pasa mientras la app no tenga activada la capacidad "Sign in with Apple".
-            return "Entrar con Apple aún no está listo en esta versión. Puedes entrar como invitado."
-        }
-    }
-}
-
 /// Un punto de oro que respira: el "cargando" de ZENO, sin ruedas de sistema.
 struct PuntoQueRespira: View {
     @State private var arriba = false
@@ -687,5 +580,68 @@ struct PuntoQueRespira: View {
                 withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) { arriba = true }
             }
             .accessibilityHidden(true)
+    }
+}
+
+/// La fecha de nacimiento con tres ruedas propias: día, mes y año. El día se ajusta solo
+/// si el mes tiene menos días.
+struct FechaDeNacimiento: View {
+    @Binding var fecha: Date
+    @State private var dia = 1
+    @State private var mes = 1
+    @State private var anio = 2000
+    @State private var listo = false
+    private let calendario = Calendar(identifier: .gregorian)
+
+    var body: some View {
+        let hoy = calendario.dateComponents([.year], from: .now).year ?? 2026
+        HStack(spacing: 0) {
+            RuedaDeValores(valores: Array(1...diasDelMes), seleccion: $dia)
+            RuedaDeValores(valores: Array(1...12), seleccion: $mes, texto: nombreDelMes)
+            RuedaDeValores(valores: Array((hoy - 100)...hoy).reversed(), seleccion: $anio)
+                .frame(width: 120)
+        }
+        .frame(height: 176)
+        .background {
+            VStack(spacing: 0) {
+                Rectangle().fill(Lujo.oro.opacity(0.35)).frame(height: 0.5)
+                Spacer().frame(height: 44)
+                Rectangle().fill(Lujo.oro.opacity(0.35)).frame(height: 0.5)
+            }
+            .padding(.horizontal, 20)
+        }
+        .mask(LinearGradient(stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.3),
+                                     .init(color: .black, location: 0.7), .init(color: .clear, location: 1)],
+                             startPoint: .top, endPoint: .bottom))
+        .onAppear {
+            let c = calendario.dateComponents([.year, .month, .day], from: fecha)
+            dia = c.day ?? 1; mes = c.month ?? 1; anio = c.year ?? 2000
+            listo = true
+        }
+        .onChange(of: [dia, mes, anio]) { _, _ in componer() }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Text("Fecha de nacimiento"))
+    }
+
+    @Environment(\.locale) private var idioma
+
+    /// "ene", "feb"… en el idioma elegido.
+    private func nombreDelMes(_ m: Int) -> String {
+        let f = DateFormatter()
+        f.locale = idioma
+        return f.shortStandaloneMonthSymbols[m - 1].replacingOccurrences(of: ".", with: "").capitalized
+    }
+
+    private var diasDelMes: Int {
+        let base = calendario.date(from: DateComponents(year: anio, month: mes, day: 1)) ?? .now
+        return calendario.range(of: .day, in: .month, for: base)?.count ?? 31
+    }
+
+    private func componer() {
+        guard listo else { return }
+        if dia > diasDelMes { dia = diasDelMes; return }
+        if let nueva = calendario.date(from: DateComponents(year: anio, month: mes, day: dia)), nueva <= .now {
+            fecha = nueva
+        }
     }
 }

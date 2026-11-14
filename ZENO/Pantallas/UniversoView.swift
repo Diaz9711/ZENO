@@ -173,7 +173,8 @@ struct UniversoView: View {
                                    alEntrarConApple: { cuenta, _ in
                                        persona.cuentaApple = cuenta
                                        abrirSesion()
-                                   })
+                                   },
+                                   vuelve: true)
                     .transition(.presentacion)
                 } else if presentando {
                     // Cada vez que se abre: el universo, el sol y ZENO. Sin botón; sigue sola.
@@ -236,6 +237,9 @@ struct UniversoView: View {
             if let forma = ajustes.string(forKey: "formaDePrueba").flatMap(Int.init) { personas.first?.formaDeLumiCruda = forma }
             if let p = ajustes.string(forKey: "paginaInicial").flatMap(Int.init), let destino = Pagina(rawValue: p) { pagina = destino }
             if ajustes.bool(forKey: "sinPresentacion") { presentando = false; llegada = true }
+            // -claveDePrueba xxxxxx: deja guardada esa clave (para probar la entrada).
+            if let c = ajustes.string(forKey: "claveDePrueba") { Clave.guardar(c) }
+            if ajustes.bool(forKey: "sesionCerrada") { sesionAbierta = false }
             #endif
             registrarApertura()
             // Si quitó el permiso de Apple desde el iPhone, la sesión se cierra (sus datos se quedan).
@@ -307,16 +311,10 @@ struct UniversoView: View {
 
                     case .tareas:
                         MisTareasView(arriba: altoTotal * 0.185 - arriba)
-                            .background(alignment: .top) {
-                                HojaDeFondo().padding(.top, altoTotal * 0.185 - arriba - 14).aparece(0)
-                            }
                             .transition(.pasoDePagina(sentido: sentido))
 
                     case .ajustes:
                         AjustesView(persona: persona, arriba: altoTotal * 0.185 - arriba)
-                            .background(alignment: .top) {
-                                HojaDeFondo().padding(.top, altoTotal * 0.185 - arriba - 14).aparece(0)
-                            }
                             .transition(.pasoDePagina(sentido: sentido))
                     }
 

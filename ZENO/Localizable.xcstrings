@@ -136,6 +136,36 @@
         }
       }
     },
+    "Al menos %lld caracteres. Solo vive en este iPhone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At least %lld characters. It lives only on this iPhone."
+          }
+        }
+      }
+    },
+    "Al menos %lld caracteres. Solo vive en este iPhone; si la olvidas, la recuperas con Face ID.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At least %lld characters. It lives only on this iPhone; if you forget it, recover it with Face ID."
+          }
+        }
+      }
+    },
+    "Al volver te la pedirá. Se recupera con Face ID.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It's asked for when you come back. Recover it with Face ID."
+          }
+        }
+      }
+    },
     "Algo así suele tomarte unos %lld min.": {
       "localizations": {
         "en": {
@@ -336,6 +366,16 @@
         }
       }
     },
+    "Cambiar tu clave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change your password"
+          }
+        }
+      }
+    },
     "Cancelar": {
       "localizations": {
         "en": {
@@ -372,6 +412,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sign out"
+          }
+        }
+      }
+    },
+    "Clave nueva": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New password"
           }
         }
       }
@@ -416,12 +466,52 @@
         }
       }
     },
+    "Confirma que eres tú para elegir una clave nueva.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm it's you to choose a new password."
+          }
+        }
+      }
+    },
+    "Confirma que eres tú para entrar en ZENO.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm it's you to open ZENO."
+          }
+        }
+      }
+    },
     "Continuar": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Continue"
+          }
+        }
+      }
+    },
+    "Crea tu clave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create your password"
+          }
+        }
+      }
+    },
+    "Crear una clave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a password"
           }
         }
       }
@@ -462,6 +552,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Leave it for later"
+          }
+        }
+      }
+    },
+    "Demasiados intentos. Espera %lld segundos o usa Face ID.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Too many tries. Wait %lld seconds or use Face ID."
           }
         }
       }
@@ -686,6 +786,26 @@
         }
       }
     },
+    "Entrando…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signing in…"
+          }
+        }
+      }
+    },
+    "Entrar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in"
+          }
+        }
+      }
+    },
     "Entrar como invitado": {
       "localizations": {
         "en": {
@@ -706,22 +826,22 @@
         }
       }
     },
-    "Entraste como invitado.": {
+    "Entraste como invitado": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You're signed in as a guest."
+            "value": "Signed in as a guest"
           }
         }
       }
     },
-    "Entraste con tu cuenta de Apple.": {
+    "Entraste con Apple": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You're signed in with your Apple Account."
+            "value": "Signed in with Apple"
           }
         }
       }
@@ -796,6 +916,36 @@
         }
       }
     },
+    "Esa no es tu clave. Inténtalo otra vez.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That's not your password. Try again."
+          }
+        }
+      }
+    },
+    "Escribe tu clave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter your password"
+          }
+        }
+      }
+    },
+    "Escribe tu clave.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter your password."
+          }
+        }
+      }
+    },
     "Escribe una tarea": {
       "localizations": {
         "en": {
@@ -822,6 +972,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sphere"
+          }
+        }
+      }
+    },
+    "Este iPhone no tiene Face ID ni código. Escribe tu clave.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This iPhone has no Face ID or passcode. Enter your password."
           }
         }
       }
@@ -912,6 +1072,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Save"
+          }
+        }
+      }
+    },
+    "Guardar clave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save password"
           }
         }
       }
@@ -1046,6 +1216,16 @@
         }
       }
     },
+    "La clave necesita al menos %lld caracteres.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The password needs at least %lld characters."
+          }
+        }
+      }
+    },
     "La hora": {
       "localizations": {
         "en": {
@@ -1072,6 +1252,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lab"
+          }
+        }
+      }
+    },
+    "Las dos claves no son iguales.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The two passwords don't match."
           }
         }
       }
@@ -1249,6 +1439,16 @@
         }
       }
     },
+    "Mostrar la clave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show password"
+          }
+        }
+      }
+    },
     "Nació contigo, %@. Nadie más tiene una igual.": {
       "localizations": {
         "en": {
@@ -1375,6 +1575,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Night"
+          }
+        }
+      }
+    },
+    "Ocultar la clave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide password"
           }
         }
       }
@@ -1529,6 +1739,16 @@
         }
       }
     },
+    "Proteger con una clave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protect with a password"
+          }
+        }
+      }
+    },
     "Puedes cambiarla cuando quieras en Ajustes.": {
       "localizations": {
         "en": {
@@ -1559,6 +1779,26 @@
         }
       }
     },
+    "Quitar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove"
+          }
+        }
+      }
+    },
+    "Quitar la clave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove password"
+          }
+        }
+      }
+    },
     "Qué quieres hacer": {
       "localizations": {
         "en": {
@@ -1575,6 +1815,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Redo sign-up"
+          }
+        }
+      }
+    },
+    "Repítela": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeat it"
           }
         }
       }
@@ -1669,12 +1919,12 @@
         }
       }
     },
-    "Sin correo ni contraseña: todo se queda en tu teléfono.": {
+    "Sin correo: todo se queda en tu teléfono.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No email or password: everything stays on your phone."
+            "value": "No email: everything stays on your phone."
           }
         }
       }
@@ -1799,6 +2049,16 @@
         }
       }
     },
+    "Todo vive solo en este teléfono.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything lives only on this phone."
+          }
+        }
+      }
+    },
     "Todo vive solo en este teléfono. Sin cuentas, sin servidores.": {
       "localizations": {
         "en": {
@@ -1815,6 +2075,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Your Lumi"
+          }
+        }
+      }
+    },
+    "Tu clave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your password"
+          }
+        }
+      }
+    },
+    "Tu clave nueva": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your new password"
+          }
+        }
+      }
+    },
+    "Tu clave protege ZENO en este iPhone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your password protects ZENO on this iPhone."
           }
         }
       }
@@ -1939,16 +2229,6 @@
         }
       }
     },
-    "Tus datos siguen solo en este teléfono": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your data stays only on this phone"
-          }
-        }
-      }
-    },
     "Tus tareas": {
       "localizations": {
         "en": {
@@ -1995,6 +2275,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "A small step is still a step."
+          }
+        }
+      }
+    },
+    "Una clave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A password"
           }
         }
       }
@@ -2049,6 +2339,16 @@
         }
       }
     },
+    "Usar %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use %@"
+          }
+        }
+      }
+    },
     "Vas a tu paso, y está bien.": {
       "localizations": {
         "en": {
@@ -2075,6 +2375,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "View presence"
+          }
+        }
+      }
+    },
+    "Volver": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back"
           }
         }
       }
@@ -2108,6 +2418,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "ZENO keeps you company through the day. It doesn't diagnose or replace treatment."
+          }
+        }
+      }
+    },
+    "ZENO dejará de pedirla al entrar.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ZENO will stop asking for it."
           }
         }
       }
@@ -2248,6 +2568,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "When do you have the most energy?"
+          }
+        }
+      }
+    },
+    "¿Olvidaste tu clave?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forgot your password?"
+          }
+        }
+      }
+    },
+    "¿Quitar la clave?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove the password?"
           }
         }
       }

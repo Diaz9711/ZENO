@@ -306,11 +306,12 @@ struct TareaDelMomentoView: View {
         VStack(spacing: 14) {
             Text(escuchando ? "Te escucho…" : "¿Qué quieres hacer?")
                 .font(.zenoTitulo(.title2))
-                .luminoso()
+                .foregroundStyle(Lujo.marfil)
+                .shadow(color: .black.opacity(0.45), radius: 12, y: 2)
             campo($frase, sugerencia: "Una sola frase")
             // Los botones quedan siempre a la vista, aunque el teclado esté abierto.
-            // El reloj abre el día y la hora (opcional): se baja el teclado y Lumi sube.
-            HStack(spacing: 12) {
+            // El reloj abre el día y la hora (opcional) en una hoja.
+            HStack(spacing: 10) {
                 botonChico("Cancelar", fuerte: false) { cerrarAgregar() }
                 Button {
                     // El día y la hora se eligen en una hoja: Lumi no se mueve y el teclado se baja.
@@ -318,11 +319,13 @@ struct TareaDelMomentoView: View {
                     let enlace = $plan
                     Hojas.compartidas.mostrar { HojaDePlan(plan: enlace) }
                 } label: {
-                    IconoReloj(activo: plan.conFecha)
-                        .frame(width: 44, height: 44)
-                        .cristal(activo: plan.conFecha)
+                    IconoFino(icono: .reloj, color: plan.conFecha ? Lujo.oro : Lujo.marfil.opacity(0.75), tamano: 19)
+                        .frame(width: Lujo.altoBoton, height: Lujo.altoBoton)
+                        .background(RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous)
+                            .fill(Lujo.marfil.opacity(0.03)))
+                        .cantoPulido(radio: Lujo.radioBoton, oro: plan.conFecha)
                 }
-                .buttonStyle(EstiloPresion())
+                .buttonStyle(EstiloLujo())
                 .accessibilityLabel(Text("Día y hora"))
                 botonChico("Guardar", fuerte: true) { guardarFrase() }
                     .disabled(limpio(frase).isEmpty)
@@ -332,37 +335,40 @@ struct TareaDelMomentoView: View {
                     .transition(.opacity)
             }
             Text(dictado.aviso ?? Idioma.texto("También puedes mantener presionada a Lumi y hablar."))
-                .font(.zenoTexto(.footnote))
+                .font(.zenoTexto(.caption))
+                .foregroundStyle(Lujo.marfilSecundario)
                 .multilineTextAlignment(.center)
-                .opacity(0.6)
                 .padding(.horizontal, 32)
         }
+        .padding(.horizontal, Lujo.margen)
     }
 
     private var preguntaDelPrimerPaso: some View {
         VStack(spacing: 14) {
             Text("¿Cuál es el primer paso de dos minutos?")
                 .font(.zenoTitulo(.title3))
-                .luminoso()
+                .foregroundStyle(Lujo.marfil)
+                .shadow(color: .black.opacity(0.45), radius: 12, y: 2)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 28)
             campo($primerPaso, sugerencia: "Algo muy pequeño")
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 botonChico("Saltar", fuerte: false) { guardarTarea(conPaso: false) }
                 botonChico("Listo", fuerte: true) { guardarTarea(conPaso: true) }
                     .disabled(limpio(primerPaso).isEmpty)
             }
             Text(verbatim: limpio(frase))
-                .font(.zenoTexto(.footnote))
-                .opacity(0.55)
-                .padding(.horizontal, 32)
+                .font(.zenoTexto(.caption))
+                .foregroundStyle(Lujo.marfilSecundario)
         }
+        .padding(.horizontal, Lujo.margen)
     }
 
     private func campo(_ texto: Binding<String>, sugerencia: LocalizedStringKey) -> some View {
-        TextField("", text: texto, prompt: Text(sugerencia).foregroundStyle(.white.opacity(0.35)), axis: .vertical)
+        // Se ve editable: fondo muy sutil, cursor dorado y una línea de oro fina al escribir.
+        TextField("", text: texto, prompt: Text(sugerencia).foregroundStyle(Lujo.marfil.opacity(0.3)), axis: .vertical)
             .font(.zenoTitulo(.title3, .regular))
-            .luminoso()
+            .foregroundStyle(Lujo.marfil)
+            .tint(Lujo.oro)
             .multilineTextAlignment(.center)
             .lineLimit(1...3)
             .submitLabel(.done)
@@ -374,25 +380,25 @@ struct TareaDelMomentoView: View {
                     if modo == .primerPaso { guardarTarea(conPaso: true) } else { guardarFrase() }
                 }
             }
-            .padding(.vertical, 12)
+            .padding(.vertical, 14)
             .padding(.horizontal, 18)
-            .cristal(radio: 20)
-            .padding(.horizontal, 28)
+            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Lujo.marfil.opacity(0.035)))
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(LinearGradient(colors: [Lujo.oro.opacity(0.1), Lujo.oro, Lujo.oro.opacity(0.1)],
+                                         startPoint: .leading, endPoint: .trailing))
+                    .frame(height: 0.75)
+                    .scaleEffect(x: escribiendo ? 1 : 0.0001)
+                    .animation(Lujo.curva(), value: escribiendo)
+            }
     }
 
     @ViewBuilder
     private func botonChico(_ titulo: LocalizedStringKey, fuerte: Bool, accion: @escaping () -> Void) -> some View {
         if fuerte {
-            BotonZeno(titulo, compacto: true, accion: accion)
+            BotonPrimarioLujo(titulo, accion: accion)
         } else {
-            Button(action: accion) {
-                Text(titulo)
-                    .font(.zenoTexto(.body, .medium))
-                    .padding(.vertical, 11)
-                    .padding(.horizontal, 26)
-                    .cristal()
-            }
-            .buttonStyle(EstiloPresion())
+            BotonSecundarioLujo(titulo, accion: accion)
         }
     }
 
