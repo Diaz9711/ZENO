@@ -197,7 +197,7 @@ struct UniversoView: View {
                 llegada = true
                 presentando = false
             } else {
-                withAnimation(.easeOut(duration: 4.2)) { llegada = true }
+                withAnimation(.easeOut(duration: 5.0)) { llegada = true }
             }
             #if DEBUG
             DatosDeEjemplo.cargarSiHaceFalta(en: contexto, hayPersona: !personas.isEmpty)

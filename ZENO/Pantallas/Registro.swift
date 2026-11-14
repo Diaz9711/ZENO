@@ -376,7 +376,7 @@ struct BienvenidaView: View {
     /// La secuencia completa dura unos cinco segundos.
     private func contar() async {
         if reducirMovimiento { fase = 4; destello = true; if !conBoton { terminar() }; return }
-        let pasos: [(Int, Double)] = conBoton ? [(1, 1.3), (2, 0.9), (4, 2.4)] : [(1, 0.9), (2, 0.7)]
+        let pasos: [(Int, Double)] = conBoton ? [(1, 1.3), (2, 0.9), (4, 2.4)] : [(1, 1.2), (2, 1.0)]
         for (f, espera) in pasos {
             try? await Task.sleep(for: .seconds(espera))
             guard fase < f else { continue }
@@ -384,7 +384,8 @@ struct BienvenidaView: View {
             if f == 1 { withAnimation(.easeOut(duration: 1.6)) { destello = true } }
         }
         if !conBoton {
-            try? await Task.sleep(for: .seconds(1.7))
+            // ZENO se queda completo unos segundos para leerlo con calma (en total, unos 5,5 s).
+            try? await Task.sleep(for: .seconds(3.3))
             terminar()
         }
     }
