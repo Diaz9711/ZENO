@@ -110,6 +110,34 @@ static float lucecitas(float2 pos, float celda, float radio, float t, float2 sem
     return (nucleo + aura) * presente * pulso;
 }
 
+// Un punto de luz con su cola. Cada ciclo de 19 s decide al azar si pasa (más o menos la mitad),
+// por dónde y hacia qué lado. Solo cruza la parte alta, lejos del texto. Con el tiempo detenido no aparece.
+static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
+    if (t < 1.0) return 0.0;
+    float periodo = 19.0;
+    float ciclo = floor(t / periodo);
+    float local = t - ciclo * periodo;
+    float dur = 2.2;
+    float pasa = step(0.48, azar(float2(ciclo, 4.3) + semilla));
+    if (pasa < 0.5 || local > dur) return 0.0;
+    float izquierda = step(0.5, azar(float2(ciclo, 1.9) + semilla));
+    float2 inicio = float2(mix(-0.05, 0.40, azar(float2(ciclo, 3.1) + semilla)) * tam.x,
+                           mix(0.04, 0.22, azar(float2(ciclo, 8.7) + semilla)) * tam.y);
+    float ang = mix(0.18, 0.42, azar(float2(ciclo, 5.5) + semilla));
+    float2 dir = float2(cos(ang), sin(ang));
+    if (izquierda > 0.5) { inicio.x = tam.x - inicio.x; dir.x = -dir.x; }
+    float p = local / dur;
+    float2 cabeza = inicio + dir * (0.85 * tam.x) * p;
+    float2 rel = pos - cabeza;
+    float atras = dot(rel, -dir);
+    float lado = abs(rel.x * dir.y - rel.y * dir.x);
+    float ancho = 0.7 + atras * 0.012;
+    float cola = step(0.0, atras) * exp(-atras / 48.0) * exp(-lado * lado / (ancho * ancho));
+    float punto = exp(-dot(rel, rel) / 2.2) + 0.25 * exp(-dot(rel, rel) / 18.0);
+    float vida = sin(p * 3.14159265);
+    return (punto * 1.1 + cola * 0.42) * vida * vida;
+}
+
 [[ stitchable ]] half4 nebulosa(float2 pos, half4 color,
                                 float2 tam, float2 centro, float t, float2 inclina,
                                 float2 desplazamiento, float energia, float calidez,
@@ -162,7 +190,9 @@ static float lucecitas(float2 pos, float celda, float radio, float t, float2 sem
     float apertura = 3.4 - 0.8 * energia - 1.0 * calidez;
     float calor = exp(-d * d * apertura);
     float velo = 0.74 + 0.44 * n + 0.30 * hilo;
-    col = mix(col, cBrasa, clamp(calor * velo * mix(0.30, 0.58, calidez) * luzE, 0.0, 1.0));
+    // Cerca de la estrella el resplandor se entibia con su oro: la luz se siente cálida, no lila.
+    float3 cCalor = mix(cBrasa, cOro, 0.42);
+    col = mix(col, cCalor, clamp(calor * velo * mix(0.30, 0.58, calidez) * luzE, 0.0, 1.0));
     col += cOro * pow(calor, 2.4) * velo * mix(0.10, 0.24, energia) * mix(0.70, 1.0, calidez);
     col += cBrasa * 0.05 * calidez * dens;
 
@@ -193,6 +223,9 @@ static float lucecitas(float2 pos, float celda, float radio, float t, float2 sem
     float luzCerca = lucecitas(pos + inclina * 38.0 + sube * 1.7, 171.0, 2.5, t * 0.8, desplazamiento + 29.0);
     col += mix(cOro, float3(1.0, 0.93, 0.80), 0.35) * (luzLejos * 0.55 + luzCerca * 0.42) * (1.0 - 0.7 * calor);
 
+    // Un cometa muy pequeño cruza el cielo alto de vez en cuando, nunca a ritmo fijo.
+    col += cometa(pos, tam, t, desplazamiento) * mix(cOro, float3(1.0, 0.97, 0.92), 0.6);
+
     // Grano finísimo contra el bandeado.
     col += (azar(pos + fract(t)) - 0.5) / 160.0;
 
@@ -218,14 +251,14 @@ static float lucecitas(float2 pos, float celda, float radio, float t, float2 sem
     float2 dir = uv / max(d, 0.0001);
     bool esEsfera = forma_ > 0.5;
 
-    float brillo = mix(0.70, 1.0, energia) + 0.12 * destello;
+    float brillo = mix(0.70, 1.0, energia) + 0.06 * destello;
 
     // ── Halo (común) ──
     float ondaH = 0.62 * sin(a * lobulos + giro)
                 + 0.38 * sin(a * (lobulos - 1.0) - giro * 0.6 + desplazamiento.x);
     float gas = ruido(dir * 1.7 + desplazamiento + float2(t * 0.05, -t * 0.04)) - 0.5;
     float forma = 1.0 + profundidad * ondaH * (0.6 + 0.4 * energia) + 0.20 * gas;
-    float rHalo = mix(0.50, 0.80, energia) * (1.0 + mix(0.04, 0.10, energia) * respiro) * forma;
+    float rHalo = mix(0.50, 0.80, energia) * (1.0 + mix(0.04, 0.10, energia) * respiro) * forma * (1.0 + 0.18 * destello);
     float halo = exp(-pow(d / rHalo, 1.45) * 2.0);
 
     // ── Motas en órbita ladeada (común) ──
@@ -246,7 +279,7 @@ static float lucecitas(float2 pos, float celda, float radio, float t, float2 sem
         motas += (0.8 * exp(-dm * dm / 0.00014) + 0.22 * exp(-dm * dm / 0.0020)) * pulso * cerca;
     }
 
-    float3 col = cHalo * halo * mix(0.40, 0.60, energia);
+    float3 col = cHalo * halo * mix(0.40, 0.60, energia) * (1.0 + 0.55 * destello);
     float disco = 0.0;
     float3 esfera = float3(0.0);
 
@@ -296,7 +329,7 @@ static float lucecitas(float2 pos, float celda, float radio, float t, float2 sem
         float brasa = pow(nube(dir * 5.5 + desplazamiento + float2(t * 0.05, giro)), 3.0) * exp(-x * 0.55) * 2.2;
 
         col += mix(cHalo, cCorona, 0.35) * velo * mix(0.02, 0.10, energia);
-        col += cCorona * medio * 1.05 * brillo;
+        col += cCorona * medio * 1.05 * brillo * (1.0 + 0.35 * destello);
         col += mix(cNucleo, cCorona, 0.40) * pegado * 0.95 * brillo;
         col += cCorona * brasa * 0.20 * brillo;
         col += mix(mix(cClaro, cCorona, 0.30), cHalo, 0.15) * rayos * 0.95 * brillo;
@@ -346,7 +379,7 @@ static float lucecitas(float2 pos, float celda, float radio, float t, float2 sem
         float velo = exp(-pow((d - rHalo * 0.84) / 0.075, 2.0)) * (0.4 + 0.6 * fil);
 
         col += mix(cHalo, cCorona, 0.35) * velo * mix(0.02, 0.10, energia);
-        col += cCorona * medio * 0.95 * brillo;
+        col += cCorona * medio * 0.95 * brillo * (1.0 + 0.35 * destello);
         col += mix(cNucleo, cCorona, 0.35) * pegado * 0.95 * brillo;
     }
 

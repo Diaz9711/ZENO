@@ -244,7 +244,6 @@ struct TareaDelMomentoView: View {
                 botonChico("Cancelar", fuerte: false) { cerrarAgregar() }
                 botonChico("Guardar", fuerte: true) { guardarFrase() }
                     .disabled(limpio(frase).isEmpty)
-                    .opacity(limpio(frase).isEmpty ? 0.45 : 1)
             }
             Text(dictado.aviso ?? String(localized: "También puedes mantener presionada a Lumi y hablar."))
                 .font(.zenoTexto(.footnote))
@@ -266,7 +265,6 @@ struct TareaDelMomentoView: View {
                 botonChico("Saltar", fuerte: false) { guardarTarea(conPaso: false) }
                 botonChico("Listo", fuerte: true) { guardarTarea(conPaso: true) }
                     .disabled(limpio(primerPaso).isEmpty)
-                    .opacity(limpio(primerPaso).isEmpty ? 0.45 : 1)
             }
             Text("\(limpio(frase))")
                 .font(.zenoTexto(.footnote))
@@ -296,15 +294,20 @@ struct TareaDelMomentoView: View {
             .padding(.horizontal, 28)
     }
 
+    @ViewBuilder
     private func botonChico(_ titulo: LocalizedStringKey, fuerte: Bool, accion: @escaping () -> Void) -> some View {
-        Button(action: accion) {
-            Text(titulo)
-                .font(.zenoTexto(.body, .medium))
-                .padding(.vertical, 11)
-                .padding(.horizontal, 26)
-                .cristal(fuerte: fuerte)
+        if fuerte {
+            BotonZeno(titulo, compacto: true, accion: accion)
+        } else {
+            Button(action: accion) {
+                Text(titulo)
+                    .font(.zenoTexto(.body, .medium))
+                    .padding(.vertical, 11)
+                    .padding(.horizontal, 26)
+                    .cristal()
+            }
+            .buttonStyle(EstiloPresion())
         }
-        .buttonStyle(EstiloPresion())
     }
 
     // MARK: Voz

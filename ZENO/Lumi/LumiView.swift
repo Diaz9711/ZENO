@@ -1,4 +1,5 @@
 import SwiftUI
+import simd
 
 /// Las dos formas de Lumi. Nunca se mezclan. La persona elige la que más le guste
 /// (en el registro, y después en Ajustes); si no elige, es `.estrella`.
@@ -25,12 +26,25 @@ struct LumiView: View, Animatable {
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     @State private var reloj = RelojDeLumi()
 
+    /// Lumi ya muestra la energía con su luz; VoiceOver la dice en palabras.
+    private var nivelDeEnergia: LocalizedStringKey {
+        switch MotorDeEnergia.nivel(energia * 100) {
+        case .alta: "Energía alta"
+        case .media: "Energía media"
+        case .baja: "Energía baja"
+        }
+    }
+
     var body: some View {
         TimelineView(.animation(paused: reducirMovimiento)) { linea in
             let m = reloj.avanzar(hasta: linea.date,
                                   energia: energia,
                                   apariencia: apariencia,
                                   quieto: reducirMovimiento)
+            // La luz va y viene entre sus dos tonos: viva, pero siempre ella misma.
+            let mezcla = Float(0.5 - 0.5 * cos(m.tiempo * 2 * .pi / apariencia.periodoDeLuz))
+            let corona = simd_mix(apariencia.colorCorona, apariencia.colorCoronaVecino, SIMD3(repeating: mezcla))
+            let nucleo = simd_mix(apariencia.colorNucleo, apariencia.colorNucleoVecino, SIMD3(repeating: mezcla))
             GeometryReader { geo in
                 Rectangle()
                     .fill(.white)
@@ -48,8 +62,8 @@ struct LumiView: View, Animatable {
                         .float(Double(apariencia.olaDeRayos)),
                         .float2(apariencia.inclinacionOrbita, apariencia.giroOrbita),
                         .float(Double(forma.rawValue)),
-                        .float3(apariencia.colorNucleo.x, apariencia.colorNucleo.y, apariencia.colorNucleo.z),
-                        .float3(apariencia.colorCorona.x, apariencia.colorCorona.y, apariencia.colorCorona.z),
+                        .float3(nucleo.x, nucleo.y, nucleo.z),
+                        .float3(corona.x, corona.y, corona.z),
                         .float3(apariencia.colorHalo.x, apariencia.colorHalo.y, apariencia.colorHalo.z)
                     ))
                     .offset(x: m.flotarX * geo.size.width, y: m.flotarY * geo.size.width)
@@ -59,6 +73,7 @@ struct LumiView: View, Animatable {
         .allowsHitTesting(false)
         .accessibilityElement()
         .accessibilityLabel(Text("Lumi, tu estrella"))
+        .accessibilityValue(Text(nivelDeEnergia))
     }
 }
 

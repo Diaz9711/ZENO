@@ -101,6 +101,8 @@ struct EstiloPresion: ButtonStyle {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.96 : 1)
             .brightness(configuration.isPressed ? 0.06 : 0)
+            // Al tocar, la luz responde: un resplandor dorado que se apaga al soltar.
+            .shadow(color: Color.oroZeno.opacity(configuration.isPressed ? 0.45 : 0), radius: 14)
             .animation(.spring(response: 0.28, dampingFraction: 0.6), value: configuration.isPressed)
     }
 }

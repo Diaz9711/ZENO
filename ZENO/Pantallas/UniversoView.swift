@@ -249,7 +249,11 @@ struct UniversoView: View {
                                     mejorHora: MotorDeEnergia.mejorHora(persona: persona, eventos: eventos),
                                     pedirAgregar: pedirAgregar,
                                     editando: $editando)
+                            }
+                            // Encima y no debajo: si empujan el contenido, la barra se sale de la pantalla.
+                            .overlay(alignment: .top) {
                                 botonesDePrueba(persona, puntaje: puntaje)
+                                    .padding(.top, 96)
                             }
                             EncabezadoDeHoy(nombre: persona.nombre, puntaje: puntaje)
                                 .padding(.horizontal, 22)
@@ -313,7 +317,9 @@ struct UniversoView: View {
             $0.tipo == .tareaTerminada && Calendar.current.isDateInToday($0.fecha)
                 && $0.tarea?.tamano == .grande && $0.tarea?.primerPaso == nil
         }.count
-        return min(Double(grandesHoy) * 0.5, 1)
+        // Cada tarea terminada hoy suma luz; las difíciles, más. Nunca se resta.
+        let hechasHoy = eventos.filter { $0.tipo == .tareaTerminada && Calendar.current.isDateInToday($0.fecha) }.count
+        return min(Double(grandesHoy) * 0.5 + Double(hechasHoy) * 0.14, 1)
     }
 
     private func celebrar(_ nueva: Celebracion) {

@@ -135,7 +135,6 @@ struct RegistroView: View {
                 .padding(.horizontal, 44)
             BotonZeno("Continuar") { ir(a: .fecha) }
                 .disabled(borrador.nombreLimpio.isEmpty)
-                .opacity(borrador.nombreLimpio.isEmpty ? 0.4 : 1)
         }
         .onAppear { escribiendo = true }
     }
@@ -249,15 +248,18 @@ struct RegistroView: View {
 
 /// El botón principal de ZENO: uno solo por pantalla, y es lo único hecho de luz.
 /// Oro de estrella con tinta oscura y una flecha en su propio círculo: se ve que se toca.
+/// Quieto mientras nadie lo toca; al tocarlo, la flecha avanza y suelta una onda de luz.
 struct BotonZeno: View {
     let titulo: LocalizedStringKey
     /// 0 a 1. Con energía baja el botón brilla menos: invita, no grita.
     var intensidad: Double
+    var compacto = false
     let accion: () -> Void
 
-    init(_ titulo: LocalizedStringKey, intensidad: Double = 1, accion: @escaping () -> Void) {
+    init(_ titulo: LocalizedStringKey, intensidad: Double = 1, compacto: Bool = false, accion: @escaping () -> Void) {
         self.titulo = titulo
         self.intensidad = intensidad
+        self.compacto = compacto
         self.accion = accion
     }
 
@@ -265,43 +267,97 @@ struct BotonZeno: View {
 
     var body: some View {
         Button(action: accion) {
-            HStack(spacing: 12) {
-                Text(titulo)
-                    .font(.zenoTexto(.body, .bold))
-                    .tracking(0.4)
-                    .foregroundStyle(Self.tinta)
-                    .padding(.leading, 26)
-                Spacer(minLength: 8)
-                ZStack {
-                    Circle().fill(Self.tinta.opacity(0.92))
-                    FlechaDibujada()
-                        .stroke(Color.oroClaro, style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round))
-                        .frame(width: 15, height: 12)
-                }
-                .frame(width: 42, height: 42)
-                .padding(.trailing, 7)
-            }
-            .frame(maxWidth: .infinity, minHeight: 56)
-            .background {
-                let forma = Capsule()
-                ZStack {
-                    forma.fill(LinearGradient(colors: [.oroClaro, .oroZeno, .oroHondo],
-                                              startPoint: .topLeading, endPoint: .bottomTrailing))
-                    // Un reflejo arriba: el oro parece metal pulido, no un color plano.
-                    forma.fill(LinearGradient(colors: [.white.opacity(0.35), .clear],
-                                              startPoint: .top, endPoint: .center))
-                        .padding(1.5)
-                    forma.strokeBorder(Color.oroClaro.opacity(0.9), lineWidth: 0.8)
-                }
-                .saturation(0.75 + 0.25 * intensidad)
-                .brightness(-0.10 * (1 - intensidad))
-                .shadow(color: Color.oroZeno.opacity(0.18 + 0.27 * intensidad), radius: 18, y: 4)
-            }
+            Text(titulo)
         }
-        .buttonStyle(EstiloPresion())
-        .padding(.horizontal, 28)
-        .padding(.bottom, 18)
+        .buttonStyle(EstiloLuz(intensidad: intensidad, compacto: compacto))
+        .padding(.horizontal, compacto ? 0 : 28)
+        .padding(.bottom, compacto ? 0 : 18)
     }
+}
+
+/// El estilo del botón de luz. Vive en una vista propia para poder guardar sus ondas.
+struct EstiloLuz: ButtonStyle {
+    var intensidad: Double = 1
+    var compacto = false
+    func makeBody(configuration: Configuration) -> some View {
+        CuerpoDeLuz(configuration: configuration, intensidad: intensidad, compacto: compacto)
+    }
+}
+
+private struct CuerpoDeLuz: View {
+    let configuration: ButtonStyleConfiguration
+    let intensidad: Double
+    let compacto: Bool
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+    @Environment(\.isEnabled) private var activo
+    @State private var ondas = 0
+
+    var body: some View {
+        let presionado = configuration.isPressed
+        let circulo: CGFloat = compacto ? 32 : 42
+        HStack(spacing: compacto ? 10 : 12) {
+            configuration.label
+                .font(.zenoTexto(compacto ? .subheadline : .body, .bold))
+                .tracking(0.4)
+                .foregroundStyle(BotonZeno.tinta)
+                .padding(.leading, compacto ? 18 : 26)
+            if !compacto { Spacer(minLength: 8) }
+            ZStack {
+                // La onda: un anillo de luz que sale del círculo, como cuando Lumi celebra.
+                Circle()
+                    .stroke(Color.oroClaro, lineWidth: 1.5)
+                    .keyframeAnimator(initialValue: OndaDeBoton(), trigger: ondas) { vista, v in
+                        vista.scaleEffect(v.escala).opacity(v.opacidad)
+                    } keyframes: { _ in
+                        KeyframeTrack(\.escala) {
+                            CubicKeyframe(1.0, duration: 0.01)
+                            CubicKeyframe(2.6, duration: 0.75)
+                        }
+                        KeyframeTrack(\.opacidad) {
+                            CubicKeyframe(0.9, duration: 0.01)
+                            CubicKeyframe(0, duration: 0.75)
+                        }
+                    }
+                Circle().fill(BotonZeno.tinta.opacity(0.92))
+                FlechaDibujada()
+                    .stroke(Color.oroClaro, style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round))
+                    .frame(width: circulo * 0.36, height: circulo * 0.29)
+                    .offset(x: presionado && !reducirMovimiento ? 3 : 0)
+            }
+            .frame(width: circulo, height: circulo)
+            .offset(x: presionado && !reducirMovimiento ? 3 : 0)
+            .padding(.trailing, compacto ? 5 : 7)
+        }
+        .frame(maxWidth: compacto ? nil : .infinity, minHeight: compacto ? 42 : 56)
+        .background {
+            let forma = Capsule()
+            ZStack {
+                forma.fill(LinearGradient(colors: [.oroClaro, .oroZeno, .oroHondo],
+                                          startPoint: .topLeading, endPoint: .bottomTrailing))
+                // Un reflejo arriba: el oro parece metal pulido, no un color plano.
+                forma.fill(LinearGradient(colors: [.white.opacity(presionado ? 0.5 : 0.35), .clear],
+                                          startPoint: .top, endPoint: .center))
+                    .padding(1.5)
+                forma.strokeBorder(Color.oroClaro.opacity(0.9), lineWidth: 0.8)
+            }
+            .saturation(0.75 + 0.25 * intensidad)
+            .brightness(-0.10 * (1 - intensidad) + (presionado ? 0.05 : 0))
+            .shadow(color: Color.oroZeno.opacity((0.18 + 0.27 * intensidad) * (presionado ? 1.6 : 1)),
+                    radius: presionado ? 24 : 18, y: 4)
+        }
+        .scaleEffect(presionado ? 0.975 : 1)
+        .opacity(activo ? 1 : 0.4)
+        .animation(.spring(response: 0.3, dampingFraction: 0.62), value: presionado)
+        .onChange(of: presionado) { _, ahora in
+            if ahora && !reducirMovimiento { ondas += 1 }
+        }
+        .sensoryFeedback(.impact(weight: .light, intensity: 0.55), trigger: presionado) { _, ahora in ahora }
+    }
+}
+
+private struct OndaDeBoton {
+    var escala: CGFloat = 1
+    var opacidad: Double = 0
 }
 
 // MARK: - Bienvenida

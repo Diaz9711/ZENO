@@ -260,13 +260,14 @@ struct BarraZeno: View {
 
 // MARK: - Encabezado y tarjeta de hoy
 
-/// Arriba de la pantalla: el saludo según la hora y la energía en palabras (nunca en números).
+/// Arriba de la pantalla: el saludo según la hora y, debajo, una línea tranquila sobre la energía.
+/// Sin cápsulas ni barras: Lumi y el cielo ya muestran la energía con su luz.
 struct EncabezadoDeHoy: View {
     let nombre: String
     let puntaje: Double
 
     var body: some View {
-        HStack(alignment: .center) {
+        HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(saludo)
                     .textCase(.uppercase)
@@ -276,26 +277,14 @@ struct EncabezadoDeHoy: View {
                 Text(nombre)
                     .font(.zenoTitulo(.title2, .regular, cursiva: true))
                     .luminoso()
+                Text(nivel)
+                    .font(.zenoTexto(.footnote))
+                    .foregroundStyle(Color.marfil.opacity(0.62))
+                    .padding(.top, 2)
+                    .contentTransition(.opacity)
+                    .animation(.easeInOut(duration: 1.2), value: MotorDeEnergia.nivel(puntaje))
             }
             Spacer()
-            HStack(spacing: 9) {
-                // Cinco barritas que se encienden con la energía.
-                HStack(alignment: .bottom, spacing: 3) {
-                    ForEach(0..<5, id: \.self) { i in
-                        Capsule()
-                            .fill(Double(i) < (puntaje / 20).rounded(.up) ? Color.oroZeno : Color.marfil.opacity(0.22))
-                            .frame(width: 3.5, height: 7 + CGFloat(i) * 2.6)
-                    }
-                }
-                Text(nivel)
-                    .font(.zenoTexto(.footnote, .semibold))
-                    .foregroundStyle(Color.marfil)
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .cristal()
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text(nivel))
         }
         .shadow(color: .black.opacity(0.35), radius: 8)
     }
@@ -310,9 +299,9 @@ struct EncabezadoDeHoy: View {
 
     private var nivel: LocalizedStringKey {
         switch MotorDeEnergia.nivel(puntaje) {
-        case .alta: "Energía alta"
-        case .media: "Energía media"
-        case .baja: "Energía baja"
+        case .alta: "Tu energía está alta."
+        case .media: "Tu energía va a medias."
+        case .baja: "Tu energía está baja. Vamos despacio."
         }
     }
 }
