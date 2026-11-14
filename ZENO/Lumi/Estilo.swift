@@ -102,8 +102,12 @@ struct EstiloPresion: ButtonStyle {
             .scaleEffect(configuration.isPressed ? 0.96 : 1)
             .brightness(configuration.isPressed ? 0.06 : 0)
             // Al tocar, la luz responde: un resplandor dorado que se apaga al soltar.
+            // Radio fijo: solo cambia la opacidad, que es lo barato.
             .shadow(color: Color.oroZeno.opacity(configuration.isPressed ? 0.45 : 0), radius: 14)
-            .animation(.spring(response: 0.28, dampingFraction: 0.6), value: configuration.isPressed)
+            // Hundirse es inmediato (el dedo lo siente al instante); volver lleva un pequeño rebote.
+            .animation(configuration.isPressed ? .easeOut(duration: 0.08)
+                                               : .spring(response: 0.3, dampingFraction: 0.62),
+                       value: configuration.isPressed)
     }
 }
 

@@ -641,8 +641,9 @@ private struct TareaTocable: View {
         .padding(.horizontal, 32)
         .padding(.vertical, 12)
         // Sin empezar, la tarea respira una luz dorada: "empieza". Al mantenerla, se enciende.
-        .shadow(color: Color.oroZeno.opacity(presionando ? 0.85 : (!enCurso && respira ? 0.55 : 0.12)),
-                radius: presionando ? 28 : (!enCurso && respira ? 22 : 10))
+        // El resplandor tiene radio fijo y solo cambia su opacidad: animarlo es barato y fluido.
+        .shadow(color: Color.oroZeno.opacity(presionando ? 0.85 : (!enCurso && respira ? 0.5 : 0.14)),
+                radius: 22)
         .scaleEffect(presionando ? 1.04 : 1)
         .contentShape(Rectangle())
         .onTapGesture { if !enCurso { alEmpezar() } }

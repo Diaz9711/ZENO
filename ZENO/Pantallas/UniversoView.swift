@@ -111,9 +111,9 @@ struct UniversoView: View {
                             vista.scaleEffect(x: forma.width, y: forma.height)
                         } keyframes: { _ in
                             KeyframeTrack {
-                                CubicKeyframe(CGSize(width: 0.90, height: 1.16), duration: 0.22)
-                                SpringKeyframe(CGSize(width: 1.10, height: 0.92), duration: 0.38, spring: .bouncy)
-                                SpringKeyframe(CGSize(width: 1, height: 1), duration: 0.6, spring: .smooth)
+                                CubicKeyframe(CGSize(width: 0.94, height: 1.09), duration: 0.14)
+                                SpringKeyframe(CGSize(width: 1.05, height: 0.96), duration: 0.24, spring: .bouncy)
+                                SpringKeyframe(CGSize(width: 1, height: 1), duration: 0.4, spring: .smooth)
                             }
                         }
                         .rotationEffect(.degrees(vueltas))
@@ -230,7 +230,7 @@ struct UniversoView: View {
 
     /// Lumi se mueve como un objeto físico: resorte con un pequeño rebote al llegar.
     private var movimientoDeLumi: Animation {
-        reducirMovimiento ? .easeInOut(duration: 0.6) : .spring(response: 1.0, dampingFraction: 0.70)
+        reducirMovimiento ? .easeInOut(duration: 0.4) : .spring(response: 0.7, dampingFraction: 0.74)
     }
 
     @ViewBuilder
@@ -313,8 +313,9 @@ struct UniversoView: View {
             // La página nueva empieza arriba: Lumi vuelve a su tamaño junto con el cambio.
             withAnimation(.easeOut(duration: 0.3)) { desplazamiento.valor = 0 }
             if !reducirMovimiento { viajes += 1 }
-            withAnimation(reducirMovimiento ? .easeInOut(duration: 0.5)
-                                            : .spring(response: 0.95, dampingFraction: 0.68)) {
+            // Rápido y suave, sin rebote largo: la página llega en menos de medio segundo.
+            withAnimation(reducirMovimiento ? .easeInOut(duration: 0.3)
+                                            : .spring(response: 0.46, dampingFraction: 0.84)) {
                 pagina = destino
                 // Si se estaba escribiendo en Hoy, al salir la barra vuelve siempre.
                 if destino != .hoy { editando = false }

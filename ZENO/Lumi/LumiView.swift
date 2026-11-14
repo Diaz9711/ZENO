@@ -42,7 +42,8 @@ struct LumiView: View, Animatable {
     }
 
     var body: some View {
-        TimelineView(.animation(paused: reducirMovimiento)) { linea in
+        // 60 cuadros por segundo: fluido y sin gastar de más en pantallas de 120 Hz.
+        TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: reducirMovimiento)) { linea in
             let m = reloj.avanzar(hasta: linea.date,
                                   energia: energia,
                                   apariencia: apariencia,

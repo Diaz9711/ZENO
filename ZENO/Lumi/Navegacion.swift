@@ -2,16 +2,16 @@ import SwiftUI
 
 // MARK: - Transiciones propias
 
-/// Lo que entra se enfoca: llega desde un desenfoque, un poco más pequeño y más abajo.
-/// Lo que sale se desenfoca igual. Nunca un corte.
+/// Lo que entra llega suave: un poco más pequeño y más abajo, y se asienta mientras aparece.
+/// Lo que sale se va igual. Nunca un corte.
+/// Solo mueve transformación y opacidad (nada de desenfoque animado): así va a 60 cuadros por segundo.
 private struct Desenfoque: ViewModifier {
     let activo: Bool
     func body(content: Content) -> some View {
         content
-            .blur(radius: activo ? 16 : 0)
             .opacity(activo ? 0 : 1)
-            .scaleEffect(activo ? 0.955 : 1)
-            .offset(y: activo ? 18 : 0)
+            .scaleEffect(activo ? 0.965 : 1)
+            .offset(y: activo ? 14 : 0)
     }
 }
 
@@ -29,11 +29,11 @@ private struct PasoLateral: ViewModifier {
 
     func body(content: Content) -> some View {
         let fuera = lado != 0
+        // Solo transformación y opacidad: barato para la tarjeta gráfica, sin saltos.
         content
-            .blur(radius: fuera && !reducirMovimiento ? 14 : 0)
             .opacity(fuera ? 0 : 1)
-            .scaleEffect(fuera && !reducirMovimiento ? 0.93 : 1)
-            .offset(x: reducirMovimiento ? 0 : lado * 84)
+            .scaleEffect(fuera && !reducirMovimiento ? 0.96 : 1)
+            .offset(x: reducirMovimiento ? 0 : lado * 56)
     }
 }
 
@@ -54,11 +54,10 @@ private struct Aparece: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .blur(radius: visible || reducirMovimiento ? 0 : 12)
             .opacity(visible ? 1 : 0)
-            .offset(y: visible || reducirMovimiento ? 0 : 30)
+            .offset(y: visible || reducirMovimiento ? 0 : 16)
             .onAppear {
-                withAnimation(.spring(response: 0.75, dampingFraction: 0.82).delay(0.12 + 0.11 * Double(orden))) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.86).delay(0.05 + 0.06 * Double(orden))) {
                     visible = true
                 }
             }
@@ -227,7 +226,7 @@ struct BarraZeno: View {
     private func pestana(_ destino: Pagina, _ titulo: LocalizedStringKey, _ glifo: Glifo) -> some View {
         let activa = pagina == destino
         return Button {
-            withAnimation(.spring(response: 0.9, dampingFraction: 0.74)) { pagina = destino }
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { pagina = destino }
         } label: {
             HStack(spacing: 7) {
                 GlifoView(glifo: glifo, activo: activa, tamano: 24)
