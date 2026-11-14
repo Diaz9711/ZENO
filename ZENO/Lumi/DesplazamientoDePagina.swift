@@ -34,7 +34,7 @@ struct LumiQueSeRetira<Contenido: View>: View {
         let p: CGFloat = activo ? min(max(desplazamiento.valor / 160, 0), 1) : 0
         contenido()
             .scaleEffect(1 - 0.32 * p)
-            .opacity(1 - 0.62 * p)
+            .opacity(Double(1 - 0.62 * p))
             .offset(y: -26 * p)
     }
 }
