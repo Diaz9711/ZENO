@@ -17,8 +17,8 @@ private struct Desenfoque: ViewModifier {
 
 /// El ritmo común de ZENO: el contenido cambia rápido y suave; Lumi viaja con su propio resorte, más lento.
 enum Ritmo {
-    /// Páginas, secciones y contenido: rápido y sin rebote.
-    static let contenido = Animation.spring(response: 0.38, dampingFraction: 0.9)
+    /// Páginas, secciones y contenido: lento y delicado, sin rebote. cubic-bezier(0.22, 1, 0.36, 1).
+    static let contenido = Animation.timingCurve(0.22, 1, 0.36, 1, duration: 0.5)
     /// Lumi y el cielo: un objeto físico, con un poco de inercia. Es el resorte original de Lumi
     /// (su comportamiento no se toca): 0,95 s y amortiguación 0,68.
     static let lumi = Animation.spring(response: 0.95, dampingFraction: 0.68)
@@ -56,9 +56,10 @@ private struct PasoLateral: ViewModifier {
     func body(content: Content) -> some View {
         let fuera = lado != 0
         content
+            .blur(radius: fuera && !reducirMovimiento ? 4 : 0)
             .opacity(fuera ? 0 : 1)
-            .scaleEffect(fuera && !reducirMovimiento ? 0.97 : 1)
-            .offset(x: reducirMovimiento ? 0 : lado * 44)
+            .scaleEffect(fuera && !reducirMovimiento ? 0.98 : 1)
+            .offset(x: reducirMovimiento ? 0 : lado * 28)
     }
 }
 
@@ -79,10 +80,12 @@ private struct Aparece: ViewModifier {
 
     func body(content: Content) -> some View {
         content
+            // Fundido + subida corta + un desenfoque leve que se aclara. Con Reducir Movimiento, solo fundido.
+            .blur(radius: visible || reducirMovimiento ? 0 : 5)
             .opacity(visible ? 1 : 0)
-            .offset(y: visible || reducirMovimiento ? 0 : 14)
+            .offset(y: visible || reducirMovimiento ? 0 : 12)
             .onAppear {
-                withAnimation(.spring(response: 0.45, dampingFraction: 0.9).delay(0.04 + 0.06 * Double(orden))) {
+                withAnimation(Lujo.curva(0.6).delay(0.08 + 0.055 * Double(orden))) {
                     visible = true
                 }
             }
@@ -219,6 +222,10 @@ struct BarraZeno: View {
     @Binding var pagina: Pagina
     var alAgregar: () -> Void
     @Namespace private var espacio
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+    /// La entrada: la píldora nace pequeña y se estira; los iconos llegan después.
+    @State private var estirada = false
+    @State private var iconos = false
 
     var body: some View {
         HStack(spacing: 6) {
@@ -226,26 +233,32 @@ struct BarraZeno: View {
             pestana(.tareas, "Tareas", .tareas)
             pestana(.ajustes, "Ajustes", .ajustes)
 
-            Button(action: alAgregar) {
-                GlifoView(glifo: .mas, color: Color(red: 0.10, green: 0.09, blue: 0.16), tamano: 20)
-                    .frame(width: 48, height: 48)
-                    .background {
-                        Circle()
-                            .fill(LinearGradient(colors: [.oroClaro, .oroZeno, .oroHondo],
-                                                 startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .shadow(color: Color.oroZeno.opacity(0.55), radius: 12)
-                    }
-            }
-            .buttonStyle(EstiloPresion())
-            .padding(.leading, 4)
-            .accessibilityLabel(Text("Agregar tarea"))
+            BotonMasLujo(accion: alAgregar)
+                .padding(.leading, 4)
+                .accessibilityLabel(Text("Agregar tarea"))
         }
+        .opacity(iconos ? 1 : 0)
         .padding(7)
-        .cristal(radio: 40)
-        // Fondo más sólido: lo que pasa por debajo al desplazar no ensucia la barra.
-        .background(Color("FondoArranque").opacity(0.86), in: Capsule())
-        .shadow(color: .black.opacity(0.35), radius: 22, y: 10)
+        .background {
+            // Píldora oscura flotante: cristal casi opaco con canto pulido y sombra larga y suave.
+            Capsule()
+                .fill(Color(red: 0.06, green: 0.065, blue: 0.11).opacity(0.9))
+                .overlay(Capsule().strokeBorder(LinearGradient(colors: [Lujo.marfil.opacity(0.2), Lujo.marfil.opacity(0.03)],
+                                                               startPoint: .top, endPoint: .bottom), lineWidth: 0.75))
+                .shadow(color: .black.opacity(0.4), radius: 28, y: 14)
+                .scaleEffect(x: estirada ? 1 : 0.35, y: estirada ? 1 : 0.8)
+                .opacity(estirada ? 1 : 0)
+        }
         .sensoryFeedback(.selection, trigger: pagina)
+        .onAppear {
+            if reducirMovimiento {
+                withAnimation(.easeInOut(duration: 0.4)) { estirada = true; iconos = true }
+                return
+            }
+            // Llega la última de la cascada.
+            withAnimation(Lujo.curva(0.6).delay(0.35)) { estirada = true }
+            withAnimation(Lujo.curva(0.5).delay(0.6)) { iconos = true }
+        }
     }
 
     private func pestana(_ destino: Pagina, _ titulo: LocalizedStringKey, _ glifo: Glifo) -> some View {
@@ -255,30 +268,30 @@ struct BarraZeno: View {
             pagina = destino
         } label: {
             HStack(spacing: 7) {
-                GlifoView(glifo: glifo, activo: activa, tamano: 24)
+                GlifoView(glifo: glifo, color: Lujo.marfil, acento: Lujo.oro, activo: activa, tamano: 22)
                 if activa {
                     Text(titulo)
-                        .font(.zenoTexto(.subheadline, .semibold))
-                        .foregroundStyle(Color.marfil)
+                        .font(.lujoEtiqueta(.caption, .medium))
+                        .versalitas(1.4)
+                        .foregroundStyle(Lujo.oro)
                         .fixedSize()
-                        .transition(.opacity.combined(with: .scale(scale: 0.7, anchor: .leading)))
+                        .transition(.opacity.combined(with: .offset(x: -6)))
                 }
             }
             .padding(.horizontal, activa ? 16 : 13)
             .frame(height: 48)
             .background {
                 if activa {
+                    // El mismo oro fino que los chips elegidos; se desliza de una pestaña a otra.
                     Capsule()
-                        .fill(LinearGradient(colors: [Color.oroZeno.opacity(0.34), Color.oroZeno.opacity(0.12)],
-                                             startPoint: .top, endPoint: .bottom))
-                        .overlay(Capsule().strokeBorder(Color.oroZeno.opacity(0.75), lineWidth: 1))
-                        .shadow(color: Color.oroZeno.opacity(0.35), radius: 10)
+                        .fill(Lujo.oro.opacity(0.06))
+                        .overlay(Capsule().strokeBorder(Lujo.oro.opacity(0.8), lineWidth: 0.75))
                         .matchedGeometryEffect(id: "activa", in: espacio)
                 }
             }
             .contentShape(Capsule())
         }
-        .buttonStyle(EstiloPresion())
+        .buttonStyle(EstiloLujo())
         .accessibilityAddTraits(activa ? .isSelected : [])
     }
 }
@@ -293,15 +306,12 @@ struct EncabezadoDeHoy: View {
 
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(saludo)
-                    .textCase(.uppercase)
-                    .font(.zenoTexto(.caption2, .semibold))
-                    .tracking(2.4)
-                    .foregroundStyle(Color.oroZeno)
+            VStack(alignment: .leading, spacing: 6) {
+                EtiquetaLujo(saludo)
                 Text(nombre)
-                    .font(.zenoTitulo(.title2, .regular, cursiva: true))
-                    .luminoso()
+                    .font(.zenoTitulo(.title, .regular, cursiva: true))
+                    .foregroundStyle(Lujo.marfil)
+                    .lineSpacing(4)
             }
             Spacer()
         }

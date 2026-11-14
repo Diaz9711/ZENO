@@ -99,103 +99,168 @@ struct TareaDelMomentoView: View {
 
     @ViewBuilder
     private var ver: some View {
-        switch eleccion {
-        case .tarea(let tarea):
-            if enRacha && enCurso == nil {
-                // Si va rápido, se le ofrece una más, sin presión.
-                Etiqueta("Vas en racha · ¿una más?")
-                    .transition(.opacity)
-            } else {
-                Etiqueta(tarea.primerPaso != nil ? "Primer paso" : (enCurso == nil ? "Ahora" : "En curso"))
-            }
-            // Sin botón: la tarea misma es el control (decisión de Diaz).
-            // Tocarla la empieza y el anillo aparece en Lumi; mantenerla presionada la termina.
-            let enMarcha = enCurso == tarea.persistentModelID
-            TareaTocable(tarea: tarea, enCurso: enMarcha,
-                         alEmpezar: { empezar(tarea) },
-                         alTerminar: { terminar(tarea) })
-                .id(tarea.persistentModelID)
-                .transition(.desenfoque)
-
-            Text(enMarcha ? "Mantén presionada la tarea cuando termines" : "Toca la tarea para empezar")
-                .font(.zenoTexto(.footnote))
-                .foregroundStyle(Color.marfil.opacity(0.6))
-                .contentTransition(.opacity)
-                .animation(.easeInOut(duration: 0.5), value: enMarcha)
-                .accessibilityHidden(true)
-            // Lo aprendido, dicho en voz baja: cuánto suele tomarle de verdad algo así.
-            if !enMarcha, tarea.primerPaso == nil,
-               let minutos = Aprendizaje.minutosReales(tarea.tamano, eventos: eventos) {
-                Text("Algo así suele tomarte unos \(Int(minutos.rounded())) min.")
-                    .font(.zenoTexto(.caption))
-                    .foregroundStyle(Color.oroZeno.opacity(0.75))
-                    .transition(.opacity)
-            }
-
-            Spacer().frame(height: 4)
-            Button(enMarcha ? "Dejarla para después" : "Ahora no") { ahoraNo(tarea) }
-                .font(.zenoTexto(.body))
-                .opacity(0.75)
-
-        case .descanso:
-            Etiqueta("Descanso")
-            Titular(texto: Idioma.texto("Hoy descansa, mañana atacamos"), tamano: .title)
-                .padding(.horizontal, 32)
-            Text("Tu energía está baja, y está bien.")
-                .font(.zenoTexto(.footnote))
-                .opacity(0.65)
-            Button("Quiero hacer algo igual") {
-                toques += 1
-                withAnimation(.easeInOut(duration: 0.4)) { quiereAlgoIgual = true }
-            }
-            .font(.zenoTexto(.body))
-            .opacity(0.75)
-            .padding(.top, 10)
-
-        case .masTarde:
-            Text("Por ahora, nada")
-                .font(.zenoTitulo(.title3))
-                .luminoso()
-            Text(vuelveA.map { Idioma.texto("Vuelvo a proponerte algo a las \($0.formatted(date: .omitted, time: .shortened)).") }
-                 ?? Idioma.texto("Lo intentamos más tarde."))
-                .font(.zenoTexto(.footnote))
-                .opacity(0.65)
-
-        case .nadaPendiente:
-            Titular(texto: Idioma.texto("No tienes nada pendiente"), tamano: .title)
-                .padding(.horizontal, 32)
-            Text("Cuando quieras, agrega una sola cosa.")
-                .font(.zenoTexto(.footnote))
-                .opacity(0.65)
-        }
-
-        Spacer()
-
-        // Escribir una tarea sin buscar el "+": al tocarlo, el campo sube bajo Lumi.
-        if mostrarCampoRapido {
-            CampoRapido { abrirAgregar() }
-                .padding(.horizontal, 28)
-                .padding(.bottom, 4)
+        // Una tarjeta ancha con lo de ahora (la única acción), y debajo dos tarjetas medianas con datos.
+        VStack(alignment: .leading, spacing: 14) {
+            tarjetaDeAhora
                 .aparece(1)
-        }
 
-        if let aviso = dictado.aviso {
-            Text(aviso)
-                .font(.zenoTexto(.footnote))
-                .multilineTextAlignment(.center)
-                .opacity(0.75)
-                .padding(.horizontal, 32)
-        }
-        // La tarjeta solo aparece cuando hay algo que celebrar: una fila de ceros parece un marcador vacío.
-        Group {
-            if hechasHoy.isEmpty {
-                Color.clear.frame(height: 1)
-            } else {
-                TarjetaDeHoy(hechas: hechasHoy.count, minutos: minutosEnFoco, mejorHora: mejorHora)
+            if mostrarCampoRapido {
+                CampoRapido { abrirAgregar() }
                     .aparece(2)
             }
+
+            HStack(alignment: .top, spacing: 12) {
+                tarjetaDelDia
+                tarjetaDeMejorHora
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            .aparece(3)
+
+            if let aviso = dictado.aviso {
+                Text(aviso)
+                    .font(.zenoTexto(.footnote))
+                    .foregroundStyle(Lujo.marfilSecundario)
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
+            }
         }
-        .padding(.bottom, 92)      // deja sitio a la barra
+        .padding(.horizontal, 22)
+        Spacer()
+            .frame(minHeight: 96)      // deja sitio a la barra
+    }
+
+    /// La tarjeta ancha: la tarea del momento (tocar empieza, mantener termina) o el estado del día.
+    @ViewBuilder
+    private var tarjetaDeAhora: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            switch eleccion {
+            case .tarea(let tarea):
+                let enMarcha = enCurso == tarea.persistentModelID
+                HStack {
+                    EtiquetaLujo(enRacha && enCurso == nil ? "Vas en racha · ¿una más?"
+                                 : (tarea.primerPaso != nil ? "Primer paso" : (enCurso == nil ? "Ahora" : "En curso")))
+                    Spacer()
+                    if let fecha = tarea.fechaPlaneada, Calendar.current.isDateInToday(fecha) {
+                        Text(fecha, format: .dateTime.hour().minute())
+                            .font(.zenoTexto(.caption, .medium))
+                            .foregroundStyle(Lujo.oro.opacity(0.85))
+                    }
+                }
+                // Sin botón: la tarea misma es el control (decisión de Diaz).
+                TareaTocable(tarea: tarea, enCurso: enMarcha,
+                             alEmpezar: { empezar(tarea) },
+                             alTerminar: { terminar(tarea) })
+                    .id(tarea.persistentModelID)
+                    .transition(.desenfoque)
+                SeparadorLujo()
+                HStack(alignment: .center) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(enMarcha ? "Mantén presionada la tarea cuando termines" : "Toca la tarea para empezar")
+                            .font(.zenoTexto(.caption))
+                            .foregroundStyle(Lujo.marfilSecundario)
+                            .contentTransition(.opacity)
+                        // Lo aprendido, dicho en voz baja: cuánto suele tomarle de verdad algo así.
+                        if !enMarcha, tarea.primerPaso == nil,
+                           let minutos = Aprendizaje.minutosReales(tarea.tamano, eventos: eventos) {
+                            Text("Algo así suele tomarte unos \(Int(minutos.rounded())) min.")
+                                .font(.zenoTexto(.caption))
+                                .foregroundStyle(Lujo.oro.opacity(0.8))
+                        }
+                    }
+                    .animation(Lujo.curva(), value: enMarcha)
+                    Spacer(minLength: 8)
+                    BotonTerciarioLujo(titulo: enMarcha ? "Dejarla para después" : "Ahora no") { ahoraNo(tarea) }
+                        .padding(.trailing, -12)
+                }
+
+            case .descanso:
+                EtiquetaLujo("Descanso")
+                Titular(texto: Idioma.texto("Hoy descansa, mañana atacamos"), tamano: .title2, alineacion: .leading)
+                SeparadorLujo()
+                HStack {
+                    Text("Tu energía está baja, y está bien.")
+                        .font(.zenoTexto(.caption))
+                        .foregroundStyle(Lujo.marfilSecundario)
+                    Spacer(minLength: 8)
+                    BotonTerciarioLujo(titulo: "Quiero hacer algo igual") {
+                        toques += 1
+                        withAnimation(Lujo.curva()) { quiereAlgoIgual = true }
+                    }
+                    .padding(.trailing, -12)
+                }
+
+            case .masTarde:
+                EtiquetaLujo("Ahora")
+                Text("Por ahora, nada")
+                    .font(.zenoTitulo(.title2))
+                    .foregroundStyle(Lujo.marfil)
+                Text(vuelveA.map { Idioma.texto("Vuelvo a proponerte algo a las \($0.formatted(date: .omitted, time: .shortened)).") }
+                     ?? Idioma.texto("Lo intentamos más tarde."))
+                    .font(.zenoTexto(.caption))
+                    .foregroundStyle(Lujo.marfilSecundario)
+
+            case .nadaPendiente:
+                EtiquetaLujo("Ahora")
+                Titular(texto: Idioma.texto("No tienes nada pendiente"), tamano: .title2, alineacion: .leading)
+                Text("Cuando quieras, agrega una sola cosa.")
+                    .font(.zenoTexto(.caption))
+                    .foregroundStyle(Lujo.marfilSecundario)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .tarjetaLujo(radio: 24)
+    }
+
+    /// Mediana izquierda: lo hecho hoy. Solo progreso; sin ceros que parezcan deuda.
+    private var tarjetaDelDia: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            EtiquetaLujo("Hoy")
+            if hechasHoy.isEmpty {
+                Text("Lo pequeño suma.")
+                    .font(.zenoTitulo(.title3, .light))
+                    .foregroundStyle(Lujo.marfil)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text("\(hechasHoy.count)")
+                    .font(.zenoTitulo(.largeTitle, .light))
+                    .foregroundStyle(Lujo.marfil)
+                    .contentTransition(.numericText())
+                Text("Hechas · \(minutosEnFoco)′ en foco")
+                    .font(.zenoTexto(.caption))
+                    .foregroundStyle(Lujo.marfilSecundario)
+                    .contentTransition(.numericText())
+            }
+            Spacer(minLength: 0)
+            LineaDeLuz(cantidad: Double(hechasHoy.count) / 4)
+                .frame(width: 58, height: 6)
+                .accessibilityHidden(true)
+        }
+        .animation(Lujo.curva(), value: hechasHoy.count)
+        .padding(18)
+        .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
+        .tarjetaLujo()
+        .accessibilityElement(children: .combine)
+    }
+
+    /// Mediana derecha: la mejor hora, aprendida de la persona.
+    private var tarjetaDeMejorHora: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            EtiquetaLujo("Tu mejor hora")
+            Text(verbatim: "\(mejorHora):00")
+                .font(.zenoTitulo(.largeTitle, .light))
+                .foregroundStyle(Lujo.marfil)
+                .contentTransition(.numericText())
+            Spacer(minLength: 0)
+            PuntoDelDia(hora: mejorHora)
+                .frame(height: 6)
+                .accessibilityHidden(true)
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
+        .tarjetaLujo()
+        .accessibilityElement(children: .combine)
     }
 
     /// El campo para escribir aparece cuando no hay una tarea en marcha ni descanso:
@@ -460,143 +525,6 @@ struct TareaDelMomentoView: View {
     }
 }
 
-/// Lo pendiente, sin fechas vencidas, sin rojo y sin contadores.
-struct MisTareasView: View {
-    /// Dónde empieza el contenido, debajo de Lumi. Lo de encima se funde con el cielo.
-    var arriba: CGFloat = 0
-    @Environment(\.modelContext) private var contexto
-    @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
-    private var pendientes: [Tarea]
-    @State private var marcando: Set<PersistentIdentifier> = []
-    /// La tarea que se está editando: la página cambia a su editor, dentro del mismo universo.
-    @State private var editando: Tarea?
-
-    var body: some View {
-        contenido
-            .onAppear {
-                #if DEBUG
-                // -abrirEditor YES: abre directamente el editor de la primera tarea (para probar).
-                if UserDefaults.standard.bool(forKey: "abrirEditor") { editando = pendientes.first }
-                #endif
-            }
-    }
-
-    private var contenido: some View {
-        ScrollView {
-            if let tarea = editando {
-                EditorDeTarea(tarea: tarea) {
-                    withAnimation(Ritmo.contenido) { editando = nil }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, arriba + 4)
-                .padding(.bottom, 120)
-                .informaDesplazamiento()
-                .transition(.desenfoque)
-            } else {
-                lista
-                    .transition(.desenfoque)
-            }
-        }
-        .coordinateSpace(name: "pagina")
-        .bordesFundidos(arriba: arriba)
-        .scrollIndicators(.hidden)
-        .scrollDismissesKeyboard(.interactively)
-        .foregroundStyle(Color.marfil)
-        .onAppear { Desplazamiento.compartido.valor = 0 }
-    }
-
-    private var lista: some View {
-            VStack(spacing: 0) {
-                HStack(alignment: .firstTextBaseline) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Etiqueta("Pendiente")
-                        Text("Mis tareas")
-                            .font(.zenoTitulo(.largeTitle))
-                            .luminoso()
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 4)
-                .padding(.bottom, 14)
-
-                if pendientes.isEmpty {
-                    Text("Nada pendiente.")
-                        .font(.zenoTitulo(.title3))
-                        .luminoso()
-                        .padding(.top, 120)
-                } else {
-                    VStack(spacing: 10) {
-                        ForEach(pendientes) { tarea in fila(tarea) }
-                    }
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, arriba + 4)
-            .padding(.bottom, 120)
-            .informaDesplazamiento()
-    }
-
-    private func fila(_ tarea: Tarea) -> some View {
-        let hecha = marcando.contains(tarea.persistentModelID)
-        return HStack(alignment: .center, spacing: 14) {
-            Button {
-                // Se enciende un instante en oro antes de irse.
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { _ = marcando.insert(tarea.persistentModelID) }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
-                    let evento = EventoDeEnergia(tipo: .tareaTerminada)
-                    contexto.insert(evento)
-                    evento.tarea = tarea
-                    evento.tamanoCrudo = tarea.tamanoCrudo
-                    withAnimation(.easeInOut(duration: 0.4)) { tarea.terminadaEn = .now }
-                    Task { await AvisosDeTareas.sincronizar(contexto) }
-                }
-            } label: {
-                ZStack {
-                    Circle()
-                        .strokeBorder(Color.oroZeno.opacity(hecha ? 0 : 0.6), lineWidth: 1.4)
-                    Circle()
-                        .fill(Color.oroZeno)
-                        .shadow(color: Color.oroZeno.opacity(0.8), radius: 8)
-                        .scaleEffect(hecha ? 1 : 0.01)
-                        .opacity(hecha ? 1 : 0)
-                }
-                .frame(width: 24, height: 24)
-                .contentShape(Rectangle().inset(by: -10))
-            }
-            .buttonStyle(.plain)
-            .sensoryFeedback(.success, trigger: hecha)
-            .accessibilityLabel(Text("Marcar como hecha"))
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(tarea.titulo)
-                    .font(.zenoTitulo(.body, .regular))
-                if let paso = tarea.primerPaso {
-                    Text("Primer paso: \(paso)")
-                        .font(.zenoTexto(.footnote))
-                        .opacity(0.6)
-                }
-                EtiquetaDePlan(tarea: tarea)
-            }
-            Spacer(minLength: 0)
-        }
-        // Tocar la tarea la abre para editarla (día, hora, aviso).
-        .contentShape(Rectangle())
-        .onTapGesture { withAnimation(Ritmo.contenido) { editando = tarea } }
-        .accessibilityAction(named: Text("Editar")) { editando = tarea }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 16)
-        .cristal(radio: 20)
-        .opacity(hecha ? 0.55 : 1)
-        .contextMenu {
-            Button("Editar") { withAnimation(Ritmo.contenido) { editando = tarea } }
-            Button("Borrar", role: .destructive) {
-                withAnimation { contexto.delete(tarea) }
-                Task { await AvisosDeTareas.sincronizar(contexto) }
-            }
-        }
-    }
-}
-
 // MARK: - Titular y campo rápido
 
 /// Titular grande de revista: la última palabra va en cursiva dorada.
@@ -604,11 +532,13 @@ struct MisTareasView: View {
 struct Titular: View {
     let texto: String
     var tamano: Font.TextStyle = .largeTitle
+    var alineacion: TextAlignment = .center
 
     var body: some View {
         partes
             .font(.zenoTitulo(tamano, .light))
-            .multilineTextAlignment(.center)
+            .multilineTextAlignment(alineacion)
+            .frame(maxWidth: .infinity, alignment: alineacion == .leading ? .leading : .center)
             .lineLimit(3)
             .minimumScaleFactor(0.7)
             .shadow(color: .black.opacity(0.5), radius: 10, y: 2)
@@ -621,7 +551,7 @@ struct Titular: View {
         let claro = Text(verbatim: inicio).foregroundStyle(Color.marfil)
         let oro = Text(verbatim: ultima)
             .font(.zenoTitulo(tamano, .regular, cursiva: true))
-            .foregroundStyle(Color.oroZeno)
+            .foregroundStyle(Lujo.oro)
         return claro + oro + Text(verbatim: cierre).foregroundStyle(Color.marfil)
     }
 
@@ -646,30 +576,31 @@ struct Titular: View {
 /// Una píldora de cristal que parece un campo: al tocarla se abre la escritura bajo Lumi.
 struct CampoRapido: View {
     let accion: () -> Void
+    @State private var toques = 0
 
     var body: some View {
-        Button(action: accion) {
+        Button {
+            toques += 1
+            accion()
+        } label: {
             HStack(spacing: 12) {
                 Text("Escribe una tarea…")
-                    .font(.zenoTexto(.body))
-                    .foregroundStyle(Color.marfil.opacity(0.55))
+                    .font(.zenoTexto(.callout))
+                    .foregroundStyle(Lujo.marfil.opacity(0.5))
                 Spacer(minLength: 0)
-                ZStack {
-                    // Discreta a propósito: lo único hecho de luz en Hoy es el botón principal.
-                    Circle().strokeBorder(Color.oroZeno.opacity(0.45), lineWidth: 1)
-                    FlechaDibujada()
-                        .stroke(Color.oroZeno,
-                                style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round))
-                        .frame(width: 14, height: 12)
-                }
-                .frame(width: 34, height: 34)
+                IconoFino(icono: .mas, color: Lujo.oro, tamano: 16)
+                    .frame(width: 32, height: 32)
+                    .overlay(Circle().strokeBorder(Lujo.oro.opacity(0.4), lineWidth: 0.75))
             }
-            .padding(.leading, 20)
-            .padding(.trailing, 7)
-            .padding(.vertical, 7)
-            .cristal()
+            .padding(.leading, 18)
+            .padding(.trailing, 8)
+            .frame(height: 50)
+            .background(RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous).fill(Lujo.marfil.opacity(0.03)))
+            .cantoPulido(radio: Lujo.radioBoton)
+            .contentShape(Rectangle())
         }
-        .buttonStyle(EstiloPresion())
+        .buttonStyle(EstiloLujo())
+        .sensoryFeedback(.impact(weight: .light, intensity: 0.45), trigger: toques)
         .accessibilityLabel(Text("Escribe una tarea"))
     }
 }
@@ -700,24 +631,21 @@ private struct TareaTocable: View {
     @State private var presionando = false
 
     var body: some View {
-        VStack(spacing: 8) {
-            Titular(texto: tarea.textoVisible)
+        VStack(alignment: .leading, spacing: 6) {
+            Titular(texto: tarea.textoVisible, tamano: .largeTitle, alineacion: .leading)
             if tarea.primerPaso != nil {
                 // Se muestra el primer paso; la tarea grande queda como contexto.
                 Text("Primer paso de: \(tarea.titulo)")
                     .font(.zenoTexto(.footnote))
-                    .multilineTextAlignment(.center)
-                    .opacity(0.6)
+                    .foregroundStyle(Lujo.marfilSecundario)
             }
         }
-        .padding(.horizontal, 32)
-        .padding(.vertical, 12)
+        .padding(.vertical, 4)
         // Sin empezar, la tarea respira una luz dorada: "empieza". Al mantenerla, se enciende.
         // El resplandor es una capa fija; solo cambia su opacidad (barato para la GPU).
         .background {
-            Titular(texto: tarea.textoVisible)
-                .padding(.horizontal, 32)
-                .colorMultiply(.oroZeno)
+            Titular(texto: tarea.textoVisible, tamano: .largeTitle, alineacion: .leading)
+                .colorMultiply(Lujo.oro)
                 .blur(radius: 18)
                 .opacity(presionando ? 0.95 : (!enCurso && respira ? 0.6 : 0.15))
                 .accessibilityHidden(true)

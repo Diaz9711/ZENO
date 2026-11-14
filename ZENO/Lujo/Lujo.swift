@@ -552,3 +552,23 @@ struct CapaDeHojas: View {
         .ignoresSafeArea(.keyboard)
     }
 }
+
+// MARK: - Hoja grande casi transparente (capas)
+
+/// La hoja donde vive el contenido: esquinas de 32, casi invisible, con un canto fino.
+/// Deja ver la nebulosa a través y por los bordes; nunca la tiñe ni la oscurece (decisión de Diaz).
+struct HojaDeFondo: View {
+    var body: some View {
+        RoundedRectangle(cornerRadius: Lujo.radioHoja, style: .continuous)
+            .fill(Lujo.marfil.opacity(0.018))
+            .overlay {
+                RoundedRectangle(cornerRadius: Lujo.radioHoja, style: .continuous)
+                    .strokeBorder(LinearGradient(colors: [Lujo.marfil.opacity(0.16), Lujo.marfil.opacity(0.0)],
+                                                 startPoint: .top, endPoint: .center), lineWidth: 0.75)
+            }
+            .padding(.horizontal, 10)
+            .padding(.bottom, -60)          // sigue bajo la barra hasta el borde de la pantalla
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+}

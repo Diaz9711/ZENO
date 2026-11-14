@@ -7,6 +7,9 @@
     "%@ · %@": {
       "shouldTranslate": false
     },
+    "%lld": {
+      "shouldTranslate": false
+    },
     "%lld fps": {
       "shouldTranslate": false
     },
@@ -383,6 +386,16 @@
         }
       }
     },
+    "Con aviso": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With reminder"
+          }
+        }
+      }
+    },
     "Con esto ZENO empieza a entender tu ritmo de energía.": {
       "localizations": {
         "en": {
@@ -409,6 +422,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Continue"
+          }
+        }
+      }
+    },
+    "Cuando quieras": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anytime"
           }
         }
       }
@@ -903,6 +926,16 @@
         }
       }
     },
+    "Hechas · %lld′ en foco": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done · %lld′ in focus"
+          }
+        }
+      }
+    },
     "Hora del día": {
       "localizations": {
         "en": {
@@ -1186,22 +1219,22 @@
         }
       }
     },
+    "Mañana": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Morning"
+          }
+        }
+      }
+    },
     "Mientras más uses ZENO, más te conoceré: a qué horas rindes, cuánto te toman las cosas y qué prefieres dejar para después.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The more you use ZENO, the better I'll know you: when you do your best work, how long things take you, and what you'd rather leave for later."
-          }
-        }
-      }
-    },
-    "Mis tareas": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "My tasks"
           }
         }
       }
@@ -1222,6 +1255,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "She was born with you, %@. No one else has one like her."
+          }
+        }
+      }
+    },
+    "Nada aquí. Está bien.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing here. That's okay."
           }
         }
       }
@@ -1326,6 +1369,16 @@
         }
       }
     },
+    "Noche": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night"
+          }
+        }
+      }
+    },
     "Opcional. Si la hora pasa, no pasa nada.": {
       "localizations": {
         "en": {
@@ -1382,16 +1435,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Step %lld of 6"
-          }
-        }
-      }
-    },
-    "Pendiente": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pending"
           }
         }
       }
@@ -1676,6 +1719,16 @@
         }
       }
     },
+    "Tarde": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afternoon"
+          }
+        }
+      }
+    },
     "Tareas": {
       "localizations": {
         "en": {
@@ -1892,6 +1945,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Your data stays only on this phone"
+          }
+        }
+      }
+    },
+    "Tus tareas": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your tasks"
           }
         }
       }

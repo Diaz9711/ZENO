@@ -278,6 +278,9 @@ struct UniversoView: View {
                     switch pagina {
                     case .hoy:
                         ZStack(alignment: .top) {
+                            HojaDeFondo()
+                                .padding(.top, altoTotal * 0.405 - arriba - 18)
+                                .aparece(1)
                             VStack(spacing: 0) {
                                 TareaDelMomentoView(
                                     centroDeLumi: CGPoint(x: geo.size.width / 2, y: altoTotal * 0.245 - arriba),
@@ -304,10 +307,16 @@ struct UniversoView: View {
 
                     case .tareas:
                         MisTareasView(arriba: altoTotal * 0.185 - arriba)
+                            .background(alignment: .top) {
+                                HojaDeFondo().padding(.top, altoTotal * 0.185 - arriba - 14).aparece(0)
+                            }
                             .transition(.pasoDePagina(sentido: sentido))
 
                     case .ajustes:
                         AjustesView(persona: persona, arriba: altoTotal * 0.185 - arriba)
+                            .background(alignment: .top) {
+                                HojaDeFondo().padding(.top, altoTotal * 0.185 - arriba - 14).aparece(0)
+                            }
                             .transition(.pasoDePagina(sentido: sentido))
                     }
 
