@@ -268,11 +268,11 @@ struct TarjetaDeHoy: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            dato("\(hechas)", "Hechas hoy")
+            dato("\(hechas)", "Hechas hoy") { LineaDeLuz(cantidad: Double(hechas) / 4) }
             separador
-            dato("\(minutos)′", "En foco")
+            dato("\(minutos)′", "En foco") { LineaDeLuz(cantidad: Double(minutos) / 45) }
             separador
-            dato("\(mejorHora):00", "Tu mejor hora")
+            dato("\(mejorHora):00", "Tu mejor hora") { PuntoDelDia(hora: mejorHora) }
         }
         .padding(.vertical, 14)
         .cristal(radio: 24)
@@ -285,7 +285,8 @@ struct TarjetaDeHoy: View {
             .frame(width: 1, height: 34)
     }
 
-    private func dato(_ valor: String, _ titulo: LocalizedStringKey) -> some View {
+    private func dato<Barra: View>(_ valor: String, _ titulo: LocalizedStringKey,
+                                   @ViewBuilder barra: () -> Barra) -> some View {
         VStack(spacing: 3) {
             Text(valor)
                 .font(.zenoTitulo(.title2, .regular))
@@ -296,8 +297,51 @@ struct TarjetaDeHoy: View {
                 .font(.zenoTexto(.caption2, .medium))
                 .tracking(1.2)
                 .foregroundStyle(Color.marfil.opacity(0.62))
+            barra()
+                .frame(width: 58, height: 6)
+                .padding(.top, 5)
+                .accessibilityHidden(true)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// Una línea de luz que solo crece y se satura: no tiene carril vacío detrás,
+/// así nunca se lee como "te falta". Empieza en el centro y se abre hacia los lados.
+struct LineaDeLuz: View {
+    let cantidad: Double
+    @State private var visible = false
+
+    var body: some View {
+        let llena = 0.25 + 0.75 * min(max(cantidad, 0), 1)
+        Capsule()
+            .fill(LinearGradient(colors: [Color.oroZeno.opacity(0.15), Color.oroZeno, Color.oroZeno.opacity(0.15)],
+                                 startPoint: .leading, endPoint: .trailing))
+            .frame(height: 2.5)
+            .scaleEffect(x: visible ? llena : 0.05)
+            .shadow(color: Color.oroZeno.opacity(0.7), radius: 4)
+            .frame(maxHeight: .infinity)
+            .onAppear { withAnimation(.easeOut(duration: 1.2).delay(0.3)) { visible = true } }
+            .animation(.easeInOut(duration: 0.8), value: cantidad)
+    }
+}
+
+/// La mejor hora como un punto de luz sobre la línea del día (0 a 24 h), no como un relleno.
+struct PuntoDelDia: View {
+    let hora: Int
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.marfil.opacity(0.10)).frame(height: 1)
+                Circle()
+                    .fill(Color.oroZeno)
+                    .frame(width: 6, height: 6)
+                    .shadow(color: Color.oroZeno.opacity(0.9), radius: 4)
+                    .offset(x: geo.size.width * CGFloat(min(max(hora, 0), 23)) / 23 - 3)
+            }
+            .frame(maxHeight: .infinity)
+        }
     }
 }

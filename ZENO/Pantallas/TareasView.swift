@@ -105,10 +105,7 @@ struct TareaDelMomentoView: View {
                 Etiqueta(tarea.primerPaso != nil ? "Primer paso" : (enCurso == nil ? "Ahora" : "En curso"))
             }
             VStack(spacing: 8) {
-                Text(tarea.textoVisible)
-                    .font(.zenoTitulo(.title, .light))
-                    .luminoso()
-                    .multilineTextAlignment(.center)
+                Titular(texto: tarea.textoVisible)
                 if tarea.primerPaso != nil {
                     // Se muestra el primer paso; la tarea grande queda como contexto.
                     Text("Primer paso de: \(tarea.titulo)")
@@ -136,10 +133,7 @@ struct TareaDelMomentoView: View {
 
         case .descanso:
             Etiqueta("Descanso")
-            Text("Hoy descansa, mañana atacamos")
-                .font(.zenoTitulo(.title3))
-                .luminoso()
-                .multilineTextAlignment(.center)
+            Titular(texto: String(localized: "Hoy descansa, mañana atacamos"), tamano: .title)
                 .padding(.horizontal, 32)
             Text("Tu energía está baja, y está bien.")
                 .font(.zenoTexto(.footnote))
@@ -162,15 +156,22 @@ struct TareaDelMomentoView: View {
                 .opacity(0.65)
 
         case .nadaPendiente:
-            Text("No tienes nada pendiente")
-                .font(.zenoTitulo(.title3))
-                .luminoso()
+            Titular(texto: String(localized: "No tienes nada pendiente"), tamano: .title)
+                .padding(.horizontal, 32)
             Text("Cuando quieras, agrega una sola cosa.")
                 .font(.zenoTexto(.footnote))
                 .opacity(0.65)
         }
 
         Spacer()
+
+        // Escribir una tarea sin buscar el "+": al tocarlo, el campo sube bajo Lumi.
+        if mostrarCampoRapido {
+            CampoRapido { abrirAgregar() }
+                .padding(.horizontal, 28)
+                .padding(.bottom, 4)
+                .aparece(1)
+        }
 
         if let aviso = dictado.aviso {
             Text(aviso)
@@ -189,6 +190,14 @@ struct TareaDelMomentoView: View {
             }
         }
         .padding(.bottom, 92)      // deja sitio a la barra
+    }
+
+    /// El campo para escribir aparece cuando no hay una tarea en marcha ni descanso:
+    /// así la pantalla sigue teniendo una sola acción principal.
+    private var mostrarCampoRapido: Bool {
+        guard enCurso == nil else { return false }
+        if case .descanso = eleccion { return false }
+        return true
     }
 
     /// Cuándo termina la pausa del último "Ahora no".
@@ -508,5 +517,96 @@ struct MisTareasView: View {
                 withAnimation { contexto.delete(tarea) }
             }
         }
+    }
+}
+
+// MARK: - Titular y campo rápido
+
+/// Titular grande de revista: la última palabra va en cursiva dorada.
+/// El texto lo escribe la persona, así que nunca pasa por el catálogo de traducciones.
+struct Titular: View {
+    let texto: String
+    var tamano: Font.TextStyle = .largeTitle
+
+    var body: some View {
+        partes
+            .font(.zenoTitulo(tamano, .light))
+            .multilineTextAlignment(.center)
+            .lineLimit(3)
+            .minimumScaleFactor(0.7)
+            .shadow(color: .black.opacity(0.5), radius: 10, y: 2)
+            .shadow(color: Color.oroZeno.opacity(0.22), radius: 20)
+            .accessibilityLabel(Text(verbatim: texto))
+    }
+
+    private var partes: Text {
+        let (inicio, ultima, cierre) = Self.dividir(texto)
+        let claro = Text(verbatim: inicio).foregroundStyle(Color.marfil)
+        let oro = Text(verbatim: ultima)
+            .font(.zenoTitulo(tamano, .regular, cursiva: true))
+            .foregroundStyle(Color.oroZeno)
+        return claro + oro + Text(verbatim: cierre).foregroundStyle(Color.marfil)
+    }
+
+    /// Separa "Ordenar el escritorio." en ("Ordenar el ", "escritorio", ".").
+    /// Con una sola palabra, toda la palabra va dorada.
+    static func dividir(_ texto: String) -> (String, String, String) {
+        let limpio = texto.trimmingCharacters(in: .whitespacesAndNewlines)
+        var cuerpo = Substring(limpio)
+        var cierre = ""
+        while let ultimo = cuerpo.last, ultimo.isPunctuation || ultimo.isSymbol {
+            cierre = String(ultimo) + cierre
+            cuerpo = cuerpo.dropLast()
+        }
+        guard let espacio = cuerpo.lastIndex(where: \.isWhitespace) else {
+            return ("", String(cuerpo), cierre)
+        }
+        let siguiente = cuerpo.index(after: espacio)
+        return (String(cuerpo[..<siguiente]), String(cuerpo[siguiente...]), cierre)
+    }
+}
+
+/// Una píldora de cristal que parece un campo: al tocarla se abre la escritura bajo Lumi.
+struct CampoRapido: View {
+    let accion: () -> Void
+
+    var body: some View {
+        Button(action: accion) {
+            HStack(spacing: 12) {
+                Text("Escribe una tarea…")
+                    .font(.zenoTexto(.body))
+                    .foregroundStyle(Color.marfil.opacity(0.55))
+                Spacer(minLength: 0)
+                ZStack {
+                    Circle().fill(LinearGradient(colors: [Color(red: 1.0, green: 0.86, blue: 0.58), Color.oroZeno],
+                                                 startPoint: .top, endPoint: .bottom))
+                    FlechaDibujada()
+                        .stroke(Color(red: 0.12, green: 0.10, blue: 0.16),
+                                style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round))
+                        .frame(width: 14, height: 12)
+                }
+                .frame(width: 34, height: 34)
+                .shadow(color: Color.oroZeno.opacity(0.45), radius: 10)
+            }
+            .padding(.leading, 20)
+            .padding(.trailing, 7)
+            .padding(.vertical, 7)
+            .cristal()
+        }
+        .buttonStyle(EstiloPresion())
+        .accessibilityLabel(Text("Escribe una tarea"))
+    }
+}
+
+/// Flecha hacia la derecha, dibujada a mano (sin símbolos de sistema).
+struct FlechaDibujada: Shape {
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: r.minX, y: r.midY))
+        p.addLine(to: CGPoint(x: r.maxX, y: r.midY))
+        p.move(to: CGPoint(x: r.maxX - r.height * 0.5, y: r.minY))
+        p.addLine(to: CGPoint(x: r.maxX, y: r.midY))
+        p.addLine(to: CGPoint(x: r.maxX - r.height * 0.5, y: r.maxY))
+        return p
     }
 }
