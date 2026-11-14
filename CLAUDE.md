@@ -11,7 +11,7 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 **ZENO nunca pide atención, la merece.** Sin culpa, sin rachas rotas, sin números en rojo, sin confeti, sin sonidos agudos. Lumi nunca pierde luz como castigo.
 
 ## Técnica
-- iPhone nativo, SwiftUI, iOS 17+. SwiftData, todo en el teléfono. Sin cuentas, sin servidor, sin analíticas de terceros.
+- iPhone nativo, SwiftUI, iOS 17+. SwiftData, todo en el teléfono. Sin cuentas, sin servidor, sin analíticas de terceros. Diaz lo confirmó el 14 nov 2026: **sin botones de iniciar sesión ni de invitado**; se entra con "Crear mi estrella".
 - Lumi y la nebulosa se dibujan por código (shaders Metal en `ZENO/Nebulosa/Sombras.metal`). Nada de imágenes fijas.
 - La estrella nace de la semilla (nombre + fecha de nacimiento). La misma semilla da siempre la misma estrella. La persona no elige colores ni movimiento; solo la forma (estrella o esfera).
 - Fondo: nebulosa azul profundo, que se aclara hacia la estrella. **Nunca negro puro.** (Diaz eligió azulado sobre el vino original el 12 nov 2026; el vino sigue en el código pero ya no tiene selector.)
