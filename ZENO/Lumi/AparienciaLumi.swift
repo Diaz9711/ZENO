@@ -45,7 +45,12 @@ struct AparienciaLumi: Equatable {
         // Oro de estrella: amarillo pálido, nunca naranja (mismo criterio que `Color.oroZeno`).
         colorCorona = Self.hsb(g.entre(0.112, 0.132), g.entre(0.50, 0.62), 1.0)
         // El halo puede ser de cualquier tono, siempre suave.
-        colorHalo = Self.hsb(g.unidad(), g.entre(0.42, 0.68), 1.0)
+        // El halo puede ser de cualquier tono menos amarillo-verde, verde o turquesa: sobre el azul
+        // del cielo esos se ven sucios.
+        // Los tonos de la franja verde se corren a su borde más cercano; los demás no cambian.
+        var tonoHalo = g.unidad()
+        if tonoHalo > 0.10 && tonoHalo < 0.64 { tonoHalo = tonoHalo < 0.30 ? 0.10 : 0.64 }
+        colorHalo = Self.hsb(tonoHalo, g.entre(0.42, 0.68), 1.0)
         lobulos = g.entero(3...7)
         profundidadLobulo = g.entre(0.09, 0.22)
         sentidoDeGiro = g.unidad() < 0.5 ? -1 : 1

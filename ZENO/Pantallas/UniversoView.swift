@@ -174,7 +174,6 @@ struct UniversoView: View {
                     .transition(.opacity)
             }
         }
-        .environment(\.cieloDeZeno, apariencia)
         .sensoryFeedback(.impact(weight: .medium, intensity: 0.7), trigger: nacimientos)
         .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: momento)
         .onChange(of: paso) { _, nuevo in
@@ -438,41 +437,22 @@ struct UniversoView: View {
 /// Solo para comparar: Lumi con energía baja, media y alta, en sus dos formas.
 struct GaleriaDeLumi: View {
     let apariencia: AparienciaLumi
+    private static let nombres = ["Ana", "Skdn", "Diaz", "Luis", "Mar", "Teo", "Sol", "Iván"]
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer().frame(height: 60)
-            ForEach([FormaDeLumi.estrella, .esfera], id: \.self) { forma in
-                HStack(spacing: 0) {
-                    ForEach([0.12, 0.5, 0.9], id: \.self) { e in
-                        VStack(spacing: 0) {
-                            LumiView(apariencia: apariencia, energia: e, forma: forma)
-                                .frame(width: 150, height: 150)
-                            Text(verbatim: e < 0.3 ? "baja" : (e < 0.7 ? "media" : "alta"))
-                                .font(.zenoTexto(.caption))
-                                .foregroundStyle(Color.oroZeno)
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 4) {
+            ForEach(Self.nombres, id: \.self) { n in
+                VStack(spacing: 0) {
+                    LumiView(apariencia: AparienciaLumi(semilla: Semilla(nombre: n, anio: 1999, mes: 6, dia: 15)),
+                             energia: 0.6)
+                        .frame(width: 170, height: 170)
+                    Text(verbatim: n).font(.zenoTexto(.caption)).foregroundStyle(Color.oroZeno)
                 }
-                .padding(.vertical, 30)
             }
-            Spacer()
         }
+        .padding(.top, 50)
+        .frame(maxHeight: .infinity, alignment: .top)
         .background(Color.black.opacity(0.25))
     }
 }
 
-/// Solo para elegir: los tres estilos del botón principal sobre el cielo real.
-struct GaleriaDeBotones: View {
-    var body: some View {
-        VStack(spacing: 34) {
-            Spacer()
-            // El botón tal como está elegido ahora.
-            BotonZeno("Empezar") {}
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black.opacity(0.15))
-    }
-}
 #endif

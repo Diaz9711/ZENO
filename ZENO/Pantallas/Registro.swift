@@ -51,6 +51,9 @@ struct BorradorDeRegistro: Equatable {
 
 /// El texto y los controles del registro. El cielo y Lumi viven detrás, en `UniversoView`,
 /// para que todo sea un solo universo continuo.
+///
+/// Todos los pasos comparten la misma estructura: arriba volver y el progreso; luego el título
+/// y una línea que dice para qué se pregunta; el contenido; y el botón siempre en el mismo lugar.
 struct RegistroView: View {
     @Binding var paso: PasoDeRegistro
     @Binding var borrador: BorradorDeRegistro
@@ -60,19 +63,16 @@ struct RegistroView: View {
 
     @FocusState private var escribiendo: Bool
 
+    /// Medidas comunes: un margen, un radio, un espacio entre opciones.
+    static let margen: CGFloat = 28
+    static let radio: CGFloat = 16
+
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                if paso > .bienvenida && paso < .nacimiento {
-                    Button("Atrás") { ir(a: paso.anterior) }
-                        .font(.zenoTexto(.subheadline))
-                        .foregroundStyle(.white.opacity(0.7))
-                }
-                Spacer()
+            if muestraCabecera {
+                cabecera
+                    .transition(.opacity)
             }
-            .frame(height: 44)
-            .padding(.horizontal, 24)
-
             contenido
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .id(paso)
@@ -80,6 +80,43 @@ struct RegistroView: View {
         }
         .foregroundStyle(Color.marfil)
         .sensoryFeedback(.selection, trigger: paso)
+    }
+
+    private var muestraCabecera: Bool { paso > .bienvenida && paso != .nacimiento }
+
+    /// Volver (un glifo dibujado, con área de toque de 44 pt) y una línea fina de progreso.
+    private var cabecera: some View {
+        HStack(spacing: 14) {
+            Button { ir(a: paso == .forma ? .forma : paso.anterior) } label: {
+                FlechaAtras()
+                    .stroke(Color.marfil.opacity(0.85), style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round))
+                    .frame(width: 9, height: 16)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .opacity(paso == .forma ? 0 : 1)
+            .disabled(paso == .forma)
+            .accessibilityLabel(Text("Atrás"))
+
+            ProgresoDeRegistro(actual: numeroDePaso, total: 6)
+                .frame(height: 3)
+                .accessibilityLabel(Text("Paso \(numeroDePaso) de 6"))
+
+            Color.clear.frame(width: 44, height: 44)
+        }
+        .padding(.horizontal, 12)
+    }
+
+    private var numeroDePaso: Int {
+        switch paso {
+        case .bienvenida: 0
+        case .nombre: 1
+        case .fecha: 2
+        case .despertar: 3
+        case .pico: 4
+        case .apagado: 5
+        case .nacimiento, .forma: 6
+        }
     }
 
     private func ir(a nuevo: PasoDeRegistro) {
@@ -100,18 +137,21 @@ struct RegistroView: View {
         case .nombre: nombre
         case .fecha: fecha
         case .despertar:
-            pregunta("¿A qué hora te despiertas?",
-                     opciones: [("Antes de las 6", 5.5), ("Entre 6 y 8", 7), ("Entre 8 y 10", 9), ("Después de las 10", 11)]) {
+            pregunta("¿A qué hora sueles despertar?",
+                     razon: "Con esto ZENO empieza a entender tu ritmo de energía.",
+                     opciones: [("Antes de las 6", 5.5), ("Entre las 6 y las 8", 7), ("Entre las 8 y las 10", 9), ("Después de las 10", 11)]) {
                 borrador.horaDespertar = $0
             }
         case .pico:
-            pregunta("¿Cuándo te sientes más despierto?",
+            pregunta("¿En qué momento tienes más energía?",
+                     razon: "Ahí te propondrá lo que pide más de ti.",
                      opciones: [("Por la mañana", 10), ("Al mediodía", 13), ("Por la tarde", 17), ("Por la noche", 21)]) {
                 borrador.horaPico = $0
             }
         case .apagado:
-            pregunta("¿Cuándo te apagas?",
-                     opciones: [("Antes de las 9 de la noche", 20.5), ("Entre 9 y 11", 22), ("Entre 11 y 1", 0), ("Después de la 1", 2)]) {
+            pregunta("¿A qué hora se te acaba la energía?",
+                     razon: "Después de esa hora, ZENO te pedirá menos.",
+                     opciones: [("Antes de las 9 de la noche", 20.5), ("Entre las 9 y las 11", 22), ("Entre las 11 y la 1", 0), ("Después de la 1", 2)]) {
                 borrador.horaApagado = $0
             }
         case .nacimiento: nacimiento
@@ -119,83 +159,105 @@ struct RegistroView: View {
         }
     }
 
+    // MARK: Estructura común
+
+    /// Título, razón, contenido y el botón abajo, siempre en el mismo sitio.
+    private func pantalla<Contenido: View>(_ titulo: LocalizedStringKey,
+                                           razon: LocalizedStringKey?,
+                                           @ViewBuilder contenido: () -> Contenido,
+                                           @ViewBuilder pie: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(titulo)
+                .font(.zenoTitulo(.title, .regular))
+                .luminoso()
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 28)
+            if let razon {
+                Text(razon)
+                    .font(.zenoTexto(.callout))
+                    .foregroundStyle(Color.marfil.opacity(0.62))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 10)
+            }
+            contenido()
+                .padding(.top, 32)
+            Spacer(minLength: 16)
+            pie()
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 20)
+        }
+        .padding(.horizontal, Self.margen)
+    }
+
     // MARK: Pasos
 
     private var nombre: some View {
-        VStack(spacing: 28) {
-            Spacer().frame(height: 60)
-            Text("¿Cómo te llamas?")
-                .font(.zenoTitulo(.title))
-                .luminoso()
-            TextField("", text: $borrador.nombre, prompt: Text("Tu nombre").foregroundStyle(.white.opacity(0.35)))
-                .font(.zenoTitulo(.largeTitle))
-                .luminoso()
-                .multilineTextAlignment(.center)
-                .textInputAutocapitalization(.words)
-                .autocorrectionDisabled()
-                .submitLabel(.continue)
-                .focused($escribiendo)
-                .onSubmit { if !borrador.nombreLimpio.isEmpty { ir(a: .fecha) } }
-                .padding(.horizontal, 32)
-            Spacer()
-            Text("ZENO acompaña tu día. No diagnostica ni reemplaza un tratamiento.")
-                .font(.zenoTexto(.caption))
-                .multilineTextAlignment(.center)
-                .opacity(0.5)
-                .padding(.horizontal, 44)
-            BotonZeno("Continuar") { ir(a: .fecha) }
-                .disabled(borrador.nombreLimpio.isEmpty)
+        pantalla("¿Cómo te llamas?", razon: "Así te saludará ZENO cada día.") {
+            VStack(alignment: .leading, spacing: 10) {
+                TextField("", text: $borrador.nombre,
+                          prompt: Text("Tu nombre").foregroundStyle(Color.marfil.opacity(0.3)))
+                    .font(.zenoTitulo(.largeTitle, .regular))
+                    .foregroundStyle(Color.marfil)
+                    .tint(Color.oroZeno)
+                    .textInputAutocapitalization(.words)
+                    .autocorrectionDisabled()
+                    .submitLabel(.continue)
+                    .focused($escribiendo)
+                    .onSubmit { if !borrador.nombreLimpio.isEmpty { ir(a: .fecha) } }
+                // Una línea fina que se enciende cuando hay nombre.
+                Rectangle()
+                    .fill(LinearGradient(colors: [Color.oroZeno.opacity(borrador.nombreLimpio.isEmpty ? 0.3 : 0.9),
+                                                  Color.oroZeno.opacity(0.05)],
+                                         startPoint: .leading, endPoint: .trailing))
+                    .frame(height: 1)
+                    .animation(.easeInOut(duration: 0.3), value: borrador.nombreLimpio.isEmpty)
+            }
+        } pie: {
+            VStack(spacing: 16) {
+                Text("ZENO acompaña tu día. No diagnostica ni reemplaza un tratamiento.")
+                    .font(.zenoTexto(.caption))
+                    .foregroundStyle(Color.marfil.opacity(0.45))
+                    .multilineTextAlignment(.center)
+                BotonZeno("Continuar") { ir(a: .fecha) }
+                    .disabled(borrador.nombreLimpio.isEmpty)
+            }
         }
         .onAppear { escribiendo = true }
     }
 
     private var fecha: some View {
-        VStack(spacing: 20) {
-            Spacer().frame(height: 60)
-            Text("¿Cuándo naciste?")
-                .font(.zenoTitulo(.title))
-                .luminoso()
-            Text("De tu nombre y tu fecha nace tu estrella.")
-                .font(.zenoTexto(.footnote))
-                .opacity(0.65)
+        pantalla("¿Cuándo naciste?", razon: "Tu estrella nace de tu nombre y tu fecha. Nadie más tiene una igual.") {
             DatePicker("Fecha de nacimiento", selection: $borrador.fecha, in: ...Date.now, displayedComponents: .date)
                 .datePickerStyle(.wheel)
                 .labelsHidden()
                 .colorScheme(.dark)
-                .padding(.horizontal, 20)
-            Spacer()
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 6)
+                .cristal(radio: Self.radio)
+        } pie: {
             BotonZeno("Continuar") { ir(a: .despertar) }
         }
     }
 
     private func pregunta(_ titulo: LocalizedStringKey,
+                          razon: LocalizedStringKey,
                           opciones: [(LocalizedStringKey, Double)],
                           elegir: @escaping (Double) -> Void) -> some View {
-        VStack(spacing: 14) {
-            Spacer().frame(height: 60)
-            Text(titulo)
-                .font(.zenoTitulo(.title))
-                .luminoso()
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 28)
-                .padding(.bottom, 18)
-            ForEach(Array(opciones.enumerated()), id: \.offset) { _, opcion in
-                // Tocar una respuesta ya es avanzar: una sola acción por pantalla.
-                Button {
-                    elegir(opcion.1)
-                    ir(a: paso.siguiente)
-                } label: {
-                    Text(opcion.0)
-                        .font(.zenoTitulo(.title3, .regular))
-                        .luminoso()
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 17)
-                        .cristal(radio: 22)
+        pantalla(titulo, razon: razon) {
+            VStack(spacing: 10) {
+                ForEach(Array(opciones.enumerated()), id: \.offset) { _, opcion in
+                    // Tocar una respuesta ya es avanzar: una sola acción por pantalla.
+                    Button {
+                        elegir(opcion.1)
+                        ir(a: paso.siguiente)
+                    } label: {
+                        FilaDeOpcion(titulo: opcion.0, elegida: false)
+                    }
+                    .buttonStyle(EstiloPresion())
                 }
-                .buttonStyle(EstiloPresion())
-                .padding(.horizontal, 28)
             }
-            Spacer()
+        } pie: {
+            Color.clear.frame(height: 50)   // el botón no hace falta: elegir ya avanza
         }
     }
 
@@ -205,79 +267,123 @@ struct RegistroView: View {
             if lumiNacida {
                 Group {
                     Text("Ella es Lumi.")
-                        .font(.zenoTitulo(.title))
+                        .font(.zenoTitulo(.title, .regular))
                         .luminoso()
                     Text("Nació contigo, \(borrador.nombreLimpio). Nadie más tiene una igual.")
-                        .font(.zenoTitulo(.body))
-                        .luminoso()
+                        .font(.zenoTexto(.callout))
+                        .foregroundStyle(Color.marfil.opacity(0.7))
                         .multilineTextAlignment(.center)
-                        .opacity(0.8)
-                        .padding(.horizontal, 36)
+                        .padding(.horizontal, Self.margen)
                 }
                 .transition(.opacity)
-                Spacer().frame(height: 26)
+                Spacer().frame(height: 30)
                 BotonZeno("Continuar") { ir(a: .forma) }
                     .transition(.opacity)
+                    .padding(.bottom, 20)
             }
         }
         .animation(.easeInOut(duration: 1.4).delay(1.0), value: lumiNacida)
     }
 
     private var forma: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 0) {
             Spacer()
-            Text("¿Cómo quieres verla?")
-                .font(.zenoTitulo(.title2))
-                .luminoso()
-            HStack(spacing: 12) {
-                opcionDeForma("Estrella", .estrella)
-                opcionDeForma("Esfera", .esfera)
+            VStack(alignment: .leading, spacing: 0) {
+                Text("¿Cómo quieres verla?")
+                    .font(.zenoTitulo(.title, .regular))
+                    .luminoso()
+                Text("Puedes cambiarla cuando quieras en Ajustes.")
+                    .font(.zenoTexto(.callout))
+                    .foregroundStyle(Color.marfil.opacity(0.62))
+                    .padding(.top, 10)
+                VStack(spacing: 10) {
+                    opcionDeForma("Estrella", .estrella)
+                    opcionDeForma("Esfera", .esfera)
+                }
+                .padding(.top, 24)
             }
-            .padding(.horizontal, 28)
-            Text("Puedes cambiarla cuando quieras en Ajustes.")
-                .font(.zenoTexto(.footnote))
-                .opacity(0.6)
-            BotonZeno("Esta es la mía", accion: alTerminar)
+            .padding(.horizontal, Self.margen)
+            BotonZeno("Listo", accion: alTerminar)
+                .padding(.top, 28)
+                .padding(.bottom, 20)
         }
     }
 
     private func opcionDeForma(_ titulo: LocalizedStringKey, _ valor: FormaDeLumi) -> some View {
         Button {
-            borrador.forma = valor
+            withAnimation(.easeInOut(duration: 0.25)) { borrador.forma = valor }
         } label: {
-            Text(titulo)
-                .font(.zenoTexto(.body, .medium))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .cristal(radio: 18, activo: borrador.forma == valor)
+            FilaDeOpcion(titulo: titulo, elegida: borrador.forma == valor)
         }
         .buttonStyle(EstiloPresion())
         .sensoryFeedback(.selection, trigger: borrador.forma)
     }
 }
 
-/// El botón principal de ZENO: uno solo por pantalla. Tiene tres estilos en prueba
-/// (Diaz elige en la galería): 1 oro, 2 cristal con borde de luz, 3 nebulosa.
+/// Una opción del registro: texto a la izquierda y un círculo a la derecha que se llena al elegir.
+private struct FilaDeOpcion: View {
+    let titulo: LocalizedStringKey
+    let elegida: Bool
+
+    var body: some View {
+        HStack {
+            Text(titulo)
+                .font(.zenoTexto(.body, .medium))
+                .foregroundStyle(Color.marfil)
+            Spacer()
+            ZStack {
+                Circle().strokeBorder(Color.oroZeno.opacity(elegida ? 1 : 0.45), lineWidth: 1.2)
+                if elegida { Circle().fill(Color.oroZeno).padding(5) }
+            }
+            .frame(width: 22, height: 22)
+        }
+        .padding(.horizontal, 20)
+        .frame(height: 58)
+        .cristal(radio: RegistroView.radio, activo: elegida)
+        .contentShape(Rectangle())
+        .accessibilityAddTraits(elegida ? .isSelected : [])
+    }
+}
+
+/// El progreso del registro: una línea fina, la parte hecha en oro.
+private struct ProgresoDeRegistro: View {
+    let actual: Int
+    let total: Int
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.marfil.opacity(0.14))
+                Capsule()
+                    .fill(LinearGradient(colors: [.oroClaro, .oroZeno], startPoint: .leading, endPoint: .trailing))
+                    .frame(width: geo.size.width * CGFloat(actual) / CGFloat(max(total, 1)))
+                    .animation(.spring(response: 0.6, dampingFraction: 0.85), value: actual)
+            }
+        }
+    }
+}
+
+/// Flecha de volver, dibujada.
+struct FlechaAtras: Shape {
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: r.maxX, y: r.minY))
+        p.addLine(to: CGPoint(x: r.minX, y: r.midY))
+        p.addLine(to: CGPoint(x: r.maxX, y: r.maxY))
+        return p
+    }
+}
+
+/// El botón principal de ZENO: uno solo por pantalla. Una píldora de oro con la palabra,
+/// del mismo tamaño que los botones de la bienvenida (280 × 50). Sin adornos: al tocarlo
+/// se hunde y se enciende (`EstiloPresion`).
 struct BotonZeno: View {
     let titulo: LocalizedStringKey
-    /// 0 a 1. Con energía baja el botón brilla menos: invita, no grita.
-    var intensidad: Double
     var compacto = false
-    /// Para la galería: fuerza un estilo. Si es nil, usa el elegido.
-    var variante: Int?
-    /// Para la galería: fuerza un color de nebulosa. Si es nil, usa el elegido.
-    var paleta: Int?
     let accion: () -> Void
-    @AppStorage("estiloBoton2") private var elegido = 4   // oro con órbita: elección de Diaz
-    @AppStorage("colorNebulosaBoton") private var paletaElegida = 0
 
-    init(_ titulo: LocalizedStringKey, intensidad: Double = 1, compacto: Bool = false,
-         variante: Int? = nil, paleta: Int? = nil, accion: @escaping () -> Void) {
-        self.paleta = paleta
+    init(_ titulo: LocalizedStringKey, compacto: Bool = false, accion: @escaping () -> Void) {
         self.titulo = titulo
-        self.intensidad = intensidad
         self.compacto = compacto
-        self.variante = variante
         self.accion = accion
     }
 
@@ -285,264 +391,32 @@ struct BotonZeno: View {
 
     var body: some View {
         Button(action: accion) {
-            Text(titulo)
+            EtiquetaDeBoton(titulo: titulo, compacto: compacto)
         }
-        .buttonStyle(EstiloLuz(intensidad: intensidad, compacto: compacto, variante: variante ?? elegido,
-                               paleta: paleta ?? paletaElegida))
-        .padding(.vertical, compacto ? 0 : 8)
-        .padding(.bottom, compacto ? 0 : 12)
+        .buttonStyle(EstiloPresion())
     }
 }
 
-/// El estilo del botón. Vive en una vista propia para poder guardar sus ondas.
-struct EstiloLuz: ButtonStyle {
-    var intensidad: Double = 1
-    var compacto = false
-    var variante = 2
-    var paleta = 0
-    func makeBody(configuration: Configuration) -> some View {
-        CuerpoDeLuz(configuration: configuration, intensidad: intensidad, compacto: compacto,
-                    variante: variante, paleta: paleta)
-    }
-}
-
-private struct CuerpoDeLuz: View {
-    let configuration: ButtonStyleConfiguration
-    let intensidad: Double
+private struct EtiquetaDeBoton: View {
+    let titulo: LocalizedStringKey
     let compacto: Bool
-    let variante: Int
-    let paleta: Int
-    @Environment(\.cieloDeZeno) private var cielo
-    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     @Environment(\.isEnabled) private var activo
-    @State private var ondas = 0
-    @State private var respira = false
-
-    private var esOro: Bool { variante == 1 || variante == 4 }
-    /// La galaxia (estilo 3) va sin flecha: solo la palabra (pedido de Diaz).
-    private var conFlecha: Bool { variante != 3 }
-
-    /// Paleta 0: los colores de la nebulosa de la persona (elección de Diaz). 1–3 quedan para comparar.
-    private var colores: (hondo: SIMD3<Float>, nube: SIMD3<Float>, oro: SIMD3<Float>) {
-        switch paleta {
-        case 1: return (SIMD3(0.36, 0.26, 0.10), SIMD3(0.86, 0.70, 0.40), SIMD3(1.0, 0.95, 0.80))
-        case 2: return (SIMD3(0.08, 0.09, 0.20), SIMD3(0.72, 0.58, 0.32), SIMD3(1.0, 0.92, 0.72))
-        case 3: return (SIMD3(0.22, 0.23, 0.30), SIMD3(0.78, 0.78, 0.82), SIMD3(1.0, 0.95, 0.85))
-        default:
-            guard let cielo else {
-                return (SIMD3(0.11, 0.14, 0.32), SIMD3(0.24, 0.29, 0.58), SIMD3(0.95, 0.84, 0.55))
-            }
-            // Como se ve el cielo de verdad: la nube, iluminada por el resplandor que rodea a Lumi.
-            let nube = simd_mix(cielo.colorNube, cielo.colorBrasa, SIMD3(repeating: 0.35)) * 1.12
-            return (cielo.colorNube * 0.62, nube, simd_mix(cielo.colorBrasa, cielo.colorOro, SIMD3(repeating: 0.5)))
-        }
-    }
-    /// Letra oscura solo sobre el oro macizo; en la galaxia el interior es vidrio oscuro.
-    private var letraOscura: Bool { esOro }
 
     var body: some View {
-        let presionado = configuration.isPressed
-        let alto: CGFloat = compacto ? 40 : 52
-        let circulo = alto - 10
-        HStack(spacing: compacto ? 10 : 16) {
-            configuration.label
-                .font(.zenoTexto(compacto ? .subheadline : .body, .bold))
-                .tracking(0.4)
-                .foregroundStyle(letraOscura ? AnyShapeStyle(BotonZeno.tinta)
-                                       : AnyShapeStyle(LinearGradient(colors: [.oroClaro, .oroZeno],
-                                                                      startPoint: .top, endPoint: .bottom)))
-                .shadow(color: letraOscura ? .white.opacity(0.35) : .black.opacity(0.5), radius: 4)
-                .padding(.leading, conFlecha ? (compacto ? 18 : 26) : 0)
-            if conFlecha {
-            ZStack {
-                // La onda: un anillo de luz que sale del círculo, como cuando Lumi celebra.
-                Circle()
-                    .stroke(Color.oroClaro, lineWidth: 1.5)
-                    .keyframeAnimator(initialValue: OndaDeBoton(), trigger: ondas) { vista, v in
-                        vista.scaleEffect(v.escala).opacity(v.opacidad)
-                    } keyframes: { _ in
-                        KeyframeTrack(\.escala) {
-                            CubicKeyframe(1.0, duration: 0.01)
-                            CubicKeyframe(2.4, duration: 0.75)
-                        }
-                        KeyframeTrack(\.opacidad) {
-                            CubicKeyframe(0.9, duration: 0.01)
-                            CubicKeyframe(0, duration: 0.75)
-                        }
-                    }
-                if letraOscura {
-                    Circle().fill(BotonZeno.tinta.opacity(0.92))
-                } else {
-                    Circle().strokeBorder(Color.oroZeno.opacity(presionado ? 0.9 : 0.55), lineWidth: 1)
-                }
-                FlechaDibujada()
-                    .stroke(Color.oroClaro, style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round))
-                    .frame(width: circulo * 0.36, height: circulo * 0.29)
-                    .offset(x: presionado && !reducirMovimiento ? 3 : 0)
-            }
-            .frame(width: circulo, height: circulo)
-            .offset(x: presionado && !reducirMovimiento ? 3 : 0)
-            .padding(.trailing, 5)
-            }
-        }
-        .padding(.horizontal, conFlecha ? 0 : (compacto ? 26 : 40))
-        // Sin flecha, la onda sale de toda la palabra.
-        .background {
-            if !conFlecha {
-                Capsule()
-                    .stroke(Color.oroClaro, lineWidth: 1.2)
-                    .keyframeAnimator(initialValue: OndaDeBoton(), trigger: ondas) { vista, v in
-                        vista.scaleEffect(x: 1 + (v.escala - 1) * 0.18, y: 1 + (v.escala - 1) * 0.6).opacity(v.opacidad)
-                    } keyframes: { _ in
-                        KeyframeTrack(\.escala) {
-                            CubicKeyframe(1.0, duration: 0.01)
-                            CubicKeyframe(2.4, duration: 0.8)
-                        }
-                        KeyframeTrack(\.opacidad) {
-                            CubicKeyframe(0.7, duration: 0.01)
-                            CubicKeyframe(0, duration: 0.8)
-                        }
-                    }
-            }
-        }
-        .frame(minWidth: compacto ? nil : (conFlecha ? 190 : 170), minHeight: alto)
-        .background { fondo(presionado: presionado) }
-        // Estilo 4: una órbita como la del sol de ZENO; la mitad de atrás pasa detrás del oro.
-        .background { if variante == 4 && !compacto { OrbitaDelBoton(mitad: .atras, vueltas: ondas) } }
-        .overlay { if variante == 4 && !compacto { OrbitaDelBoton(mitad: .adelante, vueltas: ondas) } }
-        .scaleEffect(presionado ? 0.975 : 1)
-        .opacity(activo ? 1 : 0.4)
-        .animation(.spring(response: 0.3, dampingFraction: 0.62), value: presionado)
-        .onChange(of: presionado) { _, ahora in
-            if ahora && !reducirMovimiento { ondas += 1 }
-        }
-        .onAppear {
-            // La luz de Lumi cae sobre el borde de arriba y se aviva despacio: "empieza".
-            guard !reducirMovimiento, !compacto else { return }
-            withAnimation(.easeInOut(duration: 2.6).repeatForever(autoreverses: true)) { respira = true }
-        }
-        .sensoryFeedback(.impact(weight: .light, intensity: 0.55), trigger: presionado) { _, ahora in ahora }
+        Text(titulo)
+            .font(.zenoTexto(compacto ? .subheadline : .body, .semibold))
+            .tracking(0.3)
+            .foregroundStyle(BotonZeno.tinta)
+            .frame(width: compacto ? nil : 280, height: compacto ? 42 : 50)
+            .padding(.horizontal, compacto ? 26 : 0)
+            .background(
+                Capsule().fill(LinearGradient(colors: [.oroClaro, .oroZeno],
+                                              startPoint: .top, endPoint: .bottom))
+            )
+            .overlay(Capsule().strokeBorder(Color.white.opacity(0.35), lineWidth: 0.6))
+            .opacity(activo ? 1 : 0.35)
+            .animation(.easeInOut(duration: 0.25), value: activo)
     }
-
-    @ViewBuilder
-    private func fondo(presionado: Bool) -> some View {
-        let forma = Capsule()
-        switch variante {
-        case 1, 4:
-            // Oro: píldora de metal pulido.
-            ZStack {
-                forma.fill(LinearGradient(colors: [.oroClaro, .oroZeno, .oroHondo],
-                                          startPoint: .topLeading, endPoint: .bottomTrailing))
-                forma.fill(LinearGradient(colors: [.white.opacity(presionado ? 0.5 : 0.35), .clear],
-                                          startPoint: .top, endPoint: .center))
-                    .padding(1.5)
-                forma.strokeBorder(Color.oroClaro.opacity(0.9), lineWidth: 0.8)
-            }
-            .saturation(0.75 + 0.25 * intensidad)
-            .brightness(-0.10 * (1 - intensidad) + (presionado ? 0.05 : 0))
-            .shadow(color: Color.oroZeno.opacity((0.20 + 0.25 * intensidad) * (respira ? 1.5 : 1) * (presionado ? 1.5 : 1)),
-                    radius: respira ? 22 : 15, y: 3)
-
-        case 3:
-            // Nebulosa: gas vivo con bordes de nube, sin contorno duro.
-            TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: reducirMovimiento)) { linea in
-                GeometryReader { geo in
-                    Rectangle()
-                        .colorEffect(ShaderLibrary.galaxiaBorde(
-                            .float2(geo.size),
-                            .float(linea.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1000)),
-                            .float(presionado ? 1 : (respira ? 0.55 : 0.15)),
-                            .float3(colores.hondo.x, colores.hondo.y, colores.hondo.z),
-                            .float3(colores.nube.x, colores.nube.y, colores.nube.z),
-                            .float3(colores.oro.x, colores.oro.y, colores.oro.z)))
-                }
-            }
-            .padding(.horizontal, compacto ? -14 : -20)
-            .padding(.vertical, compacto ? -12 : -16)
-            .shadow(color: Color.oroZeno.opacity(presionado ? 0.35 : (respira ? 0.18 : 0.08)), radius: 18)
-            .allowsHitTesting(false)
-
-        default:
-            // Cristal de noche con borde de luz dorada; el borde de arriba recibe la luz de Lumi.
-            ZStack {
-                forma.fill(LinearGradient(colors: [Color(red: 0.17, green: 0.20, blue: 0.38).opacity(0.78),
-                                                   Color(red: 0.06, green: 0.08, blue: 0.18).opacity(0.86)],
-                                          startPoint: .top, endPoint: .bottom))
-                forma.fill(RadialGradient(colors: [Color.oroZeno.opacity(presionado ? 0.26 : (respira ? 0.17 : 0.08)), .clear],
-                                          center: .top, startRadius: 0, endRadius: 120))
-                forma.strokeBorder(Color.oroZeno.opacity(0.45), lineWidth: 1)
-                forma.strokeBorder(LinearGradient(colors: [Color.oroClaro.opacity(respira ? 1 : 0.55), .clear],
-                                                  startPoint: .top, endPoint: .center),
-                                   lineWidth: presionado ? 1.8 : 1.4)
-            }
-            .shadow(color: Color.oroZeno.opacity(respira ? 0.30 : 0.12), radius: respira ? 18 : 10, y: -2)
-        }
-    }
-}
-
-/// La órbita del botón: una elipse fina y ladeada con una lunita, como la del logotipo.
-/// Quieta mientras nadie toca; con cada toque la luna da una vuelta completa.
-private struct OrbitaDelBoton: View {
-    enum Mitad { case atras, adelante }
-    let mitad: Mitad
-    let vueltas: Int
-    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
-
-    var body: some View {
-        GeometryReader { geo in
-            let r = CGRect(origin: .zero, size: geo.size)
-            ZStack {
-                ArcoDeElipse(desde: mitad == .atras ? .pi : 0, hasta: mitad == .atras ? 2 * .pi : .pi)
-                    .stroke(LinearGradient(colors: [Color.oroZeno.opacity(0.08), Color.oroClaro.opacity(0.75),
-                                                    Color.oroZeno.opacity(0.08)],
-                                           startPoint: .leading, endPoint: .trailing),
-                            lineWidth: 1)
-                if mitad == .adelante {
-                    Color.clear
-                        .keyframeAnimator(initialValue: 0.0, trigger: vueltas) { vista, giro in
-                            let a = 0.55 + giro
-                            vista.overlay {
-                                Circle()
-                                    .fill(Color.oroClaro)
-                                    .frame(width: 5, height: 5)
-                                    .shadow(color: Color.oroZeno, radius: 4)
-                                    .position(x: r.midX + r.width / 2 * cos(a), y: r.midY + r.height / 2 * sin(a))
-                            }
-                        } keyframes: { _ in
-                            KeyframeTrack {
-                                CubicKeyframe(0, duration: 0.01)
-                                CubicKeyframe(reducirMovimiento ? 0 : 2 * .pi, duration: 1.1)
-                            }
-                        }
-                }
-            }
-        }
-        .padding(.horizontal, -30)
-        .padding(.vertical, -15)
-        .rotationEffect(.degrees(-7))
-        .allowsHitTesting(false)
-    }
-}
-
-/// Un trozo de elipse entre dos ángulos (0 = derecha, π/2 = abajo).
-struct ArcoDeElipse: Shape {
-    var desde: Double
-    var hasta: Double
-    func path(in r: CGRect) -> Path {
-        var p = Path()
-        let pasos = 64
-        for i in 0...pasos {
-            let a = desde + (hasta - desde) * Double(i) / Double(pasos)
-            let punto = CGPoint(x: r.midX + r.width / 2 * cos(a), y: r.midY + r.height / 2 * sin(a))
-            if i == 0 { p.move(to: punto) } else { p.addLine(to: punto) }
-        }
-        return p
-    }
-}
-
-private struct OndaDeBoton {
-    var escala: CGFloat = 1
-    var opacidad: Double = 0
 }
 
 // MARK: - Bienvenida
@@ -612,7 +486,9 @@ struct BienvenidaView: View {
                 .allowsHitTesting(conBoton && fase >= 4)
         }
         .contentShape(Rectangle())
-        .onTapGesture { mostrarTodo() }
+        // Tocar salta la presentación; cuando ya terminó, el toque es solo de los botones
+        // (si no, se comía el toque de "Continuar con Apple", que es una vista de UIKit).
+        .gesture(TapGesture().onEnded { mostrarTodo() }, including: fase < 4 ? .all : .subviews)
         .sensoryFeedback(.impact(weight: .light, intensity: 0.45), trigger: fase == 1)
         .task { await contar() }
     }
@@ -690,20 +566,6 @@ struct ElipseDesdeArriba: Shape {
             if i == 0 { p.move(to: punto) } else { p.addLine(to: punto) }
         }
         return p
-    }
-}
-
-// MARK: - El cielo de la persona, al alcance de los botones
-
-private struct ClaveCieloDeZeno: EnvironmentKey {
-    static let defaultValue: AparienciaLumi? = nil
-}
-
-extension EnvironmentValues {
-    /// La apariencia del cielo actual: el botón nebulosa usa sus mismos colores.
-    var cieloDeZeno: AparienciaLumi? {
-        get { self[ClaveCieloDeZeno.self] }
-        set { self[ClaveCieloDeZeno.self] = newValue }
     }
 }
 
