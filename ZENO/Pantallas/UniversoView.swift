@@ -36,7 +36,8 @@ struct UniversoView: View {
     @State private var celebracion = Celebracion()
     @State private var celebraciones = 0
     @State private var vueltas = 0.0          // giros lentos de Lumi (tres tareas seguidas)
-    @AppStorage("diaCalido") private var diaCalido = ""   // terminó algo con energía baja
+    @AppStorage("diaCalido") private var diaCalido = ""
+    @State private var llegada = false        // la primera vez, el universo se acerca   // terminó algo con energía baja
 
     /// El cielo antes de que exista la persona: tranquilo, sin dueño todavía.
     private static let semillaNeutra = Semilla(nombre: "zeno", anio: 2026, mes: 1, dia: 1)
@@ -73,6 +74,9 @@ struct UniversoView: View {
                                  centro: centro)
                         .id(semilla)
                         .transition(.opacity)
+                        // Bienvenida: la cámara viaja hacia el cielo, que gira apenas al llegar.
+                        .scaleEffect(enRegistro && !llegada ? 1.55 : 1)
+                        .rotationEffect(.degrees(enRegistro && !llegada ? -6 : 0))
 
                     let anchoLumi = min(geo.size.width, 430) * 0.98
                     LumiView(apariencia: apariencia, energia: energia, forma: forma, destello: destelloDeHoy)
@@ -123,6 +127,14 @@ struct UniversoView: View {
             .ignoresSafeArea()
             .ignoresSafeArea(.keyboard)
 
+            // Al llegar, el espacio está casi a oscuras y se va aclarando.
+            if enRegistro {
+                Color(red: 0.01, green: 0.015, blue: 0.05)
+                    .opacity(llegada ? 0 : 0.92)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+            }
+
             // Un velo suave bajo Lumi: el texto se lee nítido sin apagar el cielo.
             LinearGradient(stops: [.init(color: .black.opacity(enOtraPagina ? 0.22 : 0), location: 0.16),
                                    .init(color: .black.opacity(enOtraPagina ? 0.40 : 0.30), location: 0.62),
@@ -169,6 +181,11 @@ struct UniversoView: View {
             }
         }
         .task {
+            if reducirMovimiento || !enRegistro {
+                llegada = true
+            } else {
+                withAnimation(.easeOut(duration: 4.2)) { llegada = true }
+            }
             #if DEBUG
             DatosDeEjemplo.cargarSiHaceFalta(en: contexto, hayPersona: !personas.isEmpty)
             #endif

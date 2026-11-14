@@ -86,7 +86,7 @@ struct RegistroView: View {
     @ViewBuilder
     private var contenido: some View {
         switch paso {
-        case .bienvenida: bienvenida
+        case .bienvenida: BienvenidaView { ir(a: .nombre) }
         case .nombre: nombre
         case .fecha: fecha
         case .despertar:
@@ -110,31 +110,6 @@ struct RegistroView: View {
     }
 
     // MARK: Pasos
-
-    private var bienvenida: some View {
-        VStack(spacing: 18) {
-            Spacer()
-            MarcaZeno(tamano: 46)
-                .padding(.bottom, 26)
-            // La promesa de ZENO, con la palabra que importa en oro.
-            (Text("Una app que se adapta\na tu ").foregroundStyle(Color.marfil)
-             + Text("energía").font(.zenoTitulo(.title, .regular, cursiva: true)).foregroundStyle(Color.oroZeno)
-             + Text(",\nno al revés.").foregroundStyle(Color.marfil))
-                .font(.zenoTitulo(.title, .light))
-                .multilineTextAlignment(.center)
-                .lineSpacing(4)
-                .shadow(color: .black.opacity(0.5), radius: 10, y: 2)
-                .shadow(color: Color.oroZeno.opacity(0.22), radius: 20)
-                .padding(.horizontal, 28)
-            Spacer()
-            Text("ZENO acompaña tu día. No diagnostica ni reemplaza un tratamiento.")
-                .font(.zenoTexto(.caption))
-                .multilineTextAlignment(.center)
-                .opacity(0.55)
-                .padding(.horizontal, 44)
-            BotonZeno("Crear mi estrella") { ir(a: .nombre) }
-        }
-    }
 
     private var nombre: some View {
         VStack(spacing: 28) {
@@ -321,5 +296,164 @@ struct BotonZeno: View {
         .buttonStyle(EstiloPresion())
         .padding(.horizontal, 28)
         .padding(.bottom, 18)
+    }
+}
+
+// MARK: - Bienvenida
+
+/// La entrada a ZENO: se llega desde el espacio. Primero el cielo, luego una luz que se enciende,
+/// el nombre letra por letra y al final la promesa. Tocar en cualquier parte lo muestra todo de una vez.
+struct BienvenidaView: View {
+    let alEmpezar: () -> Void
+
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+    /// 0 nada · 1 se enciende el sol · 2 llegan las letras · 3 la promesa · 4 el botón
+    @State private var fase = 0
+    @State private var destello = false
+
+    private static let letras = ["Z", "E", "N", "O"]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            // El sol: nace como un punto, se enciende con un destello suave y deja su órbita dibujada.
+            ZStack {
+                Circle()
+                    .fill(RadialGradient(colors: [Color.oroClaro.opacity(0.55), Color.oroZeno.opacity(0.18), .clear],
+                                         center: .center, startRadius: 0, endRadius: 120))
+                    .frame(width: 240, height: 240)
+                    .scaleEffect(destello ? 1.0 : 0.2)
+                    .opacity(destello ? 0 : (fase >= 1 ? 1 : 0))
+                OrbitaDeBienvenida(progreso: fase >= 2 ? 1 : 0)
+                    .frame(width: 118, height: 54)
+                SolZeno()
+                    .frame(width: 30, height: 30)
+                    .scaleEffect(fase >= 1 ? 1 : 0.05)
+                    .opacity(fase >= 1 ? 1 : 0)
+            }
+            .frame(height: 80)
+            .padding(.bottom, 30)
+
+            // ZENO, letra por letra: cada una llega desenfocada y se asienta en su sitio.
+            HStack(spacing: fase >= 2 ? 18 : 42) {
+                ForEach(Array(Self.letras.enumerated()), id: \.offset) { i, letra in
+                    Text(verbatim: letra)
+                        .font(.zenoMarca(54))
+                        .foregroundStyle(LinearGradient(colors: [.marfil, Color.oroZeno.opacity(0.9)],
+                                                        startPoint: .top, endPoint: .bottom))
+                        .blur(radius: fase >= 2 ? 0 : 10)
+                        .opacity(fase >= 2 ? 1 : 0)
+                        .offset(y: fase >= 2 ? 0 : 14)
+                        .animation(.easeOut(duration: 1.1).delay(Double(i) * 0.16), value: fase)
+                }
+            }
+            .shadow(color: Color.oroZeno.opacity(0.35), radius: 18)
+            .accessibilityElement()
+            .accessibilityLabel(Text(verbatim: "ZENO"))
+            .padding(.bottom, 34)
+
+            // La promesa, línea por línea.
+            VStack(spacing: 6) {
+                linea(Text("Una app que se adapta"), orden: 0)
+                linea(Text("a tu ") + Text("energía").font(.zenoTitulo(.title, .regular, cursiva: true))
+                        .foregroundStyle(Color.oroZeno) + Text(","), orden: 1)
+                linea(Text("no al revés."), orden: 2)
+            }
+            .font(.zenoTitulo(.title, .light))
+            .foregroundStyle(Color.marfil)
+            .multilineTextAlignment(.center)
+            .shadow(color: .black.opacity(0.5), radius: 10, y: 2)
+            .accessibilityElement(children: .combine)
+
+            Spacer()
+
+            Group {
+                Text("ZENO acompaña tu día. No diagnostica ni reemplaza un tratamiento.")
+                    .font(.zenoTexto(.caption))
+                    .multilineTextAlignment(.center)
+                    .opacity(0.55)
+                    .padding(.horizontal, 44)
+                    .padding(.bottom, 14)
+                BotonZeno("Crear mi estrella", accion: alEmpezar)
+            }
+            .opacity(fase >= 4 ? 1 : 0)
+            .offset(y: fase >= 4 ? 0 : 26)
+            .allowsHitTesting(fase >= 4)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { mostrarTodo() }
+        .sensoryFeedback(.impact(weight: .light, intensity: 0.45), trigger: fase == 1)
+        .task { await contar() }
+    }
+
+    private func linea(_ texto: Text, orden: Int) -> some View {
+        texto
+            .blur(radius: fase >= 3 ? 0 : 8)
+            .opacity(fase >= 3 ? 1 : 0)
+            .offset(y: fase >= 3 ? 0 : 12)
+            .animation(.easeOut(duration: 1.0).delay(Double(orden) * 0.38), value: fase)
+    }
+
+    /// La secuencia completa dura unos cinco segundos.
+    private func contar() async {
+        if reducirMovimiento { fase = 4; destello = true; return }
+        let pasos: [(Int, Double)] = [(1, 1.3), (2, 0.9), (3, 1.5), (4, 1.6)]
+        for (f, espera) in pasos {
+            try? await Task.sleep(for: .seconds(espera))
+            guard fase < f else { continue }
+            withAnimation(.spring(response: 1.1, dampingFraction: 0.8)) { fase = f }
+            if f == 1 { withAnimation(.easeOut(duration: 1.6)) { destello = true } }
+        }
+    }
+
+    private func mostrarTodo() {
+        guard fase < 4 else { return }
+        withAnimation(.easeOut(duration: 0.6)) { fase = 4; destello = true }
+    }
+}
+
+/// Una órbita ladeada que se dibuja sola alrededor del sol, con una luna pequeña al final del trazo.
+struct OrbitaDeBienvenida: View, Animatable {
+    var progreso: Double
+    var animatableData: Double {
+        get { progreso }
+        set { progreso = newValue }
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            let rect = CGRect(origin: .zero, size: geo.size)
+            let angulo = -Double.pi / 2 + 2 * Double.pi * progreso
+            let luna = CGPoint(x: rect.midX + rect.width / 2 * cos(angulo),
+                               y: rect.midY + rect.height / 2 * sin(angulo))
+            ZStack {
+                ElipseDesdeArriba()
+                    .trim(from: 0, to: progreso)
+                    .stroke(LinearGradient(colors: [Color.oroZeno.opacity(0.15), Color.oroZeno.opacity(0.75)],
+                                           startPoint: .leading, endPoint: .trailing), lineWidth: 1)
+                Circle()
+                    .fill(Color.oroClaro)
+                    .frame(width: 5, height: 5)
+                    .shadow(color: Color.oroZeno, radius: 4)
+                    .position(luna)
+                    .opacity(progreso > 0.02 ? 1 : 0)
+            }
+        }
+        .rotationEffect(.degrees(-14))
+        .animation(.easeInOut(duration: 2.2), value: progreso)
+    }
+}
+
+/// Una elipse que empieza arriba y avanza en el sentido del reloj, como la luna de la órbita.
+struct ElipseDesdeArriba: Shape {
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        for i in 0...96 {
+            let a = -Double.pi / 2 + 2 * Double.pi * Double(i) / 96
+            let punto = CGPoint(x: r.midX + r.width / 2 * cos(a), y: r.midY + r.height / 2 * sin(a))
+            if i == 0 { p.move(to: punto) } else { p.addLine(to: punto) }
+        }
+        return p
     }
 }
