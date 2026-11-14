@@ -50,7 +50,8 @@ struct PlanDeTareaView: View {
             .toggleStyle(InterruptorZeno())
 
             if plan.conFecha {
-                DatePicker("Cuándo", selection: $plan.fecha, in: Date.now...,
+                // Si la fecha ya pasó (una tarea vieja), el rango la incluye para no romper el selector.
+                DatePicker("Cuándo", selection: $plan.fecha, in: min(plan.fecha, Date.now)...,
                            displayedComponents: [.date, .hourAndMinute])
                     .font(.zenoTexto(.body))
                     .tint(Color.oroZeno)
@@ -69,7 +70,7 @@ struct PlanDeTareaView: View {
                     }
 
                     if plan.aviso == .personalizado {
-                        DatePicker("Aviso a las", selection: $plan.personalizado, in: Date.now...,
+                        DatePicker("Aviso a las", selection: $plan.personalizado, in: min(plan.personalizado, Date.now)...,
                                    displayedComponents: [.date, .hourAndMinute])
                             .font(.zenoTexto(.body))
                             .tint(Color.oroZeno)
@@ -209,9 +210,13 @@ struct EditorDeTarea: View {
         }
         .confirmationDialog("¿Borrar esta tarea?", isPresented: $confirmarBorrado, titleVisibility: .visible) {
             Button("Borrar", role: .destructive) {
-                contexto.delete(tarea)
-                Task { await AvisosDeTareas.sincronizar(contexto) }
+                // Primero se cierra el editor; la tarea se borra cuando ya no está en pantalla.
+                let tarea = tarea
                 alCerrar()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                    contexto.delete(tarea)
+                    Task { await AvisosDeTareas.sincronizar(contexto) }
+                }
             }
         }
     }
@@ -241,6 +246,27 @@ struct EditorDeTarea: View {
         plan.aplicar(a: tarea)
         Task { await AvisosDeTareas.sincronizar(contexto) }
         alCerrar()
+    }
+}
+
+/// Un reloj dibujado a mano (sin símbolos de sistema): abre el día y la hora de una tarea.
+struct IconoReloj: View {
+    var activo = false
+
+    var body: some View {
+        Canvas { ctx, size in
+            let c = CGPoint(x: size.width / 2, y: size.height / 2)
+            let r = min(size.width, size.height) * 0.22
+            let color = activo ? Color.oroClaro : Color.marfil.opacity(0.85)
+            ctx.stroke(Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)),
+                       with: .color(color), lineWidth: 1.5)
+            var agujas = Path()
+            agujas.move(to: CGPoint(x: c.x, y: c.y - r * 0.6))
+            agujas.addLine(to: c)
+            agujas.addLine(to: CGPoint(x: c.x + r * 0.45, y: c.y + r * 0.25))
+            ctx.stroke(agujas, with: .color(activo ? .oroZeno : color),
+                       style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
+        }
     }
 }
 

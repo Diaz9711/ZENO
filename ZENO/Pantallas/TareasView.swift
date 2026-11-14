@@ -22,6 +22,8 @@ struct TareaDelMomentoView: View {
     var pedirAgregar: Int = 0
     /// Avisa cuando se está escribiendo, para esconder la barra.
     @Binding var editando: Bool
+    /// Avisa cuando se abre el día y la hora: Lumi sube y se hace pequeña para dar sitio.
+    @Binding var planificando: Bool
 
     @Environment(\.modelContext) private var contexto
     /// Leído para que, al cambiar de idioma, también se redibujen las frases armadas en código.
@@ -80,6 +82,9 @@ struct TareaDelMomentoView: View {
         .onChange(of: pedirAgregar) { _, _ in abrirAgregar() }
         .onChange(of: modo) { _, nuevo in
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) { editando = nuevo != .ver }
+        }
+        .onChange(of: plan.conFecha && modo == .agregar) { _, abierto in
+            withAnimation(Ritmo.lumi) { planificando = abierto }
         }
     }
 
@@ -242,13 +247,27 @@ struct TareaDelMomentoView: View {
                 .font(.zenoTitulo(.title2))
                 .luminoso()
             campo($frase, sugerencia: "Una sola frase")
-            PlanDeTareaView(plan: $plan)
-                .padding(.horizontal, 28)
-                .onChange(of: plan.conFecha) { _, si in if si { escribiendo = false } }
+            // Los botones quedan siempre a la vista, aunque el teclado esté abierto.
+            // El reloj abre el día y la hora (opcional): se baja el teclado y Lumi sube.
             HStack(spacing: 12) {
                 botonChico("Cancelar", fuerte: false) { cerrarAgregar() }
+                Button {
+                    escribiendo = false
+                    withAnimation(Ritmo.contenido) { plan.conFecha.toggle() }
+                } label: {
+                    IconoReloj(activo: plan.conFecha)
+                        .frame(width: 44, height: 44)
+                        .cristal(activo: plan.conFecha)
+                }
+                .buttonStyle(EstiloPresion())
+                .accessibilityLabel(Text("Día y hora"))
                 botonChico("Guardar", fuerte: true) { guardarFrase() }
                     .disabled(limpio(frase).isEmpty)
+            }
+            if plan.conFecha {
+                PlanDeTareaView(plan: $plan)
+                    .padding(.horizontal, 28)
+                    .transition(.desenfoque)
             }
             Text(dictado.aviso ?? Idioma.texto("También puedes mantener presionada a Lumi y hablar."))
                 .font(.zenoTexto(.footnote))
@@ -354,6 +373,7 @@ struct TareaDelMomentoView: View {
     private func abrirAgregar() {
         toques += 1
         frase = ""
+        plan = BorradorDePlan()
         primerPaso = ""
         dictado.aviso = nil
         withAnimation(Ritmo.contenido) { modo = .agregar }
@@ -371,6 +391,7 @@ struct TareaDelMomentoView: View {
     private func cerrarAgregar() {
         toques += 1
         escribiendo = false
+        plan = BorradorDePlan()
         withAnimation(Ritmo.contenido) { modo = .ver }
     }
 

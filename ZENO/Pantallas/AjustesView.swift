@@ -226,7 +226,12 @@ struct AjustesView: View {
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .cristal(radio: 20)
-                    .task { pendientes = await Avisos.pendientes() }
+                    .task {
+                        pendientes = await Avisos.pendientes()
+                        // Al abrir la app los avisos se reprograman un instante después: se vuelve a mirar.
+                        try? await Task.sleep(for: .seconds(1.5))
+                        pendientes = await Avisos.pendientes()
+                    }
                 }
                 #endif
 
@@ -323,6 +328,7 @@ struct AjustesView: View {
     /// Cierra la sesión sin borrar nada. Mientras esté cerrada no llega ningún aviso.
     private func cerrarSesion() {
         Avisos.cancelarTodo()
+        persona.avisoDiarioProgramado = nil      // si no, al volver contaría como un aviso ignorado
         withAnimation(.spring(response: 0.75, dampingFraction: 0.74)) { sesionAbierta = false }
     }
 

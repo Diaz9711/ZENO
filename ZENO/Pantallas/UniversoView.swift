@@ -28,6 +28,7 @@ struct UniversoView: View {
     @State private var viajes = 0             // cada cambio de página: Lumi toma impulso
     @State private var pedirAgregar = 0
     @State private var editando = false
+    @State private var planificando = false   // en Hoy, eligiendo día y hora: Lumi sube para dar sitio
     @AppStorage("modoPrueba") private var modoPrueba = false
     @State private var escuchando = false    // Lumi está oyendo una tarea dictada
     @State private var ahora = Date()        // se refresca cada pocos minutos
@@ -70,7 +71,7 @@ struct UniversoView: View {
         let enTarea = persona != nil && momento == .tarea
         let enPresencia = persona != nil && momento == .presencia
         // En Tareas y Ajustes, Lumi viaja arriba y se hace pequeña: acompaña sin estorbar.
-        let enOtraPagina = enTarea && pagina != .hoy
+        let enOtraPagina = enTarea && (pagina != .hoy || planificando)
         let centro = UnitPoint(x: 0.5, y: enOtraPagina ? 0.115 : (enTarea ? 0.245 : (enPresencia ? 0.34 : 0.33)))
         let tamano = (enOtraPagina ? 0.38 : (enTarea ? 0.80 : 1.0)) * (escuchando ? 1.12 : 1.0)
         let tareaEnCurso = enTarea ? tareas.first(where: \.estaEnCurso) : nil
@@ -279,14 +280,15 @@ struct UniversoView: View {
                             VStack(spacing: 0) {
                                 TareaDelMomentoView(
                                     centroDeLumi: CGPoint(x: geo.size.width / 2, y: altoTotal * 0.245 - arriba),
-                                    inicioDelContenido: altoTotal * 0.405 - arriba,
+                                    inicioDelContenido: (planificando ? altoTotal * 0.185 : altoTotal * 0.405) - arriba,
                                     escuchando: $escuchando,
                                     puntaje: puntaje,
                                     eventos: eventos,
                                     alTerminar: celebrar,
                                     mejorHora: MotorDeEnergia.mejorHora(persona: persona, eventos: eventos),
                                     pedirAgregar: pedirAgregar,
-                                    editando: $editando)
+                                    editando: $editando,
+                                    planificando: $planificando)
                             }
                             // Encima y no debajo: si empujan el contenido, la barra se sale de la pantalla.
                             .overlay(alignment: .top) {
@@ -316,6 +318,8 @@ struct UniversoView: View {
                             pedirAgregar += 1
                         }
                         .padding(.bottom, 4)
+                        // Con el teclado abierto (editar una tarea) la barra se queda abajo, no sube encima.
+                        .ignoresSafeArea(.keyboard)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
@@ -335,7 +339,7 @@ struct UniversoView: View {
             withAnimation(reducirMovimiento ? .easeInOut(duration: 0.3) : Ritmo.contenido) {
                 pagina = destino
                 // Si se estaba escribiendo en Hoy, al salir la barra vuelve siempre.
-                if destino != .hoy { editando = false }
+                if destino != .hoy { editando = false; planificando = false }
             }
         }
     }
