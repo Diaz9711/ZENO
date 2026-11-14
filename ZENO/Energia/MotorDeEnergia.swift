@@ -151,8 +151,10 @@ enum MotorDeEnergia {
             return .tarea(planeada)
         }
 
+        // Lo aprendido: lo que suele posponer a esta hora pasa al final de la fila.
+        let franja = calendario.component(.hour, from: ahora)
         func primera(_ tamanos: TamanoDeTarea...) -> Tarea? {
-            for tamano in tamanos {
+            for tamano in Aprendizaje.ordenar(tamanos, franja: franja, eventos: eventos, ahora: ahora) {
                 if let tarea = disponibles.first(where: { $0.tamano == tamano }) { return tarea }
             }
             return nil

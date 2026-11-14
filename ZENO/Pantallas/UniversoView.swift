@@ -126,7 +126,7 @@ struct UniversoView: View {
                         .animation(reducirMovimiento ? .easeInOut(duration: 0.4) : Ritmo.lumi, value: pagina)
 
                     if let tarea = tareaEnCurso, let inicio = tarea.empezadaEn {
-                        AnilloDeTiempoView(inicio: inicio, minutos: tarea.minutosPrevistos)
+                        AnilloDeTiempoView(inicio: inicio, minutos: Aprendizaje.minutosPrevistos(tarea, eventos: eventos))
                             .frame(width: anchoLumi * tamano * 0.50, height: anchoLumi * tamano * 0.50)
                             .position(x: geo.size.width * centro.x, y: geo.size.height * centro.y)
                             .transition(.opacity.combined(with: .scale(scale: 0.8)))

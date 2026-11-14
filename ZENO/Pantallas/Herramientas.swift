@@ -86,6 +86,7 @@ enum DatosDeEjemplo {
             let evento = EventoDeEnergia(tipo: .tareaTerminada, fecha: fin, valor: duracion)
             contexto.insert(evento)
             evento.tarea = tarea
+            evento.tamanoCrudo = tarea.tamanoCrudo
         }
     }
 }

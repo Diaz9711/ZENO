@@ -120,6 +120,14 @@ struct TareaDelMomentoView: View {
                 .contentTransition(.opacity)
                 .animation(.easeInOut(duration: 0.5), value: enMarcha)
                 .accessibilityHidden(true)
+            // Lo aprendido, dicho en voz baja: cuánto suele tomarle de verdad algo así.
+            if !enMarcha, tarea.primerPaso == nil,
+               let minutos = Aprendizaje.minutosReales(tarea.tamano, eventos: eventos) {
+                Text("Algo así suele tomarte unos \(Int(minutos.rounded())) min.")
+                    .font(.zenoTexto(.caption))
+                    .foregroundStyle(Color.oroZeno.opacity(0.75))
+                    .transition(.opacity)
+            }
 
             Spacer().frame(height: 4)
             Button(enMarcha ? "Dejarla para después" : "Ahora no") { ahoraNo(tarea) }
@@ -400,6 +408,7 @@ struct TareaDelMomentoView: View {
         let evento = EventoDeEnergia(tipo: tipo, valor: valor)
         contexto.insert(evento)
         evento.tarea = tarea
+        evento.tamanoCrudo = tarea.tamanoCrudo
     }
 
     private func empezar(_ tarea: Tarea) {
@@ -507,6 +516,7 @@ struct MisTareasView: View {
                     let evento = EventoDeEnergia(tipo: .tareaTerminada)
                     contexto.insert(evento)
                     evento.tarea = tarea
+                    evento.tamanoCrudo = tarea.tamanoCrudo
                     withAnimation(.easeInOut(duration: 0.4)) { tarea.terminadaEn = .now }
                     Task { await AvisosDeTareas.sincronizar(contexto) }
                 }

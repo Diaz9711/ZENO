@@ -24,6 +24,9 @@ final class EventoDeEnergia {
     var valor: Double?
     /// De dónde viene la señal: "app" en el MVP; "salud" en la versión 2.
     var fuente: String
+    /// Tamaño de la tarea en ese momento (chica, mediana, grande). Se guarda aparte para que
+    /// lo aprendido no se pierda si la tarea se borra después.
+    var tamanoCrudo: String? = nil
 
     var tarea: Tarea?
 
@@ -40,6 +43,7 @@ final class EventoDeEnergia {
         self.franjaHoraria = calendario.component(.hour, from: fecha)
         self.valor = valor
         self.tarea = tarea
+        self.tamanoCrudo = tarea?.tamanoCrudo
         self.fuente = fuente
     }
 

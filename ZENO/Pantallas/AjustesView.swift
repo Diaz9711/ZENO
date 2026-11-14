@@ -95,6 +95,31 @@ struct AjustesView: View {
                     .cristal(radio: 20)
                 }
 
+                // — Lo aprendido —
+                VStack(alignment: .leading, spacing: 12) {
+                    titulo("Tu ritmo")
+                    let aprendido = Aprendizaje.resumen(eventos: eventos)
+                    VStack(alignment: .leading, spacing: 12) {
+                        if aprendido.isEmpty {
+                            Text("Mientras más uses ZENO, más te conoceré: a qué horas rindes, cuánto te toman las cosas y qué prefieres dejar para después.")
+                                .font(.zenoTexto(.footnote))
+                                .opacity(0.75)
+                        } else {
+                            ForEach(aprendido, id: \.self) { frase in
+                                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                                    Circle().fill(Color.oroZeno).frame(width: 5, height: 5)
+                                    Text(verbatim: frase)
+                                        .font(.zenoTexto(.subheadline))
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                            }
+                        }
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .cristal(radio: 20)
+                }
+
                 // — Datos —
                 VStack(alignment: .leading, spacing: 12) {
                     titulo("Tus datos")
