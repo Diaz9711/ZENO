@@ -220,6 +220,11 @@ struct UniversoView: View {
             }
             #if DEBUG
             DatosDeEjemplo.cargarSiHaceFalta(en: contexto, hayPersona: !personas.isEmpty)
+            // Atajos para probar sin tocar: -formaDePrueba 0|1, -paginaInicial 0|1|2, -sinPresentacion YES.
+            let ajustes = UserDefaults.standard
+            if let forma = ajustes.string(forKey: "formaDePrueba").flatMap(Int.init) { personas.first?.formaDeLumiCruda = forma }
+            if let p = ajustes.string(forKey: "paginaInicial").flatMap(Int.init), let destino = Pagina(rawValue: p) { pagina = destino }
+            if ajustes.bool(forKey: "sinPresentacion") { presentando = false; llegada = true }
             #endif
             registrarApertura()
         }
