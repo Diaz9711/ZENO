@@ -21,6 +21,31 @@ extension AnyTransition {
     }
 }
 
+/// Cambio de página con dirección: la página nueva llega desde el lado hacia donde se avanza
+/// y la anterior se va por el lado contrario. Así se siente que las páginas están una junto a otra.
+private struct PasoLateral: ViewModifier {
+    let lado: CGFloat      // -1 izquierda, 1 derecha, 0 en su sitio
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+
+    func body(content: Content) -> some View {
+        let fuera = lado != 0
+        content
+            .blur(radius: fuera && !reducirMovimiento ? 14 : 0)
+            .opacity(fuera ? 0 : 1)
+            .scaleEffect(fuera && !reducirMovimiento ? 0.93 : 1)
+            .offset(x: reducirMovimiento ? 0 : lado * 84)
+    }
+}
+
+extension AnyTransition {
+    /// `sentido` 1 = se avanza hacia la derecha de la barra; -1 = se vuelve.
+    static func pasoDePagina(sentido: CGFloat) -> AnyTransition {
+        .asymmetric(
+            insertion: .modifier(active: PasoLateral(lado: sentido), identity: PasoLateral(lado: 0)),
+            removal: .modifier(active: PasoLateral(lado: -sentido), identity: PasoLateral(lado: 0)))
+    }
+}
+
 /// Entrada escalonada: cada pieza de la pantalla llega un instante después de la anterior.
 private struct Aparece: ViewModifier {
     let orden: Int
@@ -31,9 +56,9 @@ private struct Aparece: ViewModifier {
         content
             .blur(radius: visible || reducirMovimiento ? 0 : 12)
             .opacity(visible ? 1 : 0)
-            .offset(y: visible || reducirMovimiento ? 0 : 22)
+            .offset(y: visible || reducirMovimiento ? 0 : 30)
             .onAppear {
-                withAnimation(.spring(response: 0.75, dampingFraction: 0.82).delay(0.10 + 0.09 * Double(orden))) {
+                withAnimation(.spring(response: 0.75, dampingFraction: 0.82).delay(0.12 + 0.11 * Double(orden))) {
                     visible = true
                 }
             }
@@ -130,7 +155,7 @@ private extension CGPoint {
 
 // MARK: - Barra inferior
 
-enum Pagina: Hashable { case hoy, tareas, ajustes }
+enum Pagina: Int, Hashable { case hoy, tareas, ajustes }
 
 /// La barra de ZENO: cristal flotante, la página activa encendida en oro y un "+" siempre a mano.
 struct BarraZeno: View {

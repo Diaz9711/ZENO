@@ -24,6 +24,8 @@ struct UniversoView: View {
     @State private var estuvoEnFondo = false
     @State private var mostrarLaboratorio = false
     @State private var pagina = Pagina.hoy
+    @State private var sentido: CGFloat = 1   // hacia dónde se mueve el cambio de página
+    @State private var viajes = 0             // cada cambio de página: Lumi toma impulso
     @State private var pedirAgregar = 0
     @State private var editando = false
     @AppStorage("modoPrueba") private var modoPrueba = false
@@ -83,6 +85,16 @@ struct UniversoView: View {
                                 CubicKeyframe(0.88, duration: 0.35)
                                 SpringKeyframe(1.08, duration: 0.45, spring: .bouncy)
                                 SpringKeyframe(1.0, duration: 0.7, spring: .smooth)
+                            }
+                        }
+                        // Al cambiar de página, Lumi se estira al arrancar y se asienta al llegar.
+                        .keyframeAnimator(initialValue: CGSize(width: 1, height: 1), trigger: viajes) { vista, forma in
+                            vista.scaleEffect(x: forma.width, y: forma.height)
+                        } keyframes: { _ in
+                            KeyframeTrack {
+                                CubicKeyframe(CGSize(width: 0.90, height: 1.16), duration: 0.22)
+                                SpringKeyframe(CGSize(width: 1.10, height: 0.92), duration: 0.38, spring: .bouncy)
+                                SpringKeyframe(CGSize(width: 1, height: 1), duration: 0.6, spring: .smooth)
                             }
                         }
                         .rotationEffect(.degrees(vueltas))
@@ -214,23 +226,23 @@ struct UniversoView: View {
                                 .padding(.top, 6)
                                 .aparece(0)
                         }
-                        .transition(.desenfoque)
+                        .transition(.pasoDePagina(sentido: sentido))
 
                     case .tareas:
                         MisTareasView()
                             .padding(.top, altoTotal * 0.185 - arriba)
-                            .transition(.desenfoque)
+                            .transition(.pasoDePagina(sentido: sentido))
 
                     case .ajustes:
                         AjustesView(persona: persona)
                             .padding(.top, altoTotal * 0.185 - arriba)
-                            .transition(.desenfoque)
+                            .transition(.pasoDePagina(sentido: sentido))
                     }
 
                     if !editando {
-                        BarraZeno(pagina: $pagina) {
+                        BarraZeno(pagina: Binding(get: { pagina }, set: { ir(a: $0) })) {
                             // El "+" siempre lleva a escribir una tarea en la página de hoy.
-                            withAnimation(movimientoDeLumi) { pagina = .hoy }
+                            ir(a: .hoy)
                             pedirAgregar += 1
                         }
                         .padding(.bottom, 4)
@@ -239,6 +251,20 @@ struct UniversoView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .transition(.desenfoque)
+            }
+        }
+    }
+
+    /// Cambia de página. Primero se fija el sentido y, un instante después, se mueve:
+    /// así la página que sale ya sabe por qué lado irse.
+    private func ir(a destino: Pagina) {
+        guard destino != pagina else { return }
+        sentido = destino.rawValue > pagina.rawValue ? 1 : -1
+        DispatchQueue.main.async {
+            if !reducirMovimiento { viajes += 1 }
+            withAnimation(reducirMovimiento ? .easeInOut(duration: 0.5)
+                                            : .spring(response: 0.95, dampingFraction: 0.68)) {
+                pagina = destino
             }
         }
     }
