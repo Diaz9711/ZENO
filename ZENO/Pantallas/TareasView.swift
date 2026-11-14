@@ -104,32 +104,26 @@ struct TareaDelMomentoView: View {
             } else {
                 Etiqueta(tarea.primerPaso != nil ? "Primer paso" : (enCurso == nil ? "Ahora" : "En curso"))
             }
-            VStack(spacing: 8) {
-                Titular(texto: tarea.textoVisible)
-                if tarea.primerPaso != nil {
-                    // Se muestra el primer paso; la tarea grande queda como contexto.
-                    Text("Primer paso de: \(tarea.titulo)")
-                        .font(.zenoTexto(.footnote))
-                        .multilineTextAlignment(.center)
-                        .opacity(0.6)
-                }
-            }
-            .padding(.horizontal, 32)
-            .id(tarea.persistentModelID)
-            .transition(.desenfoque)
+            // Sin botón: la tarea misma es el control (decisión de Diaz).
+            // Tocarla la empieza y el anillo aparece en Lumi; mantenerla presionada la termina.
+            let enMarcha = enCurso == tarea.persistentModelID
+            TareaTocable(tarea: tarea, enCurso: enMarcha,
+                         alEmpezar: { empezar(tarea) },
+                         alTerminar: { terminar(tarea) })
+                .id(tarea.persistentModelID)
+                .transition(.desenfoque)
 
-            Spacer().frame(height: 6)
-            if enCurso == tarea.persistentModelID {
-                BotonZeno("Terminé", intensidad: intensidadDelBoton) { terminar(tarea) }
-                Button("Dejarla para después") { ahoraNo(tarea) }
-                    .font(.zenoTexto(.body))
-                    .opacity(0.75)
-            } else {
-                BotonZeno("Empezar", intensidad: intensidadDelBoton) { empezar(tarea) }
-                Button("Ahora no") { ahoraNo(tarea) }
-                    .font(.zenoTexto(.body))
-                    .opacity(0.75)
-            }
+            Text(enMarcha ? "Mantén presionada la tarea cuando termines" : "Toca la tarea para empezar")
+                .font(.zenoTexto(.footnote))
+                .foregroundStyle(Color.marfil.opacity(0.6))
+                .contentTransition(.opacity)
+                .animation(.easeInOut(duration: 0.5), value: enMarcha)
+                .accessibilityHidden(true)
+
+            Spacer().frame(height: 4)
+            Button(enMarcha ? "Dejarla para después" : "Ahora no") { ahoraNo(tarea) }
+                .font(.zenoTexto(.body))
+                .opacity(0.75)
 
         case .descanso:
             Etiqueta("Descanso")
@@ -191,9 +185,6 @@ struct TareaDelMomentoView: View {
         }
         .padding(.bottom, 92)      // deja sitio a la barra
     }
-
-    /// Con energía baja el botón brilla menos; nunca desaparece.
-    private var intensidadDelBoton: Double { 0.55 + 0.45 * min(max(puntaje / 70, 0), 1) }
 
     /// El campo para escribir aparece cuando no hay una tarea en marcha ni descanso:
     /// así la pantalla sigue teniendo una sola acción principal.
@@ -613,5 +604,56 @@ struct FlechaDibujada: Shape {
         p.addLine(to: CGPoint(x: r.maxX, y: r.midY))
         p.addLine(to: CGPoint(x: r.maxX - r.height * 0.5, y: r.maxY))
         return p
+    }
+}
+
+/// La tarea del momento como control: tocar empieza; mantener presionada termina.
+/// Terminar pide un gesto deliberado porque no tiene vuelta atrás.
+private struct TareaTocable: View {
+    let tarea: Tarea
+    let enCurso: Bool
+    let alEmpezar: () -> Void
+    let alTerminar: () -> Void
+
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+    @State private var respira = false
+    @State private var presionando = false
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Titular(texto: tarea.textoVisible)
+            if tarea.primerPaso != nil {
+                // Se muestra el primer paso; la tarea grande queda como contexto.
+                Text("Primer paso de: \(tarea.titulo)")
+                    .font(.zenoTexto(.footnote))
+                    .multilineTextAlignment(.center)
+                    .opacity(0.6)
+            }
+        }
+        .padding(.horizontal, 32)
+        .padding(.vertical, 12)
+        // Sin empezar, la tarea respira una luz dorada: "empieza". Al mantenerla, se enciende.
+        .shadow(color: Color.oroZeno.opacity(presionando ? 0.85 : (!enCurso && respira ? 0.55 : 0.12)),
+                radius: presionando ? 28 : (!enCurso && respira ? 22 : 10))
+        .scaleEffect(presionando ? 1.04 : 1)
+        .contentShape(Rectangle())
+        .onTapGesture { if !enCurso { alEmpezar() } }
+        .onLongPressGesture(minimumDuration: 0.7, pressing: { ahora in
+            guard enCurso else { return }
+            withAnimation(.easeInOut(duration: ahora ? 0.7 : 0.3)) { presionando = ahora }
+        }, perform: {
+            if enCurso { alTerminar() }
+        })
+        .sensoryFeedback(.selection, trigger: presionando) { _, ahora in ahora }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint(enCurso ? Text("Mantén presionado para marcarla como terminada")
+                                   : Text("Toca para empezar"))
+        .accessibilityAction { if !enCurso { alEmpezar() } }
+        .accessibilityAction(named: Text("Terminé")) { if enCurso { alTerminar() } }
+        .onAppear {
+            guard !reducirMovimiento else { return }
+            withAnimation(.easeInOut(duration: 2.8).repeatForever(autoreverses: true)) { respira = true }
+        }
     }
 }
