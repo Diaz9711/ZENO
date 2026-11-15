@@ -50,9 +50,9 @@ a { color: inherit; }
 
 /* — Barra — */
 .barra { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 22px; }
-.logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-.logo .sol { width: 22px; height: 22px; }
-.logo span { font-family: var(--marca); font-size: 26px; letter-spacing: 0.32em; padding-left: 0.32em;
+.logo { display: flex; align-items: center; gap: 4px; text-decoration: none; }
+.logo .o { width: 34px; height: 22px; overflow: visible; }
+.logo span { font-family: var(--marca); font-size: 26px; letter-spacing: 0.2em;
   background: linear-gradient(180deg, var(--marfil), var(--oro)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .menu { display: flex; gap: 26px; }
 .menu a { text-decoration: none; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--marfil-2); transition: color .4s var(--curva); }
@@ -195,12 +195,12 @@ p { margin: 0; }
 <div class="envoltura">
   <header class="barra">
     <a class="logo" href="#inicio" aria-label="ZENO">
-      <svg class="sol" viewBox="0 0 24 24" aria-hidden="true">
-        <defs><radialGradient id="g" cx="40%" cy="38%" r="60%"><stop offset="0" stop-color="#f2ecdd"/><stop offset=".55" stop-color="#d9c08a"/><stop offset="1" stop-color="#b8975a"/></radialGradient></defs>
-        <circle cx="12" cy="12" r="10" fill="none" stroke="#d9c08a" stroke-opacity=".55" stroke-width="1"/>
-        <circle cx="12" cy="12" r="5" fill="url(#g)"/>
+      <span>ZEN</span>
+      <svg class="o" viewBox="0 0 40 24" aria-hidden="true">
+        <ellipse cx="18" cy="12" rx="17" ry="4.2" transform="rotate(-18 18 12)" fill="none" stroke="#d9c08a" stroke-opacity=".5" stroke-width=".9"/>
+        <circle cx="18" cy="12" r="8" fill="none" stroke="#d9c08a" stroke-width="1.6"/>
+        <circle cx="33" cy="7" r="1.6" fill="#ecdeb8"/>
       </svg>
-      <span>ZENO</span>
     </a>
     <nav class="menu" aria-label="Secciones">
       <a href="#lumi">Tu estrella</a>

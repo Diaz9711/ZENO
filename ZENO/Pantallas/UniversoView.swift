@@ -195,6 +195,10 @@ struct UniversoView: View {
                 #if DEBUG
                 GaleriaDeCohetes()
                 #endif
+            } else if UserDefaults.standard.bool(forKey: "galeriaLogos") {
+                #if DEBUG
+                GaleriaDeLogos()
+                #endif
             } else if let persona {
                 if !sesionAbierta {
                     // Sesión cerrada: el universo, ZENO y el menú de entrada. Todo lo suyo sigue guardado.
