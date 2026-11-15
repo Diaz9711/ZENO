@@ -17,11 +17,23 @@ struct AjustesView: View {
     var arriba: CGFloat = 0
     @AppStorage("modoPrueba") private var modoPrueba = false
     @Namespace private var espacio
+    /// "Cómo funciona ZENO": una página dentro de Ajustes, nunca una hoja de sistema.
+    @State private var leyendo = false
 
     var body: some View {
         let apariencia = AparienciaLumi(semilla: persona.semilla)
 
         ScrollView {
+            if leyendo {
+                ComoFuncionaView { withAnimation(Lujo.curva()) { leyendo = false } }
+                    .padding(.top, 8)
+                    .padding(.horizontal, Lujo.margen)
+                    .background(alignment: .top) { HojaDeFondo().padding(.top, -14) }
+                    .padding(.top, arriba)
+                    .padding(.bottom, 150)
+                    .informaDesplazamiento()
+                    .transition(.desenfoque)
+            } else {
             VStack(alignment: .leading, spacing: 34) {
                 VStack(alignment: .leading, spacing: 8) {
                     EtiquetaLujo("ZENO")
@@ -171,6 +183,17 @@ struct AjustesView: View {
                     }
                 }
 
+                // — Por qué funciona —
+                seccion("Saber más", orden: 6) {
+                    fila(icono: .ojo, titulo: "Cómo funciona ZENO",
+                         detalle: "Tareas pequeñas, energía, tiempo y sin culpa, con estudios.") {
+                        withAnimation(Lujo.curva()) { leyendo = true }
+                        Desplazamiento.compartido.valor = 0
+                    }
+                    .padding(.horizontal, 20)
+                    .tarjetaLujo()
+                }
+
                 // — Datos —
                 seccion("Tus datos", orden: 6) {
                     Text("Todo vive solo en este teléfono. Sin cuentas, sin servidores.")
@@ -242,7 +265,11 @@ struct AjustesView: View {
             .padding(.top, arriba)
             .padding(.bottom, 150)      // deja sitio a la barra
             .informaDesplazamiento()
+            .transition(.desenfoque)
+            }
         }
+        // Al abrir o cerrar "Cómo funciona ZENO" se empieza arriba.
+        .id(leyendo)
         .coordinateSpace(name: "pagina")
         .bordesFundidos(arriba: arriba)
         .foregroundStyle(Lujo.marfil)

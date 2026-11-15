@@ -66,6 +66,16 @@
         }
       }
     },
+    "Abre el estudio": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the study"
+          }
+        }
+      }
+    },
     "Abrir Ajustes del iPhone": {
       "localizations": {
         "en": {
@@ -386,6 +396,16 @@
         }
       }
     },
+    "Cada idea de ZENO sale de lo que se sabe del TDAH. Aquí está el porqué, con sus estudios.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every idea in ZENO comes from what is known about ADHD. Here is the why, with the studies."
+          }
+        }
+      }
+    },
     "Cambiar tu clave": {
       "localizations": {
         "en": {
@@ -412,6 +432,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Load sample data"
+          }
+        }
+      }
+    },
+    "Ceguera del tiempo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time blindness"
           }
         }
       }
@@ -452,6 +482,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "At most one, at %lld:00, your best hour. Never on a day you've already opened ZENO."
+          }
+        }
+      }
+    },
+    "Con TDAH, esperar una recompensa lejana suele costar más: hay una tendencia a evitar la espera. Una tarea grande se siente lejana y pesada. En un ensayo con adultos con TDAH, una terapia que enseñaba, entre otras cosas, a partir las tareas abrumadoras en pasos mejoró los síntomas más que la relajación, y la mejora seguía a los 12 meses.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With ADHD, waiting for a distant reward is often harder: there is a tendency to avoid waiting. A big task feels distant and heavy. In a trial with adults with ADHD, a therapy that taught, among other things, how to break overwhelming tasks into steps improved symptoms more than relaxation, and the improvement was still there at 12 months."
           }
         }
       }
@@ -572,6 +612,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "When"
+          }
+        }
+      }
+    },
+    "Cómo funciona ZENO": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How ZENO works"
           }
         }
       }
@@ -766,6 +816,16 @@
         }
       }
     },
+    "Empezar es lo más difícil": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting is the hardest part"
+          }
+        }
+      }
+    },
     "Empezar ya es mucho.": {
       "localizations": {
         "en": {
@@ -802,6 +862,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "In focus"
+          }
+        }
+      }
+    },
+    "En un estudio con 1203 adultos, quienes tenían TDAH contaban recibir más críticas de los demás y tenían menos autocompasión, es decir, menos amabilidad consigo mismos en los momentos difíciles.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In a study of 1,203 adults, those with ADHD reported more criticism from others and less self-compassion, that is, less kindness toward themselves in hard moments."
           }
         }
       }
@@ -1609,6 +1679,16 @@
         }
       }
     },
+    "Nada de regaños": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No scolding"
+          }
+        }
+      }
+    },
     "Nada pendiente.": {
       "localizations": {
         "en": {
@@ -1809,6 +1889,46 @@
         }
       }
     },
+    "Por eso ZENO nunca regaña: no hay rachas rotas, ni números en rojo, ni tareas vencidas. \"Ahora no\" también es una respuesta válida.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That is why ZENO never scolds: no broken streaks, no red numbers, no overdue tasks. \"Not now\" is a valid answer too."
+          }
+        }
+      }
+    },
+    "Por eso ZENO parte de tus horas, aprende cuándo rindes y propone lo difícil cuando tienes más energía. Con poca, te deja descansar.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That is why ZENO starts from your hours, learns when you do best and suggests the hard things when you have more energy. When you have little, it lets you rest."
+          }
+        }
+      }
+    },
+    "Por eso ZENO te pregunta el primer paso de dos minutos y te propone una sola cosa a la vez.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That is why ZENO asks you for a two-minute first step and suggests just one thing at a time."
+          }
+        }
+      }
+    },
+    "Por eso, al empezar, un anillo de luz se va consumiendo alrededor de Lumi, y ZENO aprende cuánto te toman las cosas de verdad.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That is why, when you start, a ring of light slowly runs down around Lumi, and ZENO learns how long things really take you."
+          }
+        }
+      }
+    },
     "Por la mañana": {
       "localizations": {
         "en": {
@@ -1919,6 +2039,16 @@
         }
       }
     },
+    "Que el tiempo se vea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Making time visible"
+          }
+        }
+      }
+    },
     "Quedan %lld minutos": {
       "localizations": {
         "en": {
@@ -1995,6 +2125,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Breathe. You made it."
+          }
+        }
+      }
+    },
+    "Saber más": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learn more"
           }
         }
       }
@@ -2089,6 +2229,16 @@
         }
       }
     },
+    "Sin culpa": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No guilt"
+          }
+        }
+      }
+    },
     "Solo dos minutos. Yo te acompaño.": {
       "localizations": {
         "en": {
@@ -2155,6 +2305,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tasks"
+          }
+        }
+      }
+    },
+    "Tareas pequeñas": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small tasks"
+          }
+        }
+      }
+    },
+    "Tareas pequeñas, energía, tiempo y sin culpa, con estudios.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small tasks, energy, time and no guilt, with studies."
           }
         }
       }
@@ -2399,6 +2569,16 @@
         }
       }
     },
+    "Tu reloj es tuyo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your clock is yours"
+          }
+        }
+      }
+    },
     "Tu ritmo": {
       "localizations": {
         "en": {
@@ -2505,6 +2685,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "One thing at a time."
+          }
+        }
+      }
+    },
+    "Una revisión de 62 estudios encontró, de forma consistente, que el TDAH se asocia a un reloj interno más tardío: más energía hacia la tarde o la noche y sueño más tarde. No todas las horas son iguales para todos.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A review of 62 studies consistently found that ADHD is linked to a later internal clock: more energy toward the evening or night, and falling asleep later. Not every hour is the same for everyone."
+          }
+        }
+      }
+    },
+    "Una revisión de estudios neurocognitivos y de imagen cerebral muestra que en el TDAH hay dificultades consistentes para percibir, estimar y anticipar el tiempo, en intervalos de segundos, minutos y más largos.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A review of neurocognitive and brain imaging studies shows that ADHD comes with consistent difficulties perceiving, estimating and anticipating time, over seconds, minutes and longer."
           }
         }
       }
@@ -2620,7 +2820,14 @@
       }
     },
     "ZENO": {
-      "shouldTranslate": false
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ZENO"
+          }
+        }
+      }
     },
     "ZENO acompaña tu día. No diagnostica ni reemplaza un tratamiento.": {
       "localizations": {
@@ -2628,6 +2835,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "ZENO keeps you company through the day. It doesn't diagnose or replace treatment."
+          }
+        }
+      }
+    },
+    "ZENO acompaña tu día. No diagnostica ni reemplaza un tratamiento. Si algo te preocupa, habla con un profesional de salud.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ZENO keeps you company through the day. It does not diagnose or replace treatment. If something worries you, talk to a health professional."
           }
         }
       }
