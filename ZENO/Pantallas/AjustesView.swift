@@ -19,6 +19,7 @@ struct AjustesView: View {
     @Namespace private var espacio
     /// "Cómo funciona ZENO": una página dentro de Ajustes, nunca una hoja de sistema.
     @State private var leyendo = false
+    @State private var calidadNueva = CalidadVisual.nivel > 0.5
 
     var body: some View {
         let apariencia = AparienciaLumi(semilla: persona.semilla)
@@ -219,6 +220,15 @@ struct AjustesView: View {
                     .toggleStyle(InterruptorLujo())
 
                     if modoPrueba {
+                        // Comparar en vivo el cielo y Lumi de siempre con la nueva calidad.
+                        Toggle(isOn: Binding(get: { calidadNueva }, set: { nuevo in
+                            calidadNueva = nuevo
+                            CalidadVisual.nivel = nuevo ? 1 : 0
+                            UserDefaults.standard.set(CalidadVisual.nivel, forKey: CalidadVisual.clave)
+                        })) {
+                            Text(verbatim: "Nueva calidad del cielo y Lumi").font(.zenoTexto(.subheadline))
+                        }
+                        .toggleStyle(InterruptorLujo())
                         Button("Cargar datos de ejemplo") { DatosDeEjemplo.cargar(en: contexto) }
                             .font(.zenoTexto(.subheadline, .medium))
                         Button("Enviar un aviso de prueba en 10 segundos") {

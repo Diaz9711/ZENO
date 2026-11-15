@@ -80,7 +80,8 @@ struct LumiView: View, Animatable {
                         .float(Double(forma.rawValue)),
                         .float3(nucleo.x, nucleo.y, nucleo.z),
                         .float3(corona.x, corona.y, corona.z),
-                        .float3(apariencia.colorHalo.x, apariencia.colorHalo.y, apariencia.colorHalo.z)
+                        .float3(apariencia.colorHalo.x, apariencia.colorHalo.y, apariencia.colorHalo.z),
+                        .float(CalidadVisual.nivel)
                     ))
                     .offset(x: m.flotarX * geo.size.width, y: m.flotarY * geo.size.width)
             }

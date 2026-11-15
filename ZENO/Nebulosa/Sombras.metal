@@ -93,6 +93,24 @@ static float estrellas(float2 pos, float celda, float densidad, float radio, flo
     return (nucleo + aura) * brilla * titila * (0.45 + 0.55 * fract(h * 131.0));
 }
 
+// Calidad (Diaz, 15 nov 2026): pocas estrellas brillantes, con puntas finas como en una foto del cielo.
+// Una de cada cinco celdas grandes tiene una; las demás capas siguen siendo puntos.
+static float estrellasBrillantes(float2 pos, float celda, float t, float2 semilla) {
+    float2 g = pos / celda;
+    float2 id = floor(g);
+    float h = azar(id + semilla);
+    if (h < 0.68) return 0.0;
+    float2 c = 0.5 + 0.30 * (float2(azar(id + semilla + 2.3), azar(id + semilla + 5.7)) - 0.5);
+    float2 rel = (fract(g) - c) * celda;
+    float r2 = dot(rel, rel);
+    float nucleo = exp(-r2 / 0.8);
+    float halo = 0.16 * exp(-r2 / 20.0);
+    float puntas = exp(-abs(rel.y) * 1.6) * exp(-abs(rel.x) / 9.0)
+                 + exp(-abs(rel.x) * 1.6) * exp(-abs(rel.y) / 9.0);
+    float titila = 0.82 + 0.18 * sin(t * (0.4 + fract(h * 37.0)) + h * 50.0);
+    return (nucleo + halo + 0.55 * puntas) * titila * (0.55 + 0.45 * fract(h * 91.0));
+}
+
 // Lucecitas que flotan despacio, como luciérnagas: cada una vive en su celda,
 // se pasea en ella y se enciende y se apaga con calma.
 static float lucecitas(float2 pos, float celda, float radio, float t, float2 semilla) {
@@ -141,8 +159,11 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
 [[ stitchable ]] half4 nebulosa(float2 pos, half4 color,
                                 float2 tam, float2 centro, float t, float2 inclina,
                                 float2 desplazamiento, float energia, float calidez,
-                                float3 cFondo, float3 cNube, float3 cBrasa, float3 cOro)
+                                float3 cFondo, float3 cNube, float3 cBrasa, float3 cOro,
+                                float calidad)
 {
+    // `calidad` 0 = el cielo de siempre, idéntico. 1 = más luz y profundidad (sin colores nuevos,
+    // sin depender de la energía, igual para la misma semilla y nítido aunque el tiempo esté quieto).
     float escala = min(tam.x, tam.y);
     float2 uv = (pos - centro) / escala;
     float d = length(uv);
@@ -154,7 +175,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
 
     // Gas que se pliega sobre sí mismo, muy despacio.
     // Al inclinar el teléfono, el gas se corre un poco: lo lejano se mueve menos que lo cercano.
-    float2 p = ru * 1.30 + desplazamiento + inclina * 0.035;
+    float2 p = ru * 1.30 + desplazamiento + inclina * mix(0.035, 0.070, calidad);
     float2 q = float2(gasN(p + float2(0.0, t * 0.020), 3),
                       gasN(p + float2(5.2, 1.3) - float2(t * 0.016, 0.0), 3));
     float2 r = float2(gasN(p + 1.9 * q + float2(1.7, 9.2) + t * 0.011, 3),
@@ -182,6 +203,24 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     float borde = dens * (1.0 - dens) * 4.0;
     col += mix(cNube, cBrasa, 0.30) * borde * fino * (0.10 + 0.22 * exp(-d * 1.6)) * luzE;
 
+    // Calidad: Lumi ilumina el gas. La cara de las nubes que mira a la estrella se enciende,
+    // la de atrás queda en sombra, y unos haces muy suaves salen de ella a través del gas.
+    if (calidad > 0.001) {
+        float2 haciaLumi = -ru / max(length(ru), 0.0001);
+        float2 base = p + 1.8 * r;
+        float aqui = gasN(base, 3);
+        float hacia = gasN(base + haciaLumi * 0.09, 3);
+        float iluminado = clamp((aqui - hacia) * 9.0, 0.0, 1.0);
+        float sombra = clamp((hacia - aqui) * 8.0, 0.0, 1.0);
+        float alcance = exp(-d * 0.85);
+        col += mix(cBrasa, cOro, 0.35) * iluminado * (0.35 + dens) * alcance * 0.80 * luzE * calidad;
+        col *= 1.0 - 0.42 * sombra * (0.3 + dens) * (0.5 + 0.5 * alcance) * calidad;
+        float angulo = atan2(ru.y, ru.x);
+        float haces = ruido(float2(angulo * 7.0 + desplazamiento.x, t * 0.030))
+                    * ruido(float2(angulo * 19.0 - desplazamiento.y, t * 0.018 + 3.0));
+        col += mix(cBrasa, cNube, 0.30) * pow(haces, 2.0) * exp(-d * 1.6) * (0.30 + 0.70 * dens) * 0.50 * luzE * calidad;
+    }
+
     // Filamentos luminosos, más visibles donde hay gas.
     float hilo = pow(fila, 3.0);
     col += mix(cBrasa, cNube, 0.35) * hilo * (0.12 + 0.42 * dens) * luzE;
@@ -201,24 +240,38 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     // Estrellas en tres profundidades; el gas denso las tapa un poco.
     float tapa = 1.0 - 0.60 * dens;
     float3 cEstrella = float3(1.0, 0.95, 0.88);
-    float2 posCerca = pos + inclina * 14.0;
-    float lejos = estrellas(pos + inclina * 3.0, 7.0, 0.050, 0.55, t, desplazamiento);
-    float medias = estrellas(pos + inclina * 7.0, 19.0, 0.060, 0.85, t, desplazamiento + 17.0);
+    float2 posCerca = pos + inclina * mix(14.0, 28.0, calidad);
+    float lejos = estrellas(pos + inclina * mix(3.0, 4.0, calidad), 7.0, 0.050, mix(0.55, 0.48, calidad), t, desplazamiento);
+    float medias = estrellas(pos + inclina * mix(7.0, 13.0, calidad), 19.0, 0.060, 0.85, t, desplazamiento + 17.0);
     float cerca = estrellas(posCerca, 53.0, 0.090, 1.35, t, desplazamiento + 41.0);
     float3 tinte = mix(float3(0.78, 0.86, 1.0), float3(1.0, 0.88, 0.72), azar(floor(posCerca / 53.0) + 2.0));
     col += cEstrella * (lejos * 0.42 + medias * 0.70) * tapa * (1.0 - calor);
     col += tinte * cerca * 1.12 * tapa * (1.0 - calor);
+    if (calidad > 0.001) {
+        float2 posBrillo = pos + inclina * 40.0;
+        float brillantes = estrellasBrillantes(posBrillo, 115.0, t, desplazamiento + 63.0);
+        float3 tinteB = mix(float3(0.80, 0.88, 1.0), float3(1.0, 0.92, 0.80), azar(floor(posBrillo / 115.0) + 9.0));
+        col += tinteB * brillantes * 1.35 * (1.0 - 0.45 * dens) * (1.0 - calor) * calidad;
+    }
 
     // Viñeta suave; el piso nunca baja del color del cielo.
     col *= 1.0 - 0.24 * smoothstep(0.45, 1.25, d);
     col *= luzE;
+    if (calidad > 0.001) {
+        // Calidad: más volumen. Curva en S suave (sombras más hondas, luces más vivas) y
+        // un poco más de color, sin tonos nuevos. El piso de abajo sigue impidiendo el negro.
+        float3 s = col * col * (3.0 - 2.0 * col);
+        col = mix(col, s, 0.38 * calidad);
+        float l = dot(col, float3(0.299, 0.587, 0.114));
+        col = mix(float3(l), col, 1.0 + 0.16 * calidad);
+    }
     col = max(col, cFondo * 0.74);
 
     // Lucecitas doradas en dos distancias, delante del gas. Son lo más cercano:
     // al inclinar el teléfono se mueven más que todo lo demás.
     float2 sube = float2(0.0, -t * 2.2);
-    float luzLejos = lucecitas(pos + inclina * 22.0 + sube, 104.0, 1.5, t, desplazamiento + 5.0);
-    float luzCerca = lucecitas(pos + inclina * 38.0 + sube * 1.7, 171.0, 2.5, t * 0.8, desplazamiento + 29.0);
+    float luzLejos = lucecitas(pos + inclina * mix(22.0, 36.0, calidad) + sube, 104.0, 1.5, t, desplazamiento + 5.0);
+    float luzCerca = lucecitas(pos + inclina * mix(38.0, 64.0, calidad) + sube * 1.7, 171.0, 2.5, t * 0.8, desplazamiento + 29.0);
     col += mix(cOro, float3(1.0, 0.93, 0.80), 0.35) * (luzLejos * 0.55 + luzCerca * 0.42) * (1.0 - 0.7 * calor);
 
     // Un cometa muy pequeño cruza el cielo alto de vez en cuando, nunca a ritmo fijo.
@@ -227,6 +280,11 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     // Grano finísimo contra el bandeado.
     col += (azar(pos + fract(t)) - 0.5) / 160.0;
 
+    // Calidad: las luces altas se acercan al blanco con suavidad en vez de cortarse de golpe
+    // (lo de abajo de 0,8 queda igual).
+    float3 sobra = max(col - 0.8, 0.0);
+    float3 suave = min(col, 0.8) + 0.2 * (1.0 - exp(-sobra * 5.0));
+    col = mix(col, suave, calidad);
     return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
 }
 
@@ -241,7 +299,8 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
                             float energia, float respiro, float giro,
                             float lobulos, float profundidad, float destello,
                             float fase, float ola, float2 orbita, float forma_,
-                            float3 cNucleo, float3 cCorona, float3 cHalo)
+                            float3 cNucleo, float3 cCorona, float3 cHalo,
+                            float calidad)
 {
     float2 uv = (pos - tam * 0.5) / (min(tam.x, tam.y) * 0.5);
     float d = length(uv);
@@ -349,6 +408,17 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         float rPunto = rN * 0.50;
         float punto = smoothstep(rPunto + px, rPunto - px, d);
         col += cClaro * punto * 1.1 * centelleo;
+        if (calidad > 0.001) {
+            // Calidad: el corazón tiene textura viva (como la superficie de una estrella) y un
+            // anillo de difracción finísimo, como en las fotos reales de estrellas.
+            float grano = nube(uv / rN * 2.4 + desplazamiento * 1.3 + float2(t * 0.06, -t * 0.05));
+            col += cClaro * corazon * (grano - 0.5) * 0.80 * brillo * calidad;
+            float anillo = exp(-pow((x - 3.2) / 0.16, 2.0)) * (0.55 + 0.45 * fil);
+            col += mix(cClaro, cHalo, 0.30) * anillo * 0.15 * brillo * calidad;
+            // Chispa de luz sobre el centro: un destello pequeño y nítido.
+            float chispa = exp(-x * x * 9.0);
+            col += float3(1.0, 0.98, 0.94) * chispa * 0.35 * centelleo * calidad;
+        }
     } else {
         // ═════ ESFERA ═════
         float rN = mix(0.222, 0.262, energia) * (1.0 + 0.040 * respiro);
@@ -381,6 +451,17 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         esfera += cClaro * pow(z, 5.0) * (0.08 + 0.06 * respiro);   // el corazón late
         float borde = pow(1.0 - z, 2.6);
         esfera += mix(cCorona, cHalo, 0.40) * borde * 0.42;
+        if (calidad > 0.001) {
+            // Calidad: brillo de vidrio (reflejo pequeño y nítido) y un canto de luz en el borde.
+            // El brillo nace arriba a la izquierda, del mismo lado de donde viene la luz de la bola.
+            float3 L = normalize(float3(-0.55, -0.65, 0.52));
+            float3 refl = 2.0 * dot(n, L) * n - L;
+            float especular = pow(max(refl.z, 0.0), 60.0);
+            esfera += float3(1.0, 0.98, 0.94) * especular * 0.55 * calidad;
+            esfera += cClaro * pow(max(refl.z, 0.0), 12.0) * 0.10 * calidad;
+            esfera += mix(cCorona, cHalo, 0.45) * pow(1.0 - z, 5.0) * 0.30 * calidad;
+            esfera *= 1.0 + 0.10 * (vetas - 0.2) * calidad;
+        }
         esfera *= 0.78 + 0.26 * brillo;
 
         disco = smoothstep(1.015, 1.0 - mix(0.085, 0.045, energia), x);

@@ -45,7 +45,8 @@ struct NebulosaView: View, Animatable {
                         .float3(apariencia.colorFondo.x, apariencia.colorFondo.y, apariencia.colorFondo.z),
                         .float3(apariencia.colorNube.x, apariencia.colorNube.y, apariencia.colorNube.z),
                         .float3(apariencia.colorBrasa.x, apariencia.colorBrasa.y, apariencia.colorBrasa.z),
-                        .float3(apariencia.colorOro.x, apariencia.colorOro.y, apariencia.colorOro.z)
+                        .float3(apariencia.colorOro.x, apariencia.colorOro.y, apariencia.colorOro.z),
+                        .float(CalidadVisual.nivel)
                     ))
             }
         }
