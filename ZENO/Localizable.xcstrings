@@ -546,6 +546,16 @@
         }
       }
     },
+    "Cuando quieras, escribe una con el +.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whenever you like, write one with the +."
+          }
+        }
+      }
+    },
     "Cuando quieras, toca Empezar. Yo te acompaño.": {
       "localizations": {
         "en": {
@@ -2215,6 +2225,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tap to ask for help"
+          }
+        }
+      }
+    },
+    "Toca una tarea para cambiar su día u hora.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap a task to change its day or time."
+          }
+        }
+      }
+    },
+    "Todo lo tuyo se queda en este iPhone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything of yours stays on this iPhone."
           }
         }
       }

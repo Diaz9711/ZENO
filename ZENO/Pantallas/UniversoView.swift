@@ -159,6 +159,10 @@ struct UniversoView: View {
                     OndaDeLuzView(centro: CGPoint(x: geo.size.width * centro.x, y: geo.size.height * centro.y),
                                   grande: celebracion.grande,
                                   numero: celebraciones)
+
+                    // Chispa celebra contigo: una vuelta alrededor de Lumi.
+                    VueloDeChispa(numero: celebraciones, radio: anchoLumi * tamano * 0.30)
+                        .position(x: geo.size.width * centro.x, y: geo.size.height * centro.y)
                 }
                 .animation(.easeInOut(duration: 0.6), value: tareaEnCurso?.persistentModelID)
                 // El cielo de la persona aparece despacio, como si se condensara.

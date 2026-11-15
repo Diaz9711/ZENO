@@ -29,6 +29,8 @@ struct AjustesView: View {
                         .font(.zenoTitulo(.largeTitle))
                         .foregroundStyle(Lujo.marfil)
                         .shadow(color: .black.opacity(0.45), radius: 12, y: 2)
+                    ChispaDiscreta(frase: Idioma.texto("Todo lo tuyo se queda en este iPhone."))
+                        .padding(.top, 6)
                 }
                 .padding(.leading, 4)
                 .aparece(0)

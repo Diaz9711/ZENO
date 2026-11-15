@@ -12,6 +12,9 @@ enum DisenoDeCohete: Int, CaseIterable, Identifiable {
 // MARK: - Lo que dice (función pura)
 
 enum Cohete {
+    /// Su nombre lo eligió Diaz (14 nov 2026). Es un nombre propio: no se traduce.
+    static let nombre = "Chispa"
+
     enum Momento {
         case tarea(enMarcha: Bool, primerPaso: Bool, minutosReales: Int?, enRacha: Bool)
         case descanso
@@ -103,7 +106,10 @@ struct HojaDeAyuda: View {
                 DibujoDeCohete(diseno: DisenoDeCohete(rawValue: diseno) ?? .clasico)
                     .frame(width: 40, height: 48)
                 VStack(alignment: .leading, spacing: 4) {
-                    EtiquetaLujo("Tu cohete")
+                    Text(verbatim: Cohete.nombre.uppercased())
+                        .font(.zenoTexto(.caption2, .semibold))
+                        .kerning(1.6)
+                        .foregroundStyle(Lujo.oro)
                     Text("¿En qué te ayudo?")
                         .font(.zenoTitulo(.title2, .regular))
                         .foregroundStyle(Lujo.marfil)
@@ -129,6 +135,91 @@ struct HojaDeAyuda: View {
             }
             .padding(.horizontal, 20)
             .tarjetaLujo()
+        }
+    }
+}
+
+// MARK: - Chispa en otras páginas y en las celebraciones
+
+/// Chispa, discreta, en Tareas y Ajustes: pequeña, quieta salvo un leve flote, con una pista útil.
+struct ChispaDiscreta: View {
+    let frase: String
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+    @State private var flota = false
+
+    var body: some View {
+        HStack(spacing: 10) {
+            DibujoDeCohete(diseno: .clasico)
+                .frame(width: 20, height: 24)
+                .offset(y: flota ? -1.5 : 1.5)
+            Text(verbatim: frase)
+                .font(.zenoTexto(.caption))
+                .foregroundStyle(Lujo.marfilSecundario)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text(verbatim: "\(Cohete.nombre): \(frase)"))
+        .onAppear {
+            guard !reducirMovimiento else { return }
+            withAnimation(.easeInOut(duration: 2.8).repeatForever(autoreverses: true)) { flota = true }
+        }
+    }
+}
+
+/// Al terminar una tarea, Chispa sale de Lumi, da una vuelta a su alrededor y vuelve a ella.
+/// Solo movimiento (posición, giro, escala y opacidad). Con Reducir Movimiento no vuela.
+struct VueloDeChispa: View {
+    /// Cambia con cada celebración.
+    let numero: Int
+    /// Radio de la vuelta alrededor de Lumi.
+    let radio: CGFloat
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+
+    private struct Vuelo {
+        var angulo: Double = -.pi / 2   // empieza arriba
+        var distancia: Double = 0       // 0 = dentro de Lumi, 1 = en la órbita
+        var escala: Double = 0.5
+        var opacidad: Double = 0
+    }
+
+    var body: some View {
+        if !reducirMovimiento {
+            DibujoDeCohete(diseno: .clasico)
+                .frame(width: 22, height: 26)
+                .keyframeAnimator(initialValue: Vuelo(), trigger: numero) { vista, v in
+                    vista
+                        // La nariz mira hacia donde va (vuelta en el sentido del reloj).
+                        .rotationEffect(.radians(v.angulo + .pi))
+                        .scaleEffect(v.escala)
+                        .offset(x: cos(v.angulo) * radio * v.distancia, y: sin(v.angulo) * radio * v.distancia)
+                        .opacity(v.opacidad)
+                } keyframes: { _ in
+                    KeyframeTrack(\.angulo) {
+                        LinearKeyframe(-.pi / 2, duration: 0.6)          // espera a que Lumi inhale
+                        CubicKeyframe(-.pi / 2 + 2 * .pi, duration: 2.4)
+                        CubicKeyframe(-.pi / 2 + 2.25 * .pi, duration: 0.5)
+                    }
+                    KeyframeTrack(\.distancia) {
+                        LinearKeyframe(0, duration: 0.6)
+                        SpringKeyframe(1, duration: 0.6, spring: .smooth)
+                        LinearKeyframe(1, duration: 1.8)
+                        CubicKeyframe(0, duration: 0.5)
+                    }
+                    KeyframeTrack(\.escala) {
+                        LinearKeyframe(0.5, duration: 0.6)
+                        CubicKeyframe(1, duration: 0.5)
+                        LinearKeyframe(1, duration: 1.9)
+                        CubicKeyframe(0.4, duration: 0.5)
+                    }
+                    KeyframeTrack(\.opacidad) {
+                        LinearKeyframe(0, duration: 0.6)
+                        CubicKeyframe(1, duration: 0.3)
+                        LinearKeyframe(1, duration: 2.2)
+                        CubicKeyframe(0, duration: 0.4)
+                    }
+                }
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
         }
     }
 }

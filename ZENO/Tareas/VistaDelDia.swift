@@ -103,6 +103,10 @@ struct MisTareasView: View {
                 Text(dia, format: .dateTime.day().month(.wide))
                     .font(.zenoTexto(.footnote))
                     .foregroundStyle(Lujo.marfilSecundario)
+                ChispaDiscreta(frase: pendientes.isEmpty
+                               ? Idioma.texto("Cuando quieras, escribe una con el +.")
+                               : Idioma.texto("Toca una tarea para cambiar su día u hora."))
+                    .padding(.top, 8)
             }
             .padding(.leading, 8)
             .aparece(0)
