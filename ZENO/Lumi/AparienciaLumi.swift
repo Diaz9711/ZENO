@@ -110,17 +110,17 @@ struct AparienciaLumi: Equatable {
 
         // — Cielo negro (Diaz, 15 nov 2026; colores aconsejados por Fable) —
         // Con los mismos sorteos: tinta casi negra con un susurro del tono de la persona (nunca 0,
-        // para que el grano no se corte), humo azul-violeta y luz de luna alrededor de la estrella
+        // para que el grano no se corte), humo carbón y luz plateada alrededor de la estrella
         // (el ámbar o el oro oscurecido se vuelven marrón sobre negro).
         // La estrella es su hermana: blanco dorado, platino en el centro, halo menos saturado.
         if cielo == .negro {
             let tonoN = 0.585 + 0.16 * u
             // "Negro hondo", elegido por Diaz (opción 3 de `Comparaciones/cielo-negro-opciones.jpg`).
-            colorFondo = Self.hsb(tonoN, sF * 0.60, bF * 0.13)
-            // Un segundo color en los pliegues (Fable): humo con algo de color y luz de luna
-            // azul-violeta, que el cielo usa en pliegues, bordes y filamentos. Nada de verde.
-            colorNube = Self.hsb(tonoN + (vecino - tono), sNu * 0.55, bNu * 0.52)
-            colorBrasa = Self.hsb(0.70 + 0.05 * ub, sb * 0.42, 0.44)
+            colorFondo = Self.hsb(tonoN, sF * 0.30, bF * 0.13)
+            // Negro de verdad (Diaz: "que la nebulosa negra sea negra de color"; valores de Fable):
+            // humo carbón casi sin tono y luz plateada fría alrededor de la estrella.
+            colorNube = Self.hsb(0.62, sNu * 0.10, bNu * 0.36)
+            colorBrasa = Self.hsb(0.62, sb * 0.09, 0.40)
             negro = true
             colorOro = Self.hsb(0.112 + (hO - 0.10) * 0.6, sO * 0.80, 1.0)
             colorNucleo = Self.hsb(hN, sN * 0.55, 1.0)

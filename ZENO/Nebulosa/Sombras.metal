@@ -162,8 +162,9 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
                                 float3 cFondo, float3 cNube, float3 cBrasa, float3 cOro,
                                 float calidad, float negro)
 {
-    // `negro` 0 = cielo azul (idéntico, todas las mezclas devuelven el valor de siempre).
-    // 1 = cielo negro: algunas estrellas más (consejo de Fable); solo se añaden, ninguna se mueve.
+    // `negro` 0 = cielo azul. 1 = cielo negro: gas negro de verdad (sin los tintes violeta) y algo
+    // más de estrellas. Diaz pidió (15 nov 2026) un poco más de estrellas pequeñas en los dos cielos:
+    // +20 % en las lejanas y las medias (Fable); solo se añaden, ninguna se mueve.
     // `calidad` 0 = el cielo de siempre, idéntico. 1 = más luz y profundidad (sin colores nuevos,
     // sin depender de la energía, igual para la misma semilla y nítido aunque el tiempo esté quieto).
     float escala = min(tam.x, tam.y);
@@ -199,8 +200,8 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     col = mix(col, cNube, dens * 0.74);
     col = mix(col, cAcento, pliegue * dens * 0.38);
     // Zonas un poco más frías y otras más cálidas: el cielo deja de ser de un solo tono.
-    col *= mix(float3(1.0), float3(0.82, 0.96, 1.12), 0.45 * smoothstep(0.42, 0.72, q.x));
-    col *= mix(float3(1.0), float3(1.10, 0.94, 1.04), 0.40 * smoothstep(0.45, 0.75, q.y));
+    col *= mix(float3(1.0), float3(0.82, 0.96, 1.12), mix(0.45, 0.15, negro) * smoothstep(0.42, 0.72, q.x));
+    col *= mix(float3(1.0), float3(1.10, 0.94, 1.04), mix(0.40, 0.08, negro) * smoothstep(0.45, 0.75, q.y));
     // Los bordes de las nubes atrapan luz, más del lado de la estrella.
     float borde = dens * (1.0 - dens) * 4.0;
     col += mix(cNube, cBrasa, 0.30) * borde * fino * (0.10 + 0.22 * exp(-d * 1.6)) * luzE;
@@ -216,7 +217,7 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         float iluminado = clamp((aqui - hacia) * 9.0, 0.0, 1.0);
         float sombra = clamp((hacia - aqui) * 8.0, 0.0, 1.0);
         float alcance = exp(-d * 0.85);
-        col += mix(cBrasa, cOro, 0.35) * iluminado * (0.35 + dens) * alcance * 0.80 * luzE * calidad;
+        col += mix(cBrasa, cOro, mix(0.35, 0.12, negro)) * iluminado * (0.35 + dens) * alcance * 0.80 * luzE * calidad;
         col *= 1.0 - 0.42 * sombra * (0.3 + dens) * (0.5 + 0.5 * alcance) * calidad;
         float angulo = atan2(ru.y, ru.x);
         float haces = ruido(float2(angulo * 7.0 + desplazamiento.x, t * 0.030))
@@ -244,8 +245,8 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     float tapa = 1.0 - 0.60 * dens;
     float3 cEstrella = float3(1.0, 0.95, 0.88);
     float2 posCerca = pos + inclina * mix(14.0, 28.0, calidad);
-    float lejos = estrellas(pos + inclina * mix(3.0, 4.0, calidad), 7.0, mix(0.050, 0.085, negro), mix(0.55, 0.48, calidad), t, desplazamiento);
-    float medias = estrellas(pos + inclina * mix(7.0, 13.0, calidad), 19.0, mix(0.060, 0.080, negro), 0.85, t, desplazamiento + 17.0);
+    float lejos = estrellas(pos + inclina * mix(3.0, 4.0, calidad), 7.0, mix(0.060, 0.100, negro), mix(0.55, 0.48, calidad), t, desplazamiento);
+    float medias = estrellas(pos + inclina * mix(7.0, 13.0, calidad), 19.0, mix(0.072, 0.095, negro), 0.85, t, desplazamiento + 17.0);
     float cerca = estrellas(posCerca, 53.0, 0.090, 1.35, t, desplazamiento + 41.0);
     float3 tinte = mix(float3(0.78, 0.86, 1.0), float3(1.0, 0.88, 0.72), azar(floor(posCerca / 53.0) + 2.0));
     col += cEstrella * (lejos * mix(0.42, 0.55, negro) + medias * 0.70) * tapa * (1.0 - calor);
