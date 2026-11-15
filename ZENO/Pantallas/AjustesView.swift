@@ -24,7 +24,9 @@ struct AjustesView: View {
     var body: some View {
         let apariencia = AparienciaLumi(semilla: persona.semilla)
 
+        ScrollViewReader { lector in
         ScrollView {
+            MarcaDeLista(id: "zeno.arriba")
             if leyendo {
                 ComoFuncionaView { withAnimation(Lujo.curva()) { leyendo = false } }
                     .padding(.top, 8)
@@ -115,7 +117,7 @@ struct AjustesView: View {
 
                 // — Lo aprendido —
                 seccion("Tu ritmo", orden: 4) {
-                    let aprendido = Aprendizaje.resumen(eventos: eventos)
+                    let aprendido = Memoria.compartida.resumen(senales: eventos)
                     VStack(alignment: .leading, spacing: 14) {
                         if aprendido.isEmpty {
                             Text("Mientras más uses ZENO, más te conoceré: a qué horas rindes, cuánto te toman las cosas y qué prefieres dejar para después.")
@@ -277,6 +279,9 @@ struct AjustesView: View {
             .informaDesplazamiento()
             .transition(.desenfoque)
             }
+            MarcaDeLista(id: "zeno.abajo")
+        }
+        .deslizablePorAutopiloto(lector)
         }
         // Al abrir o cerrar "Cómo funciona ZENO" se empieza arriba.
         .id(leyendo)
@@ -360,7 +365,15 @@ struct AjustesView: View {
             withAnimation(Lujo.curva()) { persona.formaDeLumi = forma }
         } label: {
             VStack(spacing: 4) {
-                LumiView(apariencia: apariencia, energia: 0.75, forma: forma, cuadros: 30)
+                // En foto (no en vivo): dentro de la lista, dos Lumis vivas frenaban toda la página.
+                Group {
+                    if UserDefaults.standard.bool(forKey: "lumiVivaEnAjustes") {
+                        LumiView(apariencia: apariencia, energia: 0.75, forma: forma, cuadros: 30)
+                    } else {
+                        LumiFija(apariencia: apariencia, forma: forma)
+                    }
+                }
+                    .frame(maxWidth: .infinity)
                     .frame(height: 124)
                     .clipShape(RoundedRectangle(cornerRadius: Lujo.radioTarjeta, style: .continuous))
                 Text(forma == .estrella ? "Estrella" : "Esfera")

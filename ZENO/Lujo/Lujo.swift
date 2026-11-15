@@ -525,11 +525,13 @@ final class Hojas {
 
     func mostrar<C: View>(@ViewBuilder _ contenido: () -> C) {
         withAnimation(Self.subida) { pila.append(Hoja(contenido: AnyView(contenido()))) }
+        Fluidez.marcar("hoja")
     }
 
     func cerrar() {
         guard !pila.isEmpty else { return }
         withAnimation(Self.bajada) { _ = pila.removeLast() }
+        Fluidez.marcar("cierra-hoja")
     }
 }
 
@@ -569,7 +571,14 @@ struct CapaDeHojas: View {
                                            style: .continuous)
                         .fill(Color(red: 0.065, green: 0.07, blue: 0.12))
                         .padding(.bottom, -60)          // llega hasta el borde de abajo de la pantalla
-                        .shadow(color: .black.opacity(0.35), radius: 22, y: -4)
+                        // Sombra hecha con un degradado fijo encima del borde: se ve igual que una sombra
+                        // difuminada, pero no se recalcula en cada cuadro mientras la hoja sube (iPhone: 40 → más).
+                        .background(alignment: .top) {
+                            LinearGradient(colors: [.black.opacity(0), .black.opacity(0.28)], startPoint: .top, endPoint: .bottom)
+                                .frame(height: 34)
+                                .offset(y: -30)
+                                .allowsHitTesting(false)
+                        }
                 }
                 .overlay(alignment: .top) {
                     UnevenRoundedRectangle(topLeadingRadius: Lujo.radioHoja, topTrailingRadius: Lujo.radioHoja,

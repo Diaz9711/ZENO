@@ -44,7 +44,9 @@ struct MisTareasView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
+            ScrollViewReader { lector in
             ScrollView {
+                MarcaDeLista(id: "zeno.arriba")
                 if let tarea = editando {
                     EditorDeTarea(tarea: tarea) {
                         withAnimation(Lujo.curva()) { editando = nil }
@@ -65,6 +67,9 @@ struct MisTareasView: View {
                         .informaDesplazamiento()
                         .transition(.desenfoque)
                 }
+                MarcaDeLista(id: "zeno.abajo")
+            }
+            .deslizablePorAutopiloto(lector)
             }
             .coordinateSpace(name: "pagina")
             .bordesFundidos(arriba: arriba, abajo: 190)

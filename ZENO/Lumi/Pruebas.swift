@@ -11,6 +11,24 @@ enum Pruebas {
         #endif
     }
 
+    /// `-sinMascara YES`: los bordes fundidos no se aplican (para medir cuánto cuestan).
+    static var sinMascara: Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "sinMascara")
+        #else
+        false
+        #endif
+    }
+
+    /// `-sinCielo YES`: sin nebulosa ni Lumi (para saber si lo caro es el cielo o la página).
+    static var sinCielo: Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "sinCielo")
+        #else
+        false
+        #endif
+    }
+
     static var energia: Double? {
         #if DEBUG
         UserDefaults.standard.string(forKey: "energiaFija").flatMap(Double.init)

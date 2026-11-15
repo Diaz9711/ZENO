@@ -28,6 +28,10 @@ struct UniversoView: View {
     @State private var pagina = Pagina.hoy
     @State private var sentido: CGFloat = 1   // hacia dónde se mueve el cambio de página
     @State private var viajes = 0             // cada cambio de página: Lumi toma impulso
+    /// Mientras Lumi viaja entre páginas se dibuja a un tamaño fijo y solo se escala (transformación):
+    /// antes se redibujaba a cada tamaño intermedio, en cada cuadro del viaje. nil = su tamaño de siempre.
+    @State private var tamanoDeDibujo: CGFloat?
+    @State private var viajeDeLumi = 0
     @State private var pedirAgregar = 0
     @State private var editando = false
     @AppStorage("modoPrueba") private var modoPrueba = false
@@ -94,6 +98,7 @@ struct UniversoView: View {
 
             GeometryReader { geo in
                 ZStack {
+                    if !Pruebas.sinCielo {
                     NebulosaView(apariencia: apariencia,
                                  energia: energia,
                                  calidez: calidez,
@@ -105,6 +110,7 @@ struct UniversoView: View {
                         // Bienvenida: la cámara viaja hacia el cielo, que gira apenas al llegar.
                         .scaleEffect(viajando ? 1.55 : 1)
                         .rotationEffect(.degrees(viajando ? -6 : 0))
+                    }
 
                     // Cada tarea terminada es una estrella nueva en tu cielo (encima de la nebulosa,
                     // sin tocarla). Nace de Lumi. No aparece en la presentación ni en el registro.
@@ -119,7 +125,9 @@ struct UniversoView: View {
                     // Se dibuja al tamaño en que se ve (no grande y luego encogida): el mismo dibujo,
                     // con muchos menos píxeles que calcular en cada cuadro cuando Lumi está pequeña.
                     LumiView(apariencia: apariencia, energia: energia, forma: forma, destello: destelloDeHoy)
-                        .frame(width: anchoLumi * tamano)
+                        .opacity(Pruebas.sinCielo ? 0 : 1)
+                        .frame(width: anchoLumi * (tamanoDeDibujo ?? tamano))
+                        .scaleEffect(tamano / (tamanoDeDibujo ?? tamano))
                         // Al terminar una tarea: inhala, se encoge un instante y suelta la onda.
                         .keyframeAnimator(initialValue: 1.0, trigger: celebraciones) { vista, escala in
                             vista.scaleEffect(escala)
@@ -256,7 +264,7 @@ struct UniversoView: View {
             // Cada vez que la persona vuelve a la app, empieza en Hoy.
             if nueva == .background {
                 estuvoEnFondo = true
-                actualizarWidget(puntaje: puntaje)
+                actualizarWidget(puntaje: puntaje, conRetrato: true)
                 registrarCierre()
                 if let persona = personas.first, sesionAbierta {
                     Task { await Avisos.alSalir(persona, eventos: eventos) }
@@ -287,6 +295,7 @@ struct UniversoView: View {
             if ajustes.bool(forKey: "sinPresentacion") { presentando = false; llegada = true }
             // -claveDePrueba xxxxxx: deja guardada esa clave (para probar la entrada).
             if let c = ajustes.string(forKey: "claveDePrueba") { Clave.guardar(c) }
+            if Autopiloto.activo { Task { await recorridoDePrueba() } }
             if ajustes.bool(forKey: "sesionCerrada") { sesionAbierta = false }
             // -probarSiri "texto": corre el mismo atajo que usa Siri para agregar una tarea.
             if let frase = ajustes.string(forKey: "probarSiri") {
@@ -313,6 +322,7 @@ struct UniversoView: View {
         .onChange(of: persona?.formaDeLumiCruda) { _, _ in actualizarWidget(puntaje: puntaje) }
         // El widget y el anillo abren ZENO en Hoy.
         .onOpenURL { abrir($0) }
+        .onChange(of: pagina, initial: true) { _, nueva in if !Autopiloto.activo { Fluidez.marcar("\(nueva)") } }
         // "Escribir una tarea" desde Siri, Atajos o el botón de Acción.
         .onChange(of: PuenteDeAtajos.compartido.pedidosDeEscribir, initial: true) { _, pedidos in
             guard pedidos > 0, !personas.isEmpty else { return }
@@ -406,6 +416,16 @@ struct UniversoView: View {
     private func ir(a destino: Pagina) {
         guard destino != pagina else { return }
         sentido = destino.rawValue > pagina.rawValue ? 1 : -1
+        // Lumi se dibuja al mayor de los dos tamaños durante el viaje (nítida) y se escala;
+        // al llegar vuelve a dibujarse a su tamaño real. A la vista no cambia nada.
+        let escala: CGFloat = escuchando ? 1.12 : 1.0
+        func tamano(_ p: Pagina) -> CGFloat { (p == .hoy ? 0.80 : 0.38) * escala }
+        tamanoDeDibujo = max(tamanoDeDibujo ?? tamano(pagina), tamano(pagina), tamano(destino))
+        viajeDeLumi += 1
+        let este = viajeDeLumi
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+            if viajeDeLumi == este { tamanoDeDibujo = nil }
+        }
         DispatchQueue.main.async {
             if !reducirMovimiento { viajes += 1 }
             withAnimation(reducirMovimiento ? .easeInOut(duration: 0.3) : Ritmo.contenido) {
@@ -415,6 +435,42 @@ struct UniversoView: View {
             }
         }
     }
+
+    #if DEBUG
+    /// El recorrido del autopiloto: cada fase queda marcada en el medidor de fluidez.
+    private func recorridoDePrueba() async {
+        UIApplication.shared.isIdleTimerDisabled = true
+        func espera(_ s: Double) async { try? await Task.sleep(for: .seconds(s)) }
+        await espera(8)
+        Fluidez.marcar("1-hoy-reposo"); await espera(10)
+        for i in 0..<8 {
+            let destino: Pagina = [.tareas, .ajustes, .hoy, .ajustes][i % 4]
+            ir(a: destino)
+            Fluidez.marcar("2-cambio-pagina")
+            await espera(1.25)
+        }
+        ir(a: .ajustes); await espera(3)
+        Fluidez.marcar("3-ajustes-reposo"); await espera(6)
+        Fluidez.marcar("4-ajustes-desliza")
+        for _ in 0..<6 { Autopiloto.compartido.desplazar += 1; await espera(1.7) }
+        ir(a: .tareas); await espera(3)
+        Fluidez.marcar("5-tareas-reposo"); await espera(6)
+        Fluidez.marcar("6-tareas-desliza")
+        for _ in 0..<6 { Autopiloto.compartido.desplazar += 1; await espera(1.7) }
+        ir(a: .hoy); await espera(3)
+        Fluidez.marcar("7-hojas")
+        for _ in 0..<5 {
+            Hojas.compartidas.mostrar { HojaDeAyuda(acciones: []) }
+            Fluidez.marcar("7-hojas")
+            await espera(1.2)
+            Hojas.compartidas.cerrar()
+            Fluidez.marcar("7-hojas")
+            await espera(1.2)
+        }
+        Fluidez.marcar("8-fin")
+        UIApplication.shared.isIdleTimerDisabled = false
+    }
+    #endif
 
     // MARK: Fuera de la app (Isla Dinámica y widget)
 
@@ -435,10 +491,10 @@ struct UniversoView: View {
         Task { await AnilloEnVivo.sincronizar(titulo: tarea?.textoVisible, inicio: tarea?.empezadaEn, minutos: minutos) }
     }
 
-    private func actualizarWidget(puntaje: Double) {
+    private func actualizarWidget(puntaje: Double, conRetrato: Bool = false) {
         guard let persona = personas.first else { return }
         Widgets.luz(apariencia: AparienciaLumi(semilla: persona.semilla), forma: persona.formaDeLumi,
-                    energia: puntaje / 100)
+                    energia: puntaje / 100, conRetrato: conRetrato)
         Widgets.revisarTarea(pendientes: Set(tareas.filter { $0.terminadaEn == nil }.map(\.textoVisible)))
     }
 

@@ -7,7 +7,9 @@ enum Widgets {
     private static var ultima: FotoDeZeno?
 
     /// La luz de Lumi (colores de su semilla, forma y energía).
-    static func luz(apariencia: AparienciaLumi, forma: FormaDeLumi, energia: Double) {
+    /// `conRetrato`: la foto de Lumi para el widget es un cálculo pesado; se hace solo al salir de la app
+    /// (al abrirla frenaba los primeros segundos).
+    static func luz(apariencia: AparienciaLumi, forma: FormaDeLumi, energia: Double, conRetrato: Bool = false) {
         var foto = FotoDeZeno.leer() ?? FotoDeZeno()
         foto.nucleo = apariencia.colorNucleo.comoLista
         foto.corona = apariencia.colorCorona.comoLista
@@ -19,7 +21,7 @@ enum Widgets {
         foto.energia = (energia * 10).rounded() / 10
         // El retrato real de Lumi para el widget (solo si cambió algo que se vea).
         let firma = "\(foto.nucleo)|\(foto.halo)|\(foto.esfera)|\(foto.energia)|calidad\(CalidadVisual.nivel)"
-        if RetratoDeLumi.guardar(apariencia: apariencia, forma: forma, energia: foto.energia, firma: firma) {
+        if conRetrato, RetratoDeLumi.guardar(apariencia: apariencia, forma: forma, energia: foto.energia, firma: firma) {
             foto.retratoEn = .now
         }
         guardarSiCambia(foto)

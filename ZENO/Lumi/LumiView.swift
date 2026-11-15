@@ -45,7 +45,9 @@ struct LumiView: View, Animatable {
     }
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1 / cuadros, paused: reducirMovimiento)) { linea in
+        // Con el ahorro de batería del iPhone, como mucho 30 cuadros: el mismo dibujo, menos trabajo.
+        TimelineView(.animation(minimumInterval: 1 / (ModoAhorro.compartido.activo ? min(cuadros, 30) : cuadros),
+                                paused: reducirMovimiento)) { linea in
             let m = reloj.avanzar(hasta: linea.date,
                                   energia: energia,
                                   apariencia: apariencia,

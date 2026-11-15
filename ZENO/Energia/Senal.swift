@@ -85,6 +85,19 @@ final class Memoria {
     private var puntajeGuardado = 72.0
     private var mejorHoraGuardada = 12
 
+    private var claveResumen: String?
+    private var resumenGuardado: [String] = []
+
+    /// "Tu ritmo" en Ajustes: se recalcula solo si cambió el historial, la hora o el idioma.
+    func resumen(senales: [Senal]) -> [String] {
+        let c = "\(senales.count)|\(senales.last?.fecha.timeIntervalSince1970 ?? 0)|\(Int(Date.now.timeIntervalSince1970 / 3600))|\(Idioma.actual.rawValue)"
+        if c != claveResumen {
+            resumenGuardado = Aprendizaje.resumen(eventos: senales)
+            claveResumen = c
+        }
+        return resumenGuardado
+    }
+
     func cerebro(persona: Persona, senales: [Senal], ahora: Date) -> (puntaje: Double, mejorHora: Int) {
         let c = Clave(cuantos: senales.count, ultima: senales.last?.fecha,
                       minuto: Int(ahora.timeIntervalSinceReferenceDate / 60),

@@ -39,7 +39,14 @@ enum Clave {
 
     // MARK: Guardar y comprobar
 
-    static var existe: Bool { leer() != nil }
+    /// Se recuerda: leer el Llavero en cada dibujo de Ajustes frenaba la entrada a la página.
+    private static var existeGuardado: Bool?
+    static var existe: Bool {
+        if let ya = existeGuardado { return ya }
+        let hay = leer() != nil
+        existeGuardado = hay
+        return hay
+    }
 
     static func guardar(_ texto: String) {
         var sal = Data(count: 16)
@@ -74,6 +81,7 @@ enum Clave {
 
     static func borrar() {
         SecItemDelete(consulta as CFDictionary)
+        existeGuardado = false
         UserDefaults.standard.removeObject(forKey: claveIntentos)
         UserDefaults.standard.removeObject(forKey: claveBloqueo)
     }
@@ -129,6 +137,7 @@ enum Clave {
     }
 
     private static func escribir(_ datos: Data) {
+        existeGuardado = true
         SecItemDelete(consulta as CFDictionary)
         var q = consulta
         q[kSecValueData as String] = datos
