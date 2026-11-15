@@ -50,6 +50,8 @@ struct AparienciaLumi: Equatable {
     var colorBrasa: SIMD3<Float>    // ámbar
     var colorOro: SIMD3<Float>
     var desplazamiento: SIMD2<Float> // qué trozo del cielo le tocó
+    /// Cielo negro: el shader añade unas estrellas más (el azul no cambia).
+    var negro = false
 
     init(semilla: Semilla, cielo: TonoDeCielo = .azulado) {
         var g = GeneradorDeSemilla(semilla)
@@ -115,8 +117,11 @@ struct AparienciaLumi: Equatable {
             let tonoN = 0.585 + 0.16 * u
             // "Negro hondo", elegido por Diaz (opción 3 de `Comparaciones/cielo-negro-opciones.jpg`).
             colorFondo = Self.hsb(tonoN, sF * 0.60, bF * 0.13)
-            colorNube = Self.hsb(tonoN + (vecino - tono), sNu * 0.38, bNu * 0.52)
-            colorBrasa = Self.hsb(0.60 + 0.06 * ub, sb * 0.30, 0.40)
+            // Un segundo color en los pliegues (Fable): humo con algo de color y luz de luna
+            // azul-violeta, que el cielo usa en pliegues, bordes y filamentos. Nada de verde.
+            colorNube = Self.hsb(tonoN + (vecino - tono), sNu * 0.55, bNu * 0.52)
+            colorBrasa = Self.hsb(0.70 + 0.05 * ub, sb * 0.42, 0.44)
+            negro = true
             colorOro = Self.hsb(0.112 + (hO - 0.10) * 0.6, sO * 0.80, 1.0)
             colorNucleo = Self.hsb(hN, sN * 0.55, 1.0)
             colorCorona = Self.hsb(hC + 0.006, sC * 0.72, 1.0)

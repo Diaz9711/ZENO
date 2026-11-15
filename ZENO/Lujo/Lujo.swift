@@ -86,10 +86,20 @@ extension View {
         background {
             // Sin sombra difuminada: con muchas tarjetas en pantalla se recalculaba en cada cuadro
             // al desplazar. El canto pulido ya las separa del cielo.
-            RoundedRectangle(cornerRadius: radio, style: .continuous)
-                .fill(Lujo.cristal)
+            CristalDeTarjeta(radio: radio)
         }
         .cantoPulido(radio: radio)
+    }
+}
+
+/// El cristal de las tarjetas. Sobre el cielo azul, el de siempre; sobre el negro, un gris
+/// tinta neutro (Fable: el azul marino parecía pegado del otro cielo).
+private struct CristalDeTarjeta: View {
+    let radio: CGFloat
+    @AppStorage(TonoDeCielo.clave) private var tono = TonoDeCielo.azulado
+    var body: some View {
+        RoundedRectangle(cornerRadius: radio, style: .continuous)
+            .fill(tono == .negro ? Color(red: 0.09, green: 0.09, blue: 0.11).opacity(0.62) : Lujo.cristal)
     }
 }
 

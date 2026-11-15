@@ -34,12 +34,32 @@
         }
       }
     },
+    "¿A qué hora se te *acaba* la energía?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When does your energy *run out*?"
+          }
+        }
+      }
+    },
     "¿A qué hora se te acaba la energía?" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "When does your energy run out?"
+          }
+        }
+      }
+    },
+    "¿A qué hora sueles *despertar*?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What time do you usually *wake up*?"
           }
         }
       }
@@ -84,12 +104,42 @@
         }
       }
     },
+    "¿Cuándo *naciste*?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When were you *born*?"
+          }
+        }
+      }
+    },
+    "¿Cómo quieres *verla*?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How would you like to *see her*?"
+          }
+        }
+      }
+    },
     "¿Cómo quieres verla?" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "How would you like to see her?"
+          }
+        }
+      }
+    },
+    "¿Cómo te *llamas*?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's your *name*?"
           }
         }
       }
@@ -120,6 +170,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "When were you born?"
+          }
+        }
+      }
+    },
+    "¿En qué momento tienes más *energía*?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When do you have the most *energy*?"
           }
         }
       }

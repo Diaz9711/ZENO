@@ -301,6 +301,12 @@ struct UniversoView: View {
             if let forma = ajustes.string(forKey: "formaDePrueba").flatMap(Int.init) { personas.first?.formaDeLumiCruda = forma }
             if let p = ajustes.string(forKey: "paginaInicial").flatMap(Int.init), let destino = Pagina(rawValue: p) { pagina = destino }
             if ajustes.bool(forKey: "sinPresentacion") { presentando = false; llegada = true }
+            // -pasoDeRegistro 1…7: abre el registro en ese paso (para ver su diseño sin tocar).
+            if personas.isEmpty, let n = ajustes.string(forKey: "pasoDeRegistro").flatMap(Int.init),
+               let destino = PasoDeRegistro(rawValue: n) {
+                borrador.nombre = "Diaz"
+                paso = destino
+            }
             // -claveDePrueba xxxxxx: deja guardada esa clave (para probar la entrada).
             if let c = ajustes.string(forKey: "claveDePrueba") { Clave.guardar(c) }
             if Autopiloto.activo { Task { await recorridoDePrueba() } }

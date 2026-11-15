@@ -62,6 +62,8 @@ struct RegistroView: View {
     var alTerminar: () -> Void
 
     @FocusState private var escribiendo: Bool
+    /// La respuesta recién tocada: se ilumina un instante antes de pasar a la siguiente pregunta.
+    @State private var tocada: Double?
 
     /// Medidas comunes: un margen, un radio, un espacio entre opciones.
     static let margen: CGFloat = 28
@@ -121,6 +123,7 @@ struct RegistroView: View {
 
     private func ir(a nuevo: PasoDeRegistro) {
         escribiendo = false
+        tocada = nil
         withAnimation(Ritmo.contenido) { paso = nuevo }
     }
 
@@ -137,19 +140,19 @@ struct RegistroView: View {
         case .nombre: nombre
         case .fecha: fecha
         case .despertar:
-            pregunta("¿A qué hora sueles despertar?",
+            pregunta("¿A qué hora sueles *despertar*?",
                      razon: "Con esto ZENO empieza a entender tu ritmo de energía.",
                      opciones: [("Antes de las 6", 5.5), ("Entre las 6 y las 8", 7), ("Entre las 8 y las 10", 9), ("Después de las 10", 11)]) {
                 borrador.horaDespertar = $0
             }
         case .pico:
-            pregunta("¿En qué momento tienes más energía?",
+            pregunta("¿En qué momento tienes más *energía*?",
                      razon: "Ahí te propondrá lo que pide más de ti.",
                      opciones: [("Por la mañana", 10), ("Al mediodía", 13), ("Por la tarde", 17), ("Por la noche", 21)]) {
                 borrador.horaPico = $0
             }
         case .apagado:
-            pregunta("¿A qué hora se te acaba la energía?",
+            pregunta("¿A qué hora se te *acaba* la energía?",
                      razon: "Después de esa hora, ZENO te pedirá menos.",
                      opciones: [("Antes de las 9 de la noche", 20.5), ("Entre las 9 y las 11", 22), ("Entre las 11 y la 1", 0), ("Después de la 1", 2)]) {
                 borrador.horaApagado = $0
@@ -162,25 +165,31 @@ struct RegistroView: View {
     // MARK: Estructura común
 
     /// Título, razón, contenido y el botón abajo, siempre en el mismo sitio.
-    private func pantalla<Contenido: View>(_ titulo: LocalizedStringKey,
+    /// Diseño "Editorial" (Fable, aprobado para Diaz el 15 nov 2026): contador "01 / 06" en oro,
+    /// título grande en Fraunces con una palabra en cursiva dorada (`*palabra*` en el texto).
+    private func pantalla<Contenido: View>(_ titulo: String.LocalizationValue,
                                            razon: LocalizedStringKey?,
                                            @ViewBuilder contenido: () -> Contenido,
                                            @ViewBuilder pie: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(titulo)
-                .font(.zenoTitulo(.title, .regular))
-                .luminoso()
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 28)
+            Text(verbatim: String(format: "%02d / %02d", numeroDePaso, 6))
+                .font(.lujoEtiqueta(.caption2, .medium))
+                .versalitas(2.5)
+                .foregroundStyle(Lujo.oro)
+                .monospacedDigit()
+                .padding(.top, 26)
+                .accessibilityHidden(true)
+            TituloConAcento(clave: titulo)
+                .padding(.top, 12)
             if let razon {
                 Text(razon)
                     .font(.zenoTexto(.callout))
-                    .foregroundStyle(Color.marfil.opacity(0.62))
+                    .foregroundStyle(Lujo.marfilSecundario)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, 10)
+                    .padding(.top, 12)
             }
             contenido()
-                .padding(.top, 32)
+                .padding(.top, 34)
             Spacer(minLength: 16)
             pie()
                 .frame(maxWidth: .infinity)
@@ -192,11 +201,11 @@ struct RegistroView: View {
     // MARK: Pasos
 
     private var nombre: some View {
-        pantalla("¿Cómo te llamas?", razon: "Así te saludará ZENO cada día.") {
+        pantalla("¿Cómo te *llamas*?", razon: "Así te saludará ZENO cada día.") {
             VStack(alignment: .leading, spacing: 10) {
                 TextField("", text: $borrador.nombre,
                           prompt: Text("Tu nombre").foregroundStyle(Color.marfil.opacity(0.3)))
-                    .font(.zenoTitulo(.largeTitle, .regular))
+                    .font(.custom("Fraunces-Regular", size: 40, relativeTo: .largeTitle))
                     .foregroundStyle(Color.marfil)
                     .tint(Lujo.oro)
                     .textInputAutocapitalization(.words)
@@ -204,12 +213,14 @@ struct RegistroView: View {
                     .submitLabel(.continue)
                     .focused($escribiendo)
                     .onSubmit { if !borrador.nombreLimpio.isEmpty { ir(a: .fecha) } }
-                // Una línea fina que se enciende cuando hay nombre.
+                // Una línea fina: marfil en reposo, oro al escribir y más viva cuando hay nombre.
                 Rectangle()
-                    .fill(LinearGradient(colors: [Lujo.oro.opacity(borrador.nombreLimpio.isEmpty ? 0.3 : 0.9),
-                                                  Lujo.oro.opacity(0.05)],
+                    .fill(LinearGradient(colors: [(escribiendo ? Lujo.oro : Lujo.marfil)
+                                                    .opacity(borrador.nombreLimpio.isEmpty ? 0.45 : 0.95),
+                                                  (escribiendo ? Lujo.oro : Lujo.marfil).opacity(0.06)],
                                          startPoint: .leading, endPoint: .trailing))
                     .frame(height: 1)
+                    .animation(Lujo.curva(), value: escribiendo)
                     .animation(.easeInOut(duration: 0.3), value: borrador.nombreLimpio.isEmpty)
             }
         } pie: {
@@ -226,31 +237,37 @@ struct RegistroView: View {
     }
 
     private var fecha: some View {
-        pantalla("¿Cuándo naciste?", razon: "Tu estrella nace de tu nombre y tu fecha. Nadie más tiene una igual.") {
-            // Ruedas propias de día, mes y año (sin la rueda del sistema).
+        pantalla("¿Cuándo *naciste*?", razon: "Tu estrella nace de tu nombre y tu fecha. Nadie más tiene una igual.") {
+            // Ruedas propias de día, mes y año (sin la rueda del sistema), sin caja: solo los dos hilos de oro.
             FechaDeNacimiento(fecha: $borrador.fecha)
                 .padding(.vertical, 8)
-                .tarjetaLujo()
         } pie: {
             BotonZeno("Continuar") { ir(a: .despertar) }
         }
     }
 
-    private func pregunta(_ titulo: LocalizedStringKey,
+    private func pregunta(_ titulo: String.LocalizationValue,
                           razon: LocalizedStringKey,
                           opciones: [(LocalizedStringKey, Double)],
                           elegir: @escaping (Double) -> Void) -> some View {
         pantalla(titulo, razon: razon) {
             VStack(spacing: 10) {
                 ForEach(Array(opciones.enumerated()), id: \.offset) { _, opcion in
-                    // Tocar una respuesta ya es avanzar: una sola acción por pantalla.
+                    // Tocar una respuesta ya es avanzar: se ilumina un instante y pasa sola.
                     Button {
+                        guard tocada == nil else { return }
                         elegir(opcion.1)
-                        ir(a: paso.siguiente)
+                        withAnimation(Lujo.curva(0.25)) { tocada = opcion.1 }
+                        let desde = paso
+                        Task {
+                            try? await Task.sleep(for: .seconds(0.32))
+                            if paso == desde { ir(a: paso.siguiente) }
+                        }
                     } label: {
-                        FilaDeOpcion(titulo: opcion.0, elegida: false)
+                        FilaDeOpcion(titulo: opcion.0, elegida: tocada == opcion.1, glifo: GlifoDeHora.para(opcion.1, paso: paso))
                     }
                     .buttonStyle(EstiloLujo(conReflejo: false))
+                    .sensoryFeedback(.selection, trigger: tocada == opcion.1)
                 }
             }
         } pie: {
@@ -286,16 +303,20 @@ struct RegistroView: View {
         VStack(spacing: 0) {
             Spacer()
             VStack(alignment: .leading, spacing: 0) {
-                Text("¿Cómo quieres verla?")
-                    .font(.zenoTitulo(.title, .regular))
-                    .luminoso()
+                Text(verbatim: String(format: "%02d / %02d", 6, 6))
+                    .font(.lujoEtiqueta(.caption2, .medium))
+                    .versalitas(2.5)
+                    .foregroundStyle(Lujo.oro)
+                    .padding(.bottom, 12)
+                    .accessibilityHidden(true)
+                TituloConAcento(clave: "¿Cómo quieres *verla*?")
                 Text("Puedes cambiarla cuando quieras en Ajustes.")
                     .font(.zenoTexto(.callout))
                     .foregroundStyle(Color.marfil.opacity(0.62))
                     .padding(.top, 10)
                 VStack(spacing: 10) {
-                    opcionDeForma("Estrella", .estrella)
-                    opcionDeForma("Esfera", .esfera)
+                    opcionDeForma("Estrella", .estrella, glifo: .estrella)
+                    opcionDeForma("Esfera", .esfera, glifo: .esfera)
                 }
                 .padding(.top, 24)
             }
@@ -306,40 +327,144 @@ struct RegistroView: View {
         }
     }
 
-    private func opcionDeForma(_ titulo: LocalizedStringKey, _ valor: FormaDeLumi) -> some View {
+    private func opcionDeForma(_ titulo: LocalizedStringKey, _ valor: FormaDeLumi, glifo: GlifoDeHora) -> some View {
         Button {
-            withAnimation(.easeInOut(duration: 0.25)) { borrador.forma = valor }
+            withAnimation(Lujo.curva(0.25)) { borrador.forma = valor }
         } label: {
-            FilaDeOpcion(titulo: titulo, elegida: borrador.forma == valor)
+            FilaDeOpcion(titulo: titulo, elegida: borrador.forma == valor, glifo: glifo)
         }
         .buttonStyle(EstiloLujo(conReflejo: false))
         .sensoryFeedback(.selection, trigger: borrador.forma)
     }
 }
 
-/// Una opción del registro: texto a la izquierda y un círculo a la derecha que se llena al elegir.
+/// Una opción del registro: un glifo fino de la hora, el texto y, al elegir, el check dibujado.
+/// Elegida: un velo de oro muy leve y el canto en oro.
 private struct FilaDeOpcion: View {
     let titulo: LocalizedStringKey
     let elegida: Bool
+    var glifo: GlifoDeHora?
 
     var body: some View {
-        HStack {
+        let forma = RoundedRectangle(cornerRadius: RegistroView.radio, style: .continuous)
+        HStack(spacing: 16) {
+            if let glifo {
+                glifo
+                    .stroke(elegida ? Lujo.oro : Lujo.marfil.opacity(0.78),
+                            style: StrokeStyle(lineWidth: 1.1, lineCap: .round, lineJoin: .round))
+                    .frame(width: 22, height: 22)
+                    .accessibilityHidden(true)
+            }
             Text(titulo)
                 .font(.zenoTexto(.body))
                 .foregroundStyle(elegida ? Lujo.oro : Lujo.marfil)
             Spacer()
-            ZStack {
-                Circle().strokeBorder(Lujo.oro.opacity(elegida ? 0.9 : 0.4), lineWidth: 0.9)
-                if elegida { Circle().fill(Lujo.oro).padding(6) }
-            }
-            .frame(width: 20, height: 20)
+            CheckDibujado(hecho: elegida)
+                .frame(width: 22, height: 22)
+                .opacity(elegida ? 1 : 0.55)
         }
         .padding(.horizontal, 20)
-        .frame(height: 58)
-        .background(RoundedRectangle(cornerRadius: RegistroView.radio, style: .continuous).fill(Lujo.marfil.opacity(0.035)))
-        .cantoPulido(radio: RegistroView.radio, oro: elegida)
+        .frame(height: 64)
+        .background {
+            forma.fill(Lujo.marfil.opacity(0.04))
+            forma.fill(Lujo.oro.opacity(elegida ? 0.10 : 0))
+        }
+        .overlay {
+            forma.strokeBorder(elegida ? Lujo.oro.opacity(0.9) : Lujo.marfil.opacity(0.12),
+                               lineWidth: elegida ? 1 : 0.5)
+        }
         .contentShape(Rectangle())
         .accessibilityAddTraits(elegida ? .isSelected : [])
+    }
+}
+
+/// El título de cada pregunta: Fraunces grande, y la palabra entre asteriscos en cursiva dorada
+/// (como en la tarjeta "Ahora" de Hoy). Se traduce entera, con su palabra marcada.
+struct TituloConAcento: View {
+    let clave: String.LocalizationValue
+    @Environment(\.locale) private var idioma
+
+    var body: some View {
+        Text(texto)
+            .font(.zenoTitulo(.largeTitle, .regular))
+            .luminoso()
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityAddTraits(.isHeader)
+    }
+
+    private var texto: AttributedString {
+        let crudo = Idioma.texto(clave)
+        var resultado = AttributedString()
+        // Partes alternas: fuera y dentro de los asteriscos.
+        for (i, parte) in crudo.split(separator: "*", omittingEmptySubsequences: false).enumerated() {
+            var trozo = AttributedString(String(parte))
+            if i % 2 == 1 {
+                trozo.font = .zenoTitulo(.largeTitle, .regular, cursiva: true)
+                trozo.foregroundColor = Lujo.oro
+            }
+            resultado += trozo
+        }
+        return resultado
+    }
+}
+
+/// Glifos finos para las respuestas: horizonte con sol naciente, sol, sol bajo, luna, y las dos formas de Lumi.
+enum GlifoDeHora: Shape {
+    case amanecer, sol, atardecer, luna, estrella, esfera
+
+    static func para(_ hora: Double, paso: PasoDeRegistro) -> GlifoDeHora {
+        switch hora {
+        case 6.5..<8.5: return .amanecer
+        case 8.5..<15.5: return .sol
+        case 15.5..<19.5: return .atardecer
+        default: return .luna
+        }
+    }
+
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        let c = CGPoint(x: r.midX, y: r.midY)
+        let u = min(r.width, r.height)
+        func rayos(_ centro: CGPoint, desde: CGFloat, hasta: CGFloat, angulos: [Double]) {
+            for a in angulos {
+                let rad = a * .pi / 180
+                p.move(to: CGPoint(x: centro.x + cos(rad) * desde, y: centro.y - sin(rad) * desde))
+                p.addLine(to: CGPoint(x: centro.x + cos(rad) * hasta, y: centro.y - sin(rad) * hasta))
+            }
+        }
+        switch self {
+        case .amanecer, .atardecer:
+            let suelo = r.minY + u * 0.72
+            p.move(to: CGPoint(x: r.minX, y: suelo)); p.addLine(to: CGPoint(x: r.maxX, y: suelo))
+            let centro = CGPoint(x: c.x, y: suelo)
+            let radio = u * (self == .amanecer ? 0.24 : 0.20)
+            p.addArc(center: centro, radius: radio, startAngle: .degrees(180), endAngle: .degrees(360), clockwise: false)
+            rayos(centro, desde: radio + u * 0.10, hasta: radio + u * (self == .amanecer ? 0.24 : 0.17),
+                  angulos: self == .amanecer ? [30, 60, 90, 120, 150] : [45, 90, 135])
+        case .sol:
+            let radio = u * 0.20
+            p.addEllipse(in: CGRect(x: c.x - radio, y: c.y - radio, width: radio * 2, height: radio * 2))
+            rayos(c, desde: radio + u * 0.09, hasta: radio + u * 0.24, angulos: stride(from: 0, to: 360, by: 45).map { Double($0) })
+        case .luna:
+            let radio = u * 0.34
+            let centro = CGPoint(x: c.x + u * 0.02, y: c.y)
+            p.addArc(center: centro, radius: radio, startAngle: .degrees(60), endAngle: .degrees(300), clockwise: false)
+            p.addArc(center: CGPoint(x: centro.x + radio * 0.55, y: centro.y), radius: radio * 0.86,
+                     startAngle: .degrees(265), endAngle: .degrees(95), clockwise: true)
+            p.closeSubpath()
+        case .estrella:
+            for a in stride(from: 0.0, to: 180.0, by: 45.0) {
+                let largo = u * (a.truncatingRemainder(dividingBy: 90) == 0 ? 0.48 : 0.30)
+                let rad = a * .pi / 180
+                p.move(to: CGPoint(x: c.x - cos(rad) * largo, y: c.y - sin(rad) * largo))
+                p.addLine(to: CGPoint(x: c.x + cos(rad) * largo, y: c.y + sin(rad) * largo))
+            }
+        case .esfera:
+            let radio = u * 0.36
+            p.addEllipse(in: CGRect(x: c.x - radio, y: c.y - radio, width: radio * 2, height: radio * 2))
+            p.addEllipse(in: CGRect(x: c.x - radio, y: c.y - radio * 0.32, width: radio * 2, height: radio * 0.64))
+        }
+        return p
     }
 }
 

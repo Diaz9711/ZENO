@@ -95,11 +95,11 @@ static float estrellas(float2 pos, float celda, float densidad, float radio, flo
 
 // Calidad (Diaz, 15 nov 2026): pocas estrellas brillantes, con puntas finas como en una foto del cielo.
 // Una de cada cinco celdas grandes tiene una; las demás capas siguen siendo puntos.
-static float estrellasBrillantes(float2 pos, float celda, float t, float2 semilla) {
+static float estrellasBrillantes(float2 pos, float celda, float t, float2 semilla, float umbral) {
     float2 g = pos / celda;
     float2 id = floor(g);
     float h = azar(id + semilla);
-    if (h < 0.68) return 0.0;
+    if (h < umbral) return 0.0;
     float2 c = 0.5 + 0.30 * (float2(azar(id + semilla + 2.3), azar(id + semilla + 5.7)) - 0.5);
     float2 rel = (fract(g) - c) * celda;
     float r2 = dot(rel, rel);
@@ -160,8 +160,10 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
                                 float2 tam, float2 centro, float t, float2 inclina,
                                 float2 desplazamiento, float energia, float calidez,
                                 float3 cFondo, float3 cNube, float3 cBrasa, float3 cOro,
-                                float calidad)
+                                float calidad, float negro)
 {
+    // `negro` 0 = cielo azul (idéntico, todas las mezclas devuelven el valor de siempre).
+    // 1 = cielo negro: algunas estrellas más (consejo de Fable); solo se añaden, ninguna se mueve.
     // `calidad` 0 = el cielo de siempre, idéntico. 1 = más luz y profundidad (sin colores nuevos,
     // sin depender de la energía, igual para la misma semilla y nítido aunque el tiempo esté quieto).
     float escala = min(tam.x, tam.y);
@@ -242,15 +244,15 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     float tapa = 1.0 - 0.60 * dens;
     float3 cEstrella = float3(1.0, 0.95, 0.88);
     float2 posCerca = pos + inclina * mix(14.0, 28.0, calidad);
-    float lejos = estrellas(pos + inclina * mix(3.0, 4.0, calidad), 7.0, 0.050, mix(0.55, 0.48, calidad), t, desplazamiento);
-    float medias = estrellas(pos + inclina * mix(7.0, 13.0, calidad), 19.0, 0.060, 0.85, t, desplazamiento + 17.0);
+    float lejos = estrellas(pos + inclina * mix(3.0, 4.0, calidad), 7.0, mix(0.050, 0.085, negro), mix(0.55, 0.48, calidad), t, desplazamiento);
+    float medias = estrellas(pos + inclina * mix(7.0, 13.0, calidad), 19.0, mix(0.060, 0.080, negro), 0.85, t, desplazamiento + 17.0);
     float cerca = estrellas(posCerca, 53.0, 0.090, 1.35, t, desplazamiento + 41.0);
     float3 tinte = mix(float3(0.78, 0.86, 1.0), float3(1.0, 0.88, 0.72), azar(floor(posCerca / 53.0) + 2.0));
-    col += cEstrella * (lejos * 0.42 + medias * 0.70) * tapa * (1.0 - calor);
+    col += cEstrella * (lejos * mix(0.42, 0.55, negro) + medias * 0.70) * tapa * (1.0 - calor);
     col += tinte * cerca * 1.12 * tapa * (1.0 - calor);
     if (calidad > 0.001) {
         float2 posBrillo = pos + inclina * 40.0;
-        float brillantes = estrellasBrillantes(posBrillo, 115.0, t, desplazamiento + 63.0);
+        float brillantes = estrellasBrillantes(posBrillo, 115.0, t, desplazamiento + 63.0, mix(0.68, 0.60, negro));
         float3 tinteB = mix(float3(0.80, 0.88, 1.0), float3(1.0, 0.92, 0.80), azar(floor(posBrillo / 115.0) + 9.0));
         col += tinteB * brillantes * 1.35 * (1.0 - 0.45 * dens) * (1.0 - calor) * calidad;
     }
