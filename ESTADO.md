@@ -56,7 +56,8 @@ Las reglas que nunca se rompen están en `CLAUDE.md`. Este archivo solo cuenta e
 
 ## Hecho el 15 nov 2026
 - Pantalla bloqueada: diseño **línea fina** (elegido por Diaz). Logo: la O como **planeta** (ícono y web). Widget: diseño **Cielo** con la Lumi y la nebulosa reales.
-- Fluidez: 120 Hz en ProMotion (`CADisableMinimumFrameDurationOnPhone`), menos trabajo por cuadro (cielo y Lumi intactos). Medidor DEBUG `-medirFluidez YES`; **falta medir en el iPhone** (`devicectl device process launch --console ... app.zeno.ZENO -- -medirFluidez YES`).
+- Fluidez: 120 Hz en ProMotion (`CADisableMinimumFrameDurationOnPhone`) y menos trabajo por cuadro. **Medido en el iPhone 16 Pro Max (Hoy, sin tocar, 5 s por línea):** calidad vieja: 120 cuadros/s, 0 tirones. Nueva calidad (primera versión): bajones a 93 cuadros/s con 60 tirones. Nueva calidad aligerada: 119–120 cuadros/s, 0–5 tirones. Los primeros 5 s (al abrir) siempre tienen tirones. Se mide con `script -q salida.txt xcrun devicectl device process launch --device 17C74077-06F2-5731-BACE-6E5EE451C30F --console --terminate-existing app.zeno.ZENO -- -medirFluidez YES -sinPresentacion YES` (el iPhone debe estar desbloqueado). Falta medir al deslizar Tareas y Ajustes.
+- **Nueva calidad del cielo y Lumi** (elegida por Diaz, también en la presentación): ver CLAUDE.md. Comparaciones en `Comparaciones/calidad-cielo-lumi.jpg` y `Comparaciones/estrella-nitida.jpg`.
 - Web publicada con las novedades y la sección de ciencia.
 - Para la App Store: `PrivacyInfo.xcprivacy` en la app y en el widget, `ITSAppUsesNonExemptEncryption = NO`, texto del micrófono corregido; la versión Release compila sin avisos.
 - **Ojo:** Diaz trabaja con la copia `~/Desktop/ZENO` (la que abre Xcode). Las copias `ZENO-main` de Descargas y Escritorio son viejas.

@@ -207,9 +207,10 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
     // la de atrás queda en sombra, y unos haces muy suaves salen de ella a través del gas.
     if (calidad > 0.001) {
         float2 haciaLumi = -ru / max(length(ru), 0.0001);
+        // Se reutiliza la densidad ya calculada (n): solo hace falta una muestra nueva, más corta.
         float2 base = p + 1.8 * r;
-        float aqui = gasN(base, 3);
-        float hacia = gasN(base + haciaLumi * 0.09, 3);
+        float aqui = n;
+        float hacia = gasN(base + haciaLumi * 0.09, 2) * 0.82 + n * 0.18;
         float iluminado = clamp((aqui - hacia) * 9.0, 0.0, 1.0);
         float sombra = clamp((hacia - aqui) * 8.0, 0.0, 1.0);
         float alcance = exp(-d * 0.85);
