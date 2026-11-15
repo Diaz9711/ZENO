@@ -2479,16 +2479,6 @@
         }
       }
     },
-    "Tu cohete": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your rocket"
-          }
-        }
-      }
-    },
     "Tu energía está baja, y está bien. Descansar también cuenta.": {
       "localizations": {
         "en": {

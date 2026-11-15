@@ -1,6 +1,6 @@
 # ZENO — dónde vamos (para empezar una conversación nueva)
 
-Última actualización: 14 nov 2026 (tarde). Repositorio privado: https://github.com/Diaz9711/ZENO (rama `main`).
+Última actualización: 14 nov 2026 (noche). Repositorio privado: https://github.com/Diaz9711/ZENO (rama `main`).
 
 ## Cómo empezar la próxima conversación
 Abre una sesión nueva en la carpeta `~/ZENO` y escribe:
@@ -45,13 +45,23 @@ Las reglas que nunca se rompen están en `CLAUDE.md`. Este archivo solo cuenta e
 - Atajos DEBUG nuevos: `-lumiQuieta YES`, `-energiaFija 70`, `-abrirEditor YES`, `-claveDePrueba xxxxxx`, `-sesionCerrada YES`.
 - Falta por juzgar en el iPhone: fluidez a 60 fps, centelleo de la estrella, Face ID real.
 
+## Hecho el 14 nov 2026 (noche): cinco mejoras, pendientes de que Diaz las apruebe
+1. **Anillo en la Isla Dinámica y en la pantalla bloqueada** (Live Activity), con "Terminé". Probado en el simulador: la Isla muestra el anillo y el tiempo, y "Terminé" cierra la tarea. Falta ver la pantalla bloqueada en el iPhone. Sin texto de la tarea con el iPhone bloqueado (lo eligió Diaz).
+2. **Widget de inicio** (pequeño y mediano) con la luz de Lumi y la tarea de ahora. Probado el mediano en el simulador.
+3. **Siri y botón de Acción**: "Agrega una tarea a ZENO" y "Escribe una tarea en ZENO". Probados con `-probarSiri` y `zeno://escribir`; falta probar la voz real de Siri en el iPhone.
+4. **Chispa** (nombre elegido por Diaz): vuela alrededor de Lumi al terminar y aparece discreta en Tareas y Ajustes.
+5. **Cómo funciona ZENO** en Ajustes → Saber más, con cinco estudios verificados.
+- Catálogo: 308 textos de la app y 10 del widget, todos con inglés (comparado con los `.stringsdata` de la compilación).
+- **Para instalar en el iPhone hace falta** que Diaz conecte su Apple ID en Xcode → Settings → Accounts. Sin cuenta, `xcodebuild` no puede crear los perfiles de la extensión ni del App Group. Si el Personal Team no permite App Groups, hay que quitar `ZENO.entitlements` y `ZENOWidgets.entitlements` de los ajustes: el widget seguiría mostrando solo la luz.
+
 ## Pendiente (en este orden)
 1. **Probar en el iPhone de Diaz** (gratis con su Apple ID, hay que reinstalar cada 7 días). Le di los pasos: conectar y confiar; en Xcode, Signing & Capabilities → Team → su Apple ID (Personal Team); Modo desarrollador en el iPhone; ▶ Run; confiar en el desarrollador en Ajustes → General → VPN y gestión de dispositivos. Comprobar con `xcrun devicectl list devices`. Si el identificador `app.zeno.ZENO` no está disponible, cambiarlo por uno único.
 2. **Fluidez** (medir en el iPhone, con números antes y después, mostrando los fps solo en la consola):
    - el gas del cielo a media resolución, con estrellas, lucecitas y cometa nítidos;
    - ~~limitar los cuadros de Lumi~~ y ~~brillo de la tarea por opacidad~~ hechos.
 3. ~~Inglés~~ hecho (selector propio dentro de ZENO).
-4. **"Cómo funciona ZENO":** sección con el respaldo científico sobre TDAH (tareas pequeñas, energía, ceguera del tiempo, sin culpa) con fuentes reales verificadas. Diaz preguntó por "respaldo médico": se le explicó que un certificado oficial (FDA o CE) no se logra con código; lo útil es este respaldo científico, la categoría Salud en App Store y que un profesional de TDAH pruebe la app.
+4. ~~"Cómo funciona ZENO"~~ hecho (falta que Diaz lo apruebe). Sobre el "respaldo médico": un certificado oficial (FDA o CE) no se logra con código; lo útil es este respaldo científico, la categoría Salud en App Store y que un profesional de TDAH pruebe la app.
+7. **IA dentro de ZENO** (Diaz lo preguntó el 14 nov): la recomendación es el modelo de Apple que corre en el iPhone (Foundation Models, iOS 26), sin internet ni servidor. Serviría para proponer el primer paso de dos minutos, calcular mejor el tamaño de las tareas y que Chispa hable con más naturalidad. Antes hay que confirmar que existe en el SDK y que corre en el iPhone 16 Pro Max.
 5. **iCloud y "Continuar con Apple" de verdad:** cuando Diaz tenga la cuenta de desarrollador de pago (aún no la tiene). Activar las capacidades "Sign in with Apple" e iCloud y sincronizar SwiftData con CloudKit.
 6. **Fase 7 (avisos):** construida, falta que Diaz la apruebe.
 
