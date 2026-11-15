@@ -244,12 +244,14 @@ struct UniversoView: View {
             // Cada vez que la persona vuelve a la app, empieza en Hoy.
             if nueva == .background {
                 estuvoEnFondo = true
+                actualizarWidget(puntaje: puntaje)
                 registrarCierre()
                 if let persona = personas.first, sesionAbierta {
                     Task { await Avisos.alSalir(persona, eventos: eventos) }
                 }
             } else if nueva == .active && estuvoEnFondo {
                 estuvoEnFondo = false
+                actualizarEnVivo()
                 visita += 1
                 registrarApertura()
                 // Al volver se entra directo a Hoy, sin fecha ni frase.
@@ -276,13 +278,23 @@ struct UniversoView: View {
             if ajustes.bool(forKey: "sesionCerrada") { sesionAbierta = false }
             #endif
             registrarApertura()
+            actualizarWidget(puntaje: puntaje)
             // Si quitó el permiso de Apple desde el iPhone, la sesión se cierra (sus datos se quedan).
             if let persona = personas.first, sesionAbierta,
                !(await Sesion.sigueValida(cuentaApple: persona.cuentaApple)) {
                 withAnimation(movimientoDeLumi) { sesionAbierta = false }
             }
         }
-        .onReceive(Timer.publish(every: 300, on: .main, in: .common).autoconnect()) { ahora = $0 }
+        .onReceive(Timer.publish(every: 300, on: .main, in: .common).autoconnect()) {
+            ahora = $0
+            actualizarWidget(puntaje: puntaje)
+        }
+        // El anillo en la Isla Dinámica sigue al estado: empezar, terminar, "Ahora no", borrar,
+        // borrar todo o cerrar sesión lo abren o lo cierran solos.
+        .onChange(of: firmaEnVivo, initial: true) { _, _ in actualizarEnVivo() }
+        .onChange(of: persona?.formaDeLumiCruda) { _, _ in actualizarWidget(puntaje: puntaje) }
+        // El widget y el anillo abren ZENO en Hoy.
+        .onOpenURL { abrir($0) }
         .fullScreenCover(isPresented: $mostrarLaboratorio) {
             LaboratorioView()
                 .preferredColorScheme(.dark)
@@ -382,6 +394,45 @@ struct UniversoView: View {
                 // Si se estaba escribiendo en Hoy, al salir la barra vuelve siempre.
                 if destino != .hoy { editando = false }
             }
+        }
+    }
+
+    // MARK: Fuera de la app (Isla Dinámica y widget)
+
+    /// La tarea en marcha, si la sesión está abierta.
+    private var tareaEnMarcha: Tarea? {
+        guard !personas.isEmpty, sesionAbierta else { return nil }
+        return tareas.first(where: \.estaEnCurso)
+    }
+
+    private var firmaEnVivo: String {
+        guard let tarea = tareaEnMarcha, let inicio = tarea.empezadaEn else { return "" }
+        return "\(tarea.textoVisible)|\(inicio.timeIntervalSince1970)"
+    }
+
+    private func actualizarEnVivo() {
+        let tarea = tareaEnMarcha
+        let minutos = tarea.map { Aprendizaje.minutosPrevistos($0, eventos: eventos) } ?? 0
+        Task { await AnilloEnVivo.sincronizar(titulo: tarea?.textoVisible, inicio: tarea?.empezadaEn, minutos: minutos) }
+    }
+
+    private func actualizarWidget(puntaje: Double) {
+        guard let persona = personas.first else { return }
+        Widgets.luz(apariencia: AparienciaLumi(semilla: persona.semilla), forma: persona.formaDeLumi,
+                    energia: puntaje / 100)
+    }
+
+    /// zeno://hoy (widget, anillo) y zeno://escribir (atajo): siempre a Hoy.
+    private func abrir(_ enlace: URL) {
+        guard !personas.isEmpty, sesionAbierta else { return }
+        withAnimation(movimientoDeLumi) {
+            presentando = false
+            llegada = true
+            momento = .tarea
+        }
+        ir(a: .hoy)
+        if enlace.host == "escribir" {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { pedirAgregar += 1 }
         }
     }
 

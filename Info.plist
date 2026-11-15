@@ -2,6 +2,25 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>app.zeno.ZENO</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>zeno</string>
+			</array>
+		</dict>
+	</array>
+	<key>NSFaceIDUsageDescription</key>
+	<string>ZENO usa Face ID solo para que entres o recuperes tu clave. Nada sale del teléfono.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>ZENO usa el micrófono solo mientras mantienes presionada a Lumi, para escribir la tarea que dices.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>ZENO convierte tu voz en texto dentro del teléfono para agregar tareas. Tu voz no sale del dispositivo.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>BebasNeue-Regular.ttf</string>
@@ -9,12 +28,6 @@
 		<string>Fraunces-Italic.ttf</string>
 		<string>Manrope.ttf</string>
 	</array>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>ZENO usa el micrófono solo mientras mantienes presionada a Lumi, para escribir la tarea que dices.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>ZENO convierte tu voz en texto dentro del teléfono para agregar tareas. Tu voz no sale del dispositivo.</string>
-	<key>NSFaceIDUsageDescription</key>
-	<string>ZENO usa Face ID solo para que entres o recuperes tu clave. Nada sale del teléfono.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

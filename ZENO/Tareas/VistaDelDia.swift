@@ -283,12 +283,7 @@ struct MisTareasView: View {
     private func completar(_ tarea: Tarea) {
         withAnimation(Lujo.curva(0.5)) { _ = marcando.insert(tarea.persistentModelID) }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-            let evento = EventoDeEnergia(tipo: .tareaTerminada)
-            contexto.insert(evento)
-            evento.tarea = tarea
-            evento.tamanoCrudo = tarea.tamanoCrudo
-            withAnimation(Lujo.curva()) { tarea.terminadaEn = .now }
-            Task { await AvisosDeTareas.sincronizar(contexto) }
+            withAnimation(Lujo.curva()) { AccionesDeTarea.terminar(tarea, en: contexto) }
         }
     }
 }

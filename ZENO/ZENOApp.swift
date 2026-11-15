@@ -24,7 +24,8 @@ struct ZENOApp: App {
             #endif
         }
         // Todo se guarda en el teléfono. Sin cuentas ni servidor.
-        .modelContainer(for: [Persona.self, Tarea.self, EventoDeEnergia.self])
+        // Un solo contenedor, el mismo que usan Siri y el "Terminé" de la pantalla bloqueada.
+        .modelContainer(Almacen.contenedor)
     }
 }
 

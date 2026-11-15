@@ -1,0 +1,66 @@
+{
+  "sourceLanguage": "es",
+  "strings": {
+    "En curso": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In progress"
+          }
+        }
+      }
+    },
+    "Lumi te acompaña": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lumi is with you"
+          }
+        }
+      }
+    },
+    "Lumi, tu estrella": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lumi, your star"
+          }
+        }
+      }
+    },
+    "Marca como terminada la tarea en curso.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marks the task in progress as done."
+          }
+        }
+      }
+    },
+    "Terminé": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        }
+      }
+    },
+    "Tiempo de la tarea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Task time"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

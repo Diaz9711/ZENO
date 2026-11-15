@@ -382,6 +382,8 @@ struct AjustesView: View {
     private func cerrarSesion() {
         Avisos.cancelarTodo()
         persona.avisoDiarioProgramado = nil      // si no, al volver contaría como un aviso ignorado
+        Task { await AnilloEnVivo.terminarTodo() }
+        Widgets.olvidar()                         // con la sesión cerrada, el widget no muestra tareas
         withAnimation(.spring(response: 0.75, dampingFraction: 0.74)) { sesionAbierta = false }
     }
 
@@ -392,6 +394,8 @@ struct AjustesView: View {
         try? contexto.delete(model: Tarea.self)
         try? contexto.delete(model: Persona.self)
         UserDefaults.standard.removeObject(forKey: "diaCalido")
+        Task { await AnilloEnVivo.terminarTodo() }
+        Widgets.olvidar()
     }
 }
 

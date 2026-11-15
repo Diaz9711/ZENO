@@ -1459,6 +1459,16 @@
         }
       }
     },
+    "Marca como terminada la tarea en curso.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marks the task in progress as done."
+          }
+        }
+      }
+    },
     "Marcar como hecha": {
       "localizations": {
         "en": {
@@ -2094,7 +2104,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "I'm done"
+            "value": "Done"
           }
         }
       }

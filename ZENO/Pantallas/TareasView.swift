@@ -74,6 +74,15 @@ struct TareaDelMomentoView: View {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) { escuchando = activo }
         }
         .onChange(of: pedirAgregar) { _, _ in abrirAgregar() }
+        // El widget de inicio muestra la misma tarea de ahora.
+        .onChange(of: firmaParaWidget, initial: true) { _, _ in
+            if case .tarea(let tarea) = eleccion {
+                Widgets.tarea(tarea.textoVisible, inicio: enCurso == tarea.persistentModelID ? tarea.empezadaEn : nil,
+                              minutos: Aprendizaje.minutosPrevistos(tarea, eventos: eventos))
+            } else {
+                Widgets.tarea(nil, inicio: nil, minutos: 0)
+            }
+        }
         .onChange(of: modo) { _, nuevo in
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) { editando = nuevo != .ver }
         }
@@ -293,6 +302,11 @@ struct TareaDelMomentoView: View {
                                      quiereAlgoIgual: quiereAlgoIgual)
     }
 
+    private var firmaParaWidget: String {
+        guard case .tarea(let tarea) = eleccion else { return "" }
+        return "\(tarea.textoVisible)|\(enCurso == tarea.persistentModelID ? tarea.empezadaEn?.timeIntervalSince1970 ?? 0 : 0)"
+    }
+
     private var idPropuesta: PersistentIdentifier? {
         if case .tarea(let tarea) = eleccion { return tarea.persistentModelID }
         return nil
@@ -505,17 +519,13 @@ struct TareaDelMomentoView: View {
 
     private func terminar(_ tarea: Tarea) {
         toques += 1
-        // Cuánto tardó: sirve para comparar con su propio promedio.
-        let segundos = tarea.empezadaEn.map { Date.now.timeIntervalSince($0) }
         let celebracion = Celebracion.para(tarea, eventos: eventos, puntaje: puntaje)
-        registrar(.tareaTerminada, valor: segundos, tarea: tarea)
         alTerminar(celebracion)
-        // La tarea se va despacio, mientras Lumi celebra.
+        // La tarea se va despacio, mientras Lumi celebra. Guarda cuánto tardó (para su propio promedio).
         withAnimation(.easeInOut(duration: 0.8).delay(0.4)) {
-            tarea.terminadaEn = .now
+            AccionesDeTarea.terminar(tarea, en: contexto)
             quiereAlgoIgual = false
         }
-        Task { await AvisosDeTareas.sincronizar(contexto) }
     }
 
     /// "Ahora no" nunca es un fracaso: la app aprende que esta hora no era, y lo intenta más tarde.
