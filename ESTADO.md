@@ -89,6 +89,14 @@ Pasos siguientes, uno por uno (Diaz pidió paso a paso, "razona bien", usar a Fa
 5. "Más premium, que la app tenga vida": sin efectos nuevos hasta que lo de arriba esté aprobado.
 - **No tocar** la estrella ni la nebulosa por defecto ni sus colores (Diaz lo repitió).
 
+## Qué le falta a ZENO para ser número uno (Fable, 15 nov 2026)
+Ya resuelve bien: una sola tarea, sin culpa ("Ahora no" sin castigo), energía según la hora, anillo de tiempo, capturar con voz/Siri/widget.
+Huecos principales: (1) empezar sigue siendo trabajo de la persona (escribe ella el primer paso); (2) nada la acompaña durante la tarea; (3) volver tras días sin usarla muestra una lista acumulada; (4) la recompensa es siempre igual (se aburre a las 2 semanas); (5) no se puede anotar algo en descanso o con una tarea en marcha; (6) no avisa del próximo compromiso; (7) la presentación de 5,5 s cada vez frena (decide Diaz).
+Funciones por orden: 1 Chispa propone el primer paso y micro-pasos (IA en el teléfono, Apple Foundation Models; reserva sin IA) · 2 Vuelta amable tras 3+ días · 3 Modo "Lumi se queda contigo" (acompañamiento) · 4 Anotar siempre disponible · 5 Tiempo hasta el próximo compromiso · 6 Recompensas que varían (sin confeti) · 7 Widget de pantalla bloqueada y filtro de Enfoque · 8 Apple Watch (después).
+No hacer: rachas, puntos, red social, planificador tipo calendario, chat de IA en la nube, diario de ánimo, cuentas.
+Posicionamiento: "La única app para TDAH que elige la tarea que encaja con tu energía ahora, te ayuda a empezarla y nunca te hace sentir atrasado; todo se queda en tu iPhone". Precio: 1.0 gratis; luego ZENO Plus ~4,99 $/mes o 29,99 $/año, y vitalicio 59–79 $.
+Riesgos de rechazo: botón "Continuar con Apple" sin la capacidad (esconderlo en 1.0); frase de Safren en Cómo funciona y en la web suena a promesa médica (reescribir); que la clave local nunca deje fuera al revisor; textos en inglés de Face ID y voz marcados para revisar (`InfoPlist.xcstrings`); falta página de privacidad y de soporte con contacto; versión 0.1 → 1.0.
+
 ## Lista para subir a la App Store (lo que falta)
 1. **Cuenta Apple Developer de pago** (99 USD al año). Con el Personal Team gratis no se puede subir.
 2. **"Continuar con Apple"**: activar la capacidad Sign in with Apple con la cuenta de pago, o esconder ese botón antes de enviar. Si no funciona, Apple rechaza la app.
