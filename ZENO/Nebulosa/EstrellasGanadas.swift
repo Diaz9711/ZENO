@@ -31,10 +31,17 @@ struct EstrellasGanadas: View {
         ZStack {
             Canvas { ctx, size in
                 for (i, p) in puntos.enumerated() where !(naciendo && i == puntos.count - 1) {
-                    let edad = Double(puntos.count - 1 - i) / Double(max(puntos.count, 1))
-                    let luz = (0.95 - 0.35 * edad) * (0.85 + 0.15 * sin(p.fase))
+                    // Las 24 más recientes brillan enteras; de la 24 a la 72 se asientan poco a poco
+                    // más hondo en el cielo, y desde ahí quedan pequeñas y tenues, pero nunca se van
+                    // (consejo de Fable: con muchas tareas el cielo se llenaba de más). No es castigo:
+                    // es el cielo que se va haciendo tuyo.
+                    let puesto = Double(puntos.count - 1 - i)
+                    let k = min(max((puesto - 24) / 48, 0), 1)
+                    let asentada = k * k * (3 - 2 * k)
+                    let luz = (0.95 - 0.45 * asentada) * (0.85 + 0.15 * sin(p.fase))
                     Self.estrella(en: &ctx, centro: CGPoint(x: p.x * size.width, y: p.y * size.height),
-                                  radio: p.tamano, luz: luz * luzMaxima)
+                                  radio: p.tamano * (1 - 0.38 * asentada), luz: luz * luzMaxima,
+                                  halo: 4.5 - 1.3 * asentada, luzDelHalo: 0.28 - 0.08 * asentada)
                 }
             }
             if naciendo, let p = ultima {
@@ -48,10 +55,11 @@ struct EstrellasGanadas: View {
 
     static let duracion: TimeInterval = 4.4
 
-    static func estrella(en ctx: inout GraphicsContext, centro: CGPoint, radio: Double, luz: Double) {
-        let halo = radio * 4.5
+    static func estrella(en ctx: inout GraphicsContext, centro: CGPoint, radio: Double, luz: Double,
+                         halo escalaHalo: Double = 4.5, luzDelHalo: Double = 0.28) {
+        let halo = radio * escalaHalo
         ctx.fill(Path(ellipseIn: CGRect(x: centro.x - halo, y: centro.y - halo, width: halo * 2, height: halo * 2)),
-                 with: .radialGradient(Gradient(colors: [Color.oroClaro.opacity(0.28 * luz), .clear]),
+                 with: .radialGradient(Gradient(colors: [Color.oroClaro.opacity(luzDelHalo * luz), .clear]),
                                        center: centro, startRadius: 0, endRadius: halo))
         ctx.fill(Path(ellipseIn: CGRect(x: centro.x - radio, y: centro.y - radio, width: radio * 2, height: radio * 2)),
                  with: .color(Color.marfil.opacity(luz)))

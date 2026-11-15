@@ -113,11 +113,10 @@ struct AparienciaLumi: Equatable {
         // La estrella es su hermana: blanco dorado, platino en el centro, halo menos saturado.
         if cielo == .negro {
             let tonoN = 0.585 + 0.16 * u
-            // Prueba de comparación (se quita al elegir): 1 = más hondo.
-            let hondo = UserDefaults.standard.integer(forKey: "negroHondo") == 1
-            colorFondo = Self.hsb(tonoN, sF * (hondo ? 0.60 : 0.85), bF * (hondo ? 0.13 : 0.26))
-            colorNube = Self.hsb(tonoN + (vecino - tono), sNu * (hondo ? 0.38 : 0.62), bNu * (hondo ? 0.52 : 0.74))
-            colorBrasa = Self.hsb(0.60 + 0.06 * ub, sb * (hondo ? 0.30 : 0.50), hondo ? 0.40 : 0.50)
+            // "Negro hondo", elegido por Diaz (opción 3 de `Comparaciones/cielo-negro-opciones.jpg`).
+            colorFondo = Self.hsb(tonoN, sF * 0.60, bF * 0.13)
+            colorNube = Self.hsb(tonoN + (vecino - tono), sNu * 0.38, bNu * 0.52)
+            colorBrasa = Self.hsb(0.60 + 0.06 * ub, sb * 0.30, 0.40)
             colorOro = Self.hsb(0.112 + (hO - 0.10) * 0.6, sO * 0.80, 1.0)
             colorNucleo = Self.hsb(hN, sN * 0.55, 1.0)
             colorCorona = Self.hsb(hC + 0.006, sC * 0.72, 1.0)

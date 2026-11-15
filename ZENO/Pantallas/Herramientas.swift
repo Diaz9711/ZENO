@@ -69,7 +69,20 @@ enum DatosDeEjemplo {
     @MainActor
     static func cargarCielo(en contexto: ModelContext) {
         guard UserDefaults.standard.bool(forKey: "cieloDeEjemplo") else { return }
+        // Solo una vez: al abrir la app varias veces con esta prueba, el cielo se llenaba de más.
+        guard !UserDefaults.standard.bool(forKey: "cieloDeEjemploCargado") else { return }
+        UserDefaults.standard.set(true, forKey: "cieloDeEjemploCargado")
         let tamanos: [TamanoDeTarea] = [.chica, .mediana, .grande, .chica, .mediana]
+        // `-estrellasDeEjemplo 200`: un cielo de alguien que lleva meses usando ZENO.
+        let cuantas = UserDefaults.standard.integer(forKey: "estrellasDeEjemplo")
+        if cuantas > 0 {
+            for i in 0..<cuantas {
+                let evento = EventoDeEnergia(tipo: .tareaTerminada, fecha: Date.now.addingTimeInterval(-Double(i + 1) * 14_000), valor: 600)
+                evento.tamanoCrudo = tamanos[i % tamanos.count].rawValue
+                contexto.insert(evento)
+            }
+            return
+        }
         for dia in 1...12 {
             for i in 0..<(2 + dia % 4) {
                 let fecha = Date.now.addingTimeInterval(-Double(dia) * 86_400 + Double(i) * 3_700)
