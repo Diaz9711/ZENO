@@ -18,7 +18,7 @@ enum Widgets {
         // La energía se guarda en pasos, para no recargar el widget por cambios mínimos.
         foto.energia = (energia * 10).rounded() / 10
         // El retrato real de Lumi para el widget (solo si cambió algo que se vea).
-        let firma = "\(foto.nucleo)|\(foto.halo)|\(foto.esfera)|\(foto.energia)"
+        let firma = "\(foto.nucleo)|\(foto.halo)|\(foto.esfera)|\(foto.energia)|calidad\(CalidadVisual.nivel)"
         if RetratoDeLumi.guardar(apariencia: apariencia, forma: forma, energia: foto.energia, firma: firma) {
             foto.retratoEn = .now
         }

@@ -348,10 +348,11 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         float corazon = exp(-x * x * 0.85);
         float vivo = nube(uv / rN * 0.8 + desplazamiento + float2(t * 0.04, -t * 0.03));
         // Resplandor recogido hacia el centro: con el resplandor ancho la estrella se veía borrosa (Diaz).
-        float pegado = 1.0 / (1.0 + pow(x / 1.0, 2.0));
+        // Calidad: resplandor más recogido aún, para que la estrella se vea nítida (Diaz: "que no se vea borrosa").
+        float pegado = 1.0 / (1.0 + pow(x / mix(1.0, 0.72, calidad), 2.0));
         float fil = nube(dir * 1.25 + desplazamiento + (x * 0.12 - t * 0.035));
-        float medio = 1.0 / (1.0 + pow(x / mix(1.9, 2.6, energia), 2.0));
-        medio *= 0.74 + 0.52 * fil;
+        float medio = 1.0 / (1.0 + pow(x / (mix(1.9, 2.6, energia) * mix(1.0, 0.78, calidad)), 2.0));
+        medio *= (0.74 + 0.52 * fil) * mix(1.0, 0.70, calidad);
         float velo = exp(-pow((d - rHalo * 0.84) / 0.075, 2.0)) * (0.4 + 0.6 * fil);
 
         // Rayos: líneas finas que se afilan hacia la punta. Cada persona tiene
@@ -379,8 +380,8 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
             float chispa = 1.0 + 0.10 * sin(t * (1.6 + 0.35 * fi) + fi * 2.7 + desplazamiento.x);
             float L = largo * (0.82 + 0.18 * danza) * chispa;
             // Rayos finos y nítidos: casi sin falda difusa alrededor.
-            float w = 0.0024 + 0.0068 * clamp(1.0 - al / L, 0.0, 1.0);
-            float linea = exp(-pe * pe / (w * w)) + 0.10 * exp(-pe * pe / (w * w * 14.0));
+            float w = (0.0024 + 0.0068 * clamp(1.0 - al / L, 0.0, 1.0)) * mix(1.0, 0.78, calidad);
+            float linea = exp(-pe * pe / (w * w)) + mix(0.10, 0.03, calidad) * exp(-pe * pe / (w * w * 14.0));
             rayos += activo * smoothstep(-0.01, 0.03, al) * linea * exp(-al / L * 2.5) * chispa;
 
             float ang2 = ang + 3.14159265 / nR;
@@ -388,8 +389,8 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
             float al2 = dot(uv, e2);
             float pe2 = abs(uv.x * e2.y - uv.y * e2.x);
             float L2 = L * 0.46;
-            float w2 = 0.0020 + 0.0050 * clamp(1.0 - al2 / L2, 0.0, 1.0);
-            float linea2 = exp(-pe2 * pe2 / (w2 * w2)) + 0.10 * exp(-pe2 * pe2 / (w2 * w2 * 14.0));
+            float w2 = (0.0020 + 0.0050 * clamp(1.0 - al2 / L2, 0.0, 1.0)) * mix(1.0, 0.78, calidad);
+            float linea2 = exp(-pe2 * pe2 / (w2 * w2)) + mix(0.10, 0.03, calidad) * exp(-pe2 * pe2 / (w2 * w2 * 14.0));
             rayosCortos += activo * smoothstep(-0.01, 0.03, al2) * linea2 * exp(-al2 / L2 * 2.5);
         }
         // Rayitos muy finos pegados al corazón.
@@ -412,12 +413,12 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
             // Calidad: el corazón tiene textura viva (como la superficie de una estrella) y un
             // anillo de difracción finísimo, como en las fotos reales de estrellas.
             float grano = nube(uv / rN * 2.4 + desplazamiento * 1.3 + float2(t * 0.06, -t * 0.05));
-            col += cClaro * corazon * (grano - 0.5) * 0.80 * brillo * calidad;
-            float anillo = exp(-pow((x - 3.2) / 0.16, 2.0)) * (0.55 + 0.45 * fil);
-            col += mix(cClaro, cHalo, 0.30) * anillo * 0.15 * brillo * calidad;
+            col += cClaro * corazon * (grano - 0.5) * 0.40 * brillo * calidad;
+            float anillo = exp(-pow((x - 3.2) / 0.10, 2.0)) * (0.55 + 0.45 * fil);
+            col += mix(cClaro, cHalo, 0.30) * anillo * 0.12 * brillo * calidad;
             // Chispa de luz sobre el centro: un destello pequeño y nítido.
-            float chispa = exp(-x * x * 9.0);
-            col += float3(1.0, 0.98, 0.94) * chispa * 0.35 * centelleo * calidad;
+            float chispa = exp(-x * x * 14.0);
+            col += float3(1.0, 0.98, 0.94) * chispa * 0.50 * centelleo * calidad;
         }
     } else {
         // ═════ ESFERA ═════
