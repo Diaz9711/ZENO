@@ -50,14 +50,14 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "ZENO uses the microphone only while you press and hold Lumi, to write the task you say."
+            "state" : "translated",
+            "value" : "ZENO uses the microphone only when you tap the dictate button, to write down the task you say."
           }
         },
         "es" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "ZENO usa el micrófono solo mientras mantienes presionada a Lumi, para escribir la tarea que dices."
+            "state" : "translated",
+            "value" : "ZENO usa el micrófono solo cuando tocas el botón de dictar, para escribir la tarea que dices."
           }
         }
       }

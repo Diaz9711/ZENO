@@ -54,6 +54,24 @@ Las reglas que nunca se rompen están en `CLAUDE.md`. Este archivo solo cuenta e
 - Catálogo: 309 textos de la app y 10 del widget, todos con inglés (comparado con los `.stringsdata` de la compilación).
 - **Para instalar en el iPhone hace falta** que Diaz conecte su Apple ID en Xcode → Settings → Accounts. Sin cuenta, `xcodebuild` no puede crear los perfiles de la extensión ni del App Group. Si el Personal Team no permite App Groups, hay que quitar `ZENO.entitlements` y `ZENOWidgets.entitlements` de los ajustes: el widget seguiría mostrando solo la luz.
 
+## Hecho el 15 nov 2026
+- Pantalla bloqueada: diseño **línea fina** (elegido por Diaz). Logo: la O como **planeta** (ícono y web). Widget: diseño **Cielo** con la Lumi y la nebulosa reales.
+- Fluidez: 120 Hz en ProMotion (`CADisableMinimumFrameDurationOnPhone`), menos trabajo por cuadro (cielo y Lumi intactos). Medidor DEBUG `-medirFluidez YES`; **falta medir en el iPhone** (`devicectl device process launch --console ... app.zeno.ZENO -- -medirFluidez YES`).
+- Web publicada con las novedades y la sección de ciencia.
+- Para la App Store: `PrivacyInfo.xcprivacy` en la app y en el widget, `ITSAppUsesNonExemptEncryption = NO`, texto del micrófono corregido; la versión Release compila sin avisos.
+- **Ojo:** Diaz trabaja con la copia `~/Desktop/ZENO` (la que abre Xcode). Las copias `ZENO-main` de Descargas y Escritorio son viejas.
+
+## Lista para subir a la App Store (lo que falta)
+1. **Cuenta Apple Developer de pago** (99 USD al año). Con el Personal Team gratis no se puede subir.
+2. **"Continuar con Apple"**: activar la capacidad Sign in with Apple con la cuenta de pago, o esconder ese botón antes de enviar. Si no funciona, Apple rechaza la app.
+3. **App Store Connect**: crear la app (nombre ZENO, si está libre), subtítulo, descripción en español e inglés, palabras clave, categoría (Productividad; evitar "Salud/Medicina" para no prometer tratamiento), clasificación por edad.
+4. **Política de privacidad (URL obligatoria)** y URL de soporte: se pueden publicar como página. En "Privacidad de la app" marcar **"No se recopilan datos"**.
+5. **Capturas**: iPhone 6,9" (1320 × 2868) y 6,5". Opcional: video corto.
+6. **Versión 1.0** (hoy `MARKETING_VERSION = 0.1`) y número de compilación.
+7. **TestFlight** en el iPhone de Diaz: probar Isla Dinámica, widget, Siri, avisos, Face ID y la fluidez.
+8. Revisar los textos de la ficha: ZENO acompaña, **no diagnostica ni trata** el TDAH (regla 1.4.1 de Apple).
+9. Aprobar lo pendiente: Fase 7 (avisos) y las mejoras del 14 y 15 nov.
+
 ## Pendiente (en este orden)
 1. **Probar en el iPhone de Diaz** (gratis con su Apple ID, hay que reinstalar cada 7 días). Le di los pasos: conectar y confiar; en Xcode, Signing & Capabilities → Team → su Apple ID (Personal Team); Modo desarrollador en el iPhone; ▶ Run; confiar en el desarrollador en Ajustes → General → VPN y gestión de dispositivos. Comprobar con `xcrun devicectl list devices`. Si el identificador `app.zeno.ZENO` no está disponible, cambiarlo por uno único.
 2. **Fluidez** (medir en el iPhone, con números antes y después, mostrando los fps solo en la consola):
