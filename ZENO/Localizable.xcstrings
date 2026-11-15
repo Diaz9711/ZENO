@@ -56,6 +56,16 @@
         }
       }
     },
+    "Abre ZENO listo para escribir o dictar una tarea.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens ZENO ready to write or dictate a task."
+          }
+        }
+      }
+    },
     "Abrir Ajustes del iPhone": {
       "localizations": {
         "en": {
@@ -82,6 +92,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Add task"
+          }
+        }
+      }
+    },
+    "Agregar una tarea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a task"
           }
         }
       }
@@ -1036,6 +1056,16 @@
         }
       }
     },
+    "Escribir tarea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write task"
+          }
+        }
+      }
+    },
     "Escribir una tarea": {
       "localizations": {
         "en": {
@@ -1142,6 +1172,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lumi's shape"
+          }
+        }
+      }
+    },
+    "Guarda una tarea en ZENO sin abrir la app.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saves a task in ZENO without opening the app."
+          }
+        }
+      }
+    },
+    "Guardada. Es grande: en ZENO puedes elegir su primer paso de dos minutos.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved. It is a big one: in ZENO you can choose its two-minute first step."
+          }
+        }
+      }
+    },
+    "Guardada. Lumi te la propone en el momento justo.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved. Lumi will suggest it at the right moment."
           }
         }
       }
@@ -1809,6 +1869,16 @@
         }
       }
     },
+    "Primero abre ZENO y conoce a Lumi.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First open ZENO and meet Lumi."
+          }
+        }
+      }
+    },
     "Probar otra estrella": {
       "localizations": {
         "en": {
@@ -2055,6 +2125,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Afternoon"
+          }
+        }
+      }
+    },
+    "Tarea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Task"
           }
         }
       }

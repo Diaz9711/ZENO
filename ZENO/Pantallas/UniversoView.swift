@@ -276,6 +276,12 @@ struct UniversoView: View {
             // -claveDePrueba xxxxxx: deja guardada esa clave (para probar la entrada).
             if let c = ajustes.string(forKey: "claveDePrueba") { Clave.guardar(c) }
             if ajustes.bool(forKey: "sesionCerrada") { sesionAbierta = false }
+            // -probarSiri "texto": corre el mismo atajo que usa Siri para agregar una tarea.
+            if let frase = ajustes.string(forKey: "probarSiri") {
+                var atajo = AgregarTareaIntent()
+                atajo.tarea = frase
+                _ = try? await atajo.perform()
+            }
             #endif
             registrarApertura()
             actualizarWidget(puntaje: puntaje)
@@ -295,6 +301,12 @@ struct UniversoView: View {
         .onChange(of: persona?.formaDeLumiCruda) { _, _ in actualizarWidget(puntaje: puntaje) }
         // El widget y el anillo abren ZENO en Hoy.
         .onOpenURL { abrir($0) }
+        // "Escribir una tarea" desde Siri, Atajos o el botón de Acción.
+        .onChange(of: PuenteDeAtajos.compartido.pedidosDeEscribir, initial: true) { _, pedidos in
+            guard pedidos > 0, !personas.isEmpty else { return }
+            PuenteDeAtajos.compartido.pedidosDeEscribir = 0
+            abrir(EnlaceZeno.escribir)
+        }
         .fullScreenCover(isPresented: $mostrarLaboratorio) {
             LaboratorioView()
                 .preferredColorScheme(.dark)

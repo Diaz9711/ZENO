@@ -1,0 +1,66 @@
+{
+  "sourceLanguage": "es",
+  "strings": {
+    "Agrega una tarea a ${applicationName}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a task to ${applicationName}"
+          }
+        }
+      }
+    },
+    "Agrega a ${applicationName}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to ${applicationName}"
+          }
+        }
+      }
+    },
+    "Añade una tarea en ${applicationName}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a task in ${applicationName}"
+          }
+        }
+      }
+    },
+    "Nueva tarea en ${applicationName}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New task in ${applicationName}"
+          }
+        }
+      }
+    },
+    "Escribe una tarea en ${applicationName}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write a task in ${applicationName}"
+          }
+        }
+      }
+    },
+    "Abre ${applicationName} para escribir": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open ${applicationName} to write"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
