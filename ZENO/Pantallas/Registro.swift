@@ -198,7 +198,7 @@ struct RegistroView: View {
                           prompt: Text("Tu nombre").foregroundStyle(Color.marfil.opacity(0.3)))
                     .font(.zenoTitulo(.largeTitle, .regular))
                     .foregroundStyle(Color.marfil)
-                    .tint(Color.oroZeno)
+                    .tint(Lujo.oro)
                     .textInputAutocapitalization(.words)
                     .autocorrectionDisabled()
                     .submitLabel(.continue)
@@ -206,8 +206,8 @@ struct RegistroView: View {
                     .onSubmit { if !borrador.nombreLimpio.isEmpty { ir(a: .fecha) } }
                 // Una línea fina que se enciende cuando hay nombre.
                 Rectangle()
-                    .fill(LinearGradient(colors: [Color.oroZeno.opacity(borrador.nombreLimpio.isEmpty ? 0.3 : 0.9),
-                                                  Color.oroZeno.opacity(0.05)],
+                    .fill(LinearGradient(colors: [Lujo.oro.opacity(borrador.nombreLimpio.isEmpty ? 0.3 : 0.9),
+                                                  Lujo.oro.opacity(0.05)],
                                          startPoint: .leading, endPoint: .trailing))
                     .frame(height: 1)
                     .animation(.easeInOut(duration: 0.3), value: borrador.nombreLimpio.isEmpty)
@@ -570,9 +570,9 @@ struct PuntoQueRespira: View {
 
     var body: some View {
         Circle()
-            .fill(Color.oroZeno)
+            .fill(Lujo.oro)
             .frame(width: 7, height: 7)
-            .shadow(color: Color.oroZeno.opacity(0.9), radius: 5)
+            .shadow(color: Lujo.oro.opacity(0.9), radius: 5)
             .scaleEffect(arriba ? 1.25 : 0.75)
             .opacity(arriba ? 1 : 0.5)
             .onAppear {

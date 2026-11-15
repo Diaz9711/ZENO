@@ -12,6 +12,7 @@ struct SelectorDeFecha: View {
     @State private var local = Date.now
     @State private var hora = 0
     @State private var minuto = 0
+    @State private var avisoPasada = 0
     @Namespace private var espacio
     private let calendario = Calendar.current
 
@@ -58,8 +59,15 @@ struct SelectorDeFecha: View {
                                          .init(color: .black, location: 0.7), .init(color: .clear, location: 1)],
                                  startPoint: .top, endPoint: .bottom))
 
+            if avisoPasada > 0 {
+                Text("Esa hora ya pasó; la moví al próximo momento libre.")
+                    .font(.zenoTexto(.caption))
+                    .foregroundStyle(Lujo.marfilSecundario)
+                    .transition(.opacity)
+            }
             BotonPrimarioLujo("Listo") { Hojas.compartidas.cerrar() }
         }
+        .sensoryFeedback(.warning, trigger: avisoPasada)
         .onAppear {
             local = max(fecha, calendario.startOfDay(for: desde))
             hora = calendario.component(.hour, from: local)
@@ -116,8 +124,19 @@ struct SelectorDeFecha: View {
         calendario.date(bySettingHour: hora, minute: minuto, second: 0, of: dia) ?? dia
     }
 
+    /// Nunca antes de `desde`: si la hora elegida ya pasó hoy, se mueve al próximo cuarto de hora.
     private func componer() {
-        local = combinar(dia: local)
+        var nueva = combinar(dia: local)
+        if nueva < desde {
+            let minutos = Int(ceil(desde.timeIntervalSinceReferenceDate / 60 / 15)) * 15
+            nueva = Date(timeIntervalSinceReferenceDate: Double(minutos) * 60)
+            withAnimation(Lujo.curva(0.45)) {
+                hora = calendario.component(.hour, from: nueva)
+                minuto = Self.minutos.min { abs($0 - calendario.component(.minute, from: nueva)) < abs($1 - calendario.component(.minute, from: nueva)) } ?? 0
+            }
+            avisoPasada += 1
+        }
+        local = nueva
         fecha = local
     }
 }

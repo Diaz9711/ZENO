@@ -430,7 +430,11 @@ struct HojaDeNuevaClave: View {
         }
         .sensoryFeedback(.success, trigger: guardada)
         .sensoryFeedback(.error, trigger: problema) { _, nuevo in nuevo != nil }
-        .onAppear { enfoque = 0 }
+        .task {
+            // El campo recibe el teclado cuando la pantalla ya terminó de entrar.
+            try? await Task.sleep(for: .milliseconds(450))
+            enfoque = 0
+        }
         .onChange(of: clave) { _, _ in if problema != nil { withAnimation(Lujo.curva()) { problema = nil } } }
     }
 

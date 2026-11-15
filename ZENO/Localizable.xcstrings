@@ -916,6 +916,16 @@
         }
       }
     },
+    "Esa hora ya pasó; la moví al próximo momento libre.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That time has passed; I moved it to the next free moment."
+          }
+        }
+      }
+    },
     "Esa no es tu clave. Inténtalo otra vez.": {
       "localizations": {
         "en": {
@@ -1525,6 +1535,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "I couldn't hear you this time. You can type instead."
+          }
+        }
+      }
+    },
+    "No se pudo confirmar que eres tú. Inténtalo otra vez o escribe tu clave.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't confirm it's you. Try again or enter your password."
           }
         }
       }

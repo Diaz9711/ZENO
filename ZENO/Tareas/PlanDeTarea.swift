@@ -314,14 +314,14 @@ struct EtiquetaDePlan: View {
     var body: some View {
         if let fecha = tarea.fechaPlaneada, fecha > .now {
             HStack(spacing: 6) {
-                Circle().fill(Color.oroZeno).frame(width: 4, height: 4)
+                Circle().fill(Lujo.oro).frame(width: 4, height: 4)
                 Text(fecha, format: .dateTime.weekday(.wide).day().hour().minute())
                 if tarea.momentoDelAviso != nil {
                     Text("· con aviso")
                 }
             }
             .font(.zenoTexto(.caption, .medium))
-            .foregroundStyle(Color.oroZeno.opacity(0.85))
+            .foregroundStyle(Lujo.oro.opacity(0.85))
         }
     }
 }

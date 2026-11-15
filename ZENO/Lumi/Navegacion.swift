@@ -342,13 +342,13 @@ struct TarjetaDeHoy: View {
             dato("\(mejorHora):00", "Tu mejor hora") { PuntoDelDia(hora: mejorHora) }
         }
         .padding(.vertical, 14)
-        .cristal(radio: 24)
+        .tarjetaLujo(radio: 24)
         .padding(.horizontal, 22)
     }
 
     private var separador: some View {
         Rectangle()
-            .fill(LinearGradient(colors: [.clear, Color.oroZeno.opacity(0.4), .clear], startPoint: .top, endPoint: .bottom))
+            .fill(LinearGradient(colors: [.clear, Lujo.oro.opacity(0.4), .clear], startPoint: .top, endPoint: .bottom))
             .frame(width: 1, height: 34)
     }
 
@@ -383,11 +383,11 @@ struct LineaDeLuz: View {
     var body: some View {
         let llena = 0.25 + 0.75 * min(max(cantidad, 0), 1)
         Capsule()
-            .fill(LinearGradient(colors: [Color.oroZeno.opacity(0.15), Color.oroZeno, Color.oroZeno.opacity(0.15)],
+            .fill(LinearGradient(colors: [Lujo.oro.opacity(0.15), Lujo.oro, Lujo.oro.opacity(0.15)],
                                  startPoint: .leading, endPoint: .trailing))
             .frame(height: 2.5)
             .scaleEffect(x: visible ? llena : 0.05)
-            .shadow(color: Color.oroZeno.opacity(0.7), radius: 4)
+            .shadow(color: Lujo.oro.opacity(0.7), radius: 4)
             .frame(maxHeight: .infinity)
             .onAppear { withAnimation(.easeOut(duration: 1.2).delay(0.3)) { visible = true } }
             .animation(.easeInOut(duration: 0.8), value: cantidad)
@@ -403,9 +403,9 @@ struct PuntoDelDia: View {
             ZStack(alignment: .leading) {
                 Capsule().fill(Color.marfil.opacity(0.10)).frame(height: 1)
                 Circle()
-                    .fill(Color.oroZeno)
+                    .fill(Lujo.oro)
                     .frame(width: 6, height: 6)
-                    .shadow(color: Color.oroZeno.opacity(0.9), radius: 4)
+                    .shadow(color: Lujo.oro.opacity(0.9), radius: 4)
                     .offset(x: geo.size.width * CGFloat(min(max(hora, 0), 23)) / 23 - 3)
             }
             .frame(maxHeight: .infinity)

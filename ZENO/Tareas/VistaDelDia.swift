@@ -357,21 +357,16 @@ struct IconoDeParte: View {
     }
 }
 
-/// La tira de la semana: el día de hoy en oro; el elegido, con un borde fino que se desliza.
+/// La tira de días: esta semana y las dos siguientes (cubre todo lo que se puede planear),
+/// se desliza de lado. Hoy siempre en oro; el día elegido, con un borde fino que se desliza.
 struct FranjaDeSemana: View {
     @Binding var dia: Date
     @Namespace private var espacio
+    @State private var ancla: Date?
     private let calendario = Calendar.current
 
-    private var semana: [Date] {
-        let hoy = calendario.startOfDay(for: .now)
-        let inicio = calendario.dateInterval(of: .weekOfYear, for: hoy)?.start ?? hoy
-        return (0..<7).compactMap { calendario.date(byAdding: .day, value: $0, to: inicio) }
-    }
-
-    var body: some View {
-        HStack(spacing: 0) {
-            ForEach(semana, id: \.self) { d in
+    @ViewBuilder
+    private func celda(_ d: Date) -> some View {
                 let elegido = calendario.isDate(d, inSameDayAs: dia)
                 let hoy = calendario.isDateInToday(d)
                 Button {
@@ -399,8 +394,38 @@ struct FranjaDeSemana: View {
                 .buttonStyle(EstiloLujo())
                 .sensoryFeedback(.selection, trigger: elegido) { _, ahora in ahora }
                 .accessibilityAddTraits(elegido ? .isSelected : [])
+    }
+
+    private var semana: [Date] {
+        let hoy = calendario.startOfDay(for: .now)
+        let inicio = calendario.dateInterval(of: .weekOfYear, for: hoy)?.start ?? hoy
+        return (0..<21).compactMap { calendario.date(byAdding: .day, value: $0, to: inicio) }
+    }
+
+    /// La semana a la que pertenece un día (0, 1 o 2), para deslizar de semana en semana.
+    private func semanaDe(_ d: Date) -> Int {
+        (semana.firstIndex { calendario.isDate($0, inSameDayAs: d) } ?? 0) / 7
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            let ancho = geo.size.width / 7
+            ScrollView(.horizontal) {
+                HStack(spacing: 0) {
+                    ForEach(semana, id: \.self) { d in
+                        celda(d)
+                            .frame(width: ancho)
+                    }
+                }
+                .scrollTargetLayout()
             }
+            .scrollIndicators(.hidden)
+            // Se asienta de semana en semana (7 días por página).
+            .scrollTargetBehavior(.paging)
+            .scrollPosition(id: $ancla, anchor: .leading)
+            .onAppear { ancla = semana[semanaDe(dia) * 7] }
         }
+        .frame(height: 52)
         .padding(6)
         .background(RoundedRectangle(cornerRadius: 22, style: .continuous)
             .fill(Color(red: 0.06, green: 0.065, blue: 0.11).opacity(0.88)))

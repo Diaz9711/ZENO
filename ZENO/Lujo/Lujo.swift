@@ -568,7 +568,7 @@ struct CapaDeHojas: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-        .ignoresSafeArea(.keyboard)
+        .animation(Lujo.curva(0.45), value: hojas.pila.count)
     }
 }
 

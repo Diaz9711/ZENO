@@ -548,7 +548,7 @@ struct Titular: View {
             .lineLimit(3)
             .minimumScaleFactor(0.7)
             .shadow(color: .black.opacity(0.5), radius: 10, y: 2)
-            .shadow(color: Color.oroZeno.opacity(0.22), radius: 20)
+            .shadow(color: Lujo.oro.opacity(0.22), radius: 20)
             .accessibilityLabel(Text(verbatim: texto))
     }
 

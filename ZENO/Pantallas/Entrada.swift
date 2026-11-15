@@ -106,6 +106,12 @@ struct MenuDeEntrada: View {
             CampoDeClave(texto: $clave, sugerencia: "Escribe tu clave", error: problema != nil,
                          enfocado: $enfoque, indice: 0) { comprobar() }
             mensajeDeProblema
+            if problema == nil, let aviso {
+                Text(verbatim: aviso)
+                    .font(.zenoTexto(.caption))
+                    .foregroundStyle(Lujo.marfilSecundario)
+                    .transition(.opacity)
+            }
             BotonPrimarioLujo(cargando ? "Entrando…" : "Entrar", accion: comprobar)
                 .disabled(cargando)
             HStack {
@@ -122,7 +128,11 @@ struct MenuDeEntrada: View {
                 .padding(.trailing, -12)
             }
         }
-        .onAppear { enfoque = 0 }
+        .task {
+            // El campo recibe el teclado cuando la pantalla ya terminó de entrar.
+            try? await Task.sleep(for: .milliseconds(450))
+            enfoque = 0
+        }
     }
 
     // MARK: Crear (o elegir una nueva tras recuperar)
@@ -153,7 +163,11 @@ struct MenuDeEntrada: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .onAppear { enfoque = 0 }
+        .task {
+            // El campo recibe el teclado cuando la pantalla ya terminó de entrar.
+            try? await Task.sleep(for: .milliseconds(450))
+            enfoque = 0
+        }
     }
 
     @ViewBuilder
@@ -212,13 +226,14 @@ struct MenuDeEntrada: View {
         let motivo = recuperar ? Idioma.texto("Confirma que eres tú para elegir una clave nueva.")
                                : Idioma.texto("Confirma que eres tú para entrar en ZENO.")
         guard await Clave.confirmarDueno(motivo: motivo) else {
-            if !Clave.puedeUsarFaceID {
-                withAnimation(Lujo.curva()) {
-                    aviso = Idioma.texto("Este iPhone no tiene Face ID ni código. Escribe tu clave.")
-                }
+            withAnimation(Lujo.curva()) {
+                aviso = Clave.puedeUsarFaceID
+                    ? Idioma.texto("No se pudo confirmar que eres tú. Inténtalo otra vez o escribe tu clave.")
+                    : Idioma.texto("Este iPhone no tiene Face ID ni código. Escribe tu clave.")
             }
             return
         }
+        aviso = nil
         if recuperar {
             limpiar()
             withAnimation(Lujo.curva()) { modo = .nueva }
