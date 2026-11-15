@@ -43,6 +43,8 @@ struct UniversoView: View {
     @State private var llegada = false        // al abrir, el universo se acerca
     @State private var presentando = true     // al abrir: la presentación corta de ZENO
     @AppStorage(Sesion.clave) private var sesionAbierta = true
+    /// El cielo que eligió la persona en Ajustes (azul de siempre o negro).
+    @AppStorage(TonoDeCielo.clave) private var tonoDeCielo = TonoDeCielo.azulado
 
     /// Solo para elegir el botón (se abre con el argumento -galeriaBotones YES).
     private static var verGaleria: Bool {
@@ -69,7 +71,9 @@ struct UniversoView: View {
         let persona = personas.first
         let enRegistro = persona == nil
         let semilla = persona?.semilla ?? (paso.yaNacio ? borrador.semilla : Self.semillaNeutra)
-        let apariencia = AparienciaLumi(semilla: semilla)
+        // La presentación y el registro siempre con el cielo azul de siempre; el elegido, ya dentro.
+        let tono: TonoDeCielo = persona == nil ? .azulado : tonoDeCielo
+        let apariencia = AparienciaLumi(semilla: semilla, cielo: tono)
         let forma = persona?.formaDeLumi ?? borrador.forma
         // Al abrir, Lumi aún no está: nace del sol de la presentación cuando esta termina.
         let hayLumi = (persona != nil && !presentando && sesionAbierta) || lumiNacida
@@ -88,10 +92,14 @@ struct UniversoView: View {
         let centro = UnitPoint(x: 0.5, y: enOtraPagina ? 0.115 : (enTarea ? 0.245 : (enPresencia ? 0.34 : 0.33)))
         let tamano = (enOtraPagina ? 0.38 : (enTarea ? 0.80 : 1.0)) * (escuchando ? 1.12 : 1.0)
         let tareaEnCurso = enTarea ? tareas.first(where: \.estaEnCurso) : nil
-        let calidez = min(1, Cielo.calidez(hora: Cielo.horaActual()) + (diaCalido == Self.hoyTexto ? 0.28 : 0))
+        // En el cielo negro la mañana no abre tanto el resplandor (se volvería niebla gris).
+        let calidez = min(tono == .negro ? 0.45 : 1,
+                          Cielo.calidez(hora: Cielo.horaActual()) + (diaCalido == Self.hoyTexto ? 0.28 : 0))
 
         ZStack {
-            Color("FondoArranque").ignoresSafeArea()
+            (tono == .negro ? Color(red: Double(apariencia.colorFondo.x), green: Double(apariencia.colorFondo.y),
+                                    blue: Double(apariencia.colorFondo.z)) : Color("FondoArranque"))
+                .ignoresSafeArea()
 
             GeometryReader { geo in
                 ZStack {
@@ -102,7 +110,8 @@ struct UniversoView: View {
                                  centro: centro)
                         // El calor del cielo sigue a Lumi con su mismo resorte.
                         .animation(reducirMovimiento ? .easeInOut(duration: 0.5) : Ritmo.lumi, value: pagina)
-                        .id(semilla)
+                        // Al cambiar de cielo en Ajustes, el nuevo aparece fundiéndose sobre el anterior.
+                        .id(CieloElegido(semilla: semilla, tono: tono))
                         .transition(.opacity)
                         // Bienvenida: la cámara viaja hacia el cielo, que gira apenas al llegar.
                         .scaleEffect(viajando ? 1.55 : 1)
@@ -113,7 +122,8 @@ struct UniversoView: View {
                     // sin tocarla). Nace de Lumi. No aparece en la presentación ni en el registro.
                     if let persona, !presentando, sesionAbierta {
                         EstrellasGanadas(hechas: eventos.filter { $0.tipo == .tareaTerminada },
-                                         semilla: persona.semilla, origen: centro)
+                                         semilla: persona.semilla, origen: centro,
+                                         luzMaxima: tono == .negro ? 0.85 : 1)
                             .transition(.opacity)
                     }
 
@@ -122,6 +132,8 @@ struct UniversoView: View {
                     // Se dibuja al tamaño en que se ve (no grande y luego encogida): el mismo dibujo,
                     // con muchos menos píxeles que calcular en cada cuadro cuando Lumi está pequeña.
                     LumiView(apariencia: apariencia, energia: energia, forma: forma, destello: destelloDeHoy)
+                        .id(tono)
+                        .transition(.opacity)
                         .opacity(Pruebas.sinCielo ? 0 : 1)
                         .frame(width: anchoLumi * tamano)
                         // Al terminar una tarea: inhala, se encoge un instante y suelta la onda.
@@ -479,7 +491,7 @@ struct UniversoView: View {
 
     private func actualizarWidget(puntaje: Double, conRetrato: Bool = false) {
         guard let persona = personas.first else { return }
-        Widgets.luz(apariencia: AparienciaLumi(semilla: persona.semilla), forma: persona.formaDeLumi,
+        Widgets.luz(apariencia: AparienciaLumi(semilla: persona.semilla, cielo: tonoDeCielo), forma: persona.formaDeLumi,
                     energia: puntaje / 100, conRetrato: conRetrato)
         Widgets.revisarTarea(pendientes: Set(tareas.filter { $0.terminadaEn == nil }.map(\.textoVisible)))
     }

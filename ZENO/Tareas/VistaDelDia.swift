@@ -161,13 +161,15 @@ struct MisTareasView: View {
 
     private func tinte(_ parte: ParteDelDia) -> Color {
         // Solo se toman los tonos de la nebulosa como referencia para los paneles; la nebulosa no se toca.
-        let a = AparienciaLumi(semilla: personas.first?.semilla ?? Semilla(nombre: "zeno", anio: 2026, mes: 1, dia: 1))
+        let a = AparienciaLumi(semilla: personas.first?.semilla ?? Semilla(nombre: "zeno", anio: 2026, mes: 1, dia: 1),
+                               cielo: TonoDeCielo.elegido)
         let c: SIMD3<Float>
         switch parte {
         case .cuandoQuieras: return Lujo.marfil
         case .manana: c = a.colorBrasa
         case .tarde: c = a.colorNube
-        case .noche: c = a.colorFondo * 1.6
+        // En el cielo negro el fondo casi no tiene color: la noche toma el humo de la nube.
+        case .noche: c = TonoDeCielo.elegido == .negro ? a.colorNube * 0.55 : a.colorFondo * 1.6
         }
         return Color(red: Double(c.x), green: Double(c.y), blue: Double(c.z))
     }

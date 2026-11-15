@@ -9,6 +9,8 @@ struct EstrellasGanadas: View {
     let semilla: Semilla
     /// Dónde está Lumi (proporción de la pantalla): de ahí sale la estrella nueva.
     var origen: UnitPoint = UnitPoint(x: 0.5, y: 0.245)
+    /// Sobre el cielo negro se ven más: un poco menos de luz para que no resalten de más.
+    var luzMaxima: Double = 1
 
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     private static let maximo = 200
@@ -32,7 +34,7 @@ struct EstrellasGanadas: View {
                     let edad = Double(puntos.count - 1 - i) / Double(max(puntos.count, 1))
                     let luz = (0.95 - 0.35 * edad) * (0.85 + 0.15 * sin(p.fase))
                     Self.estrella(en: &ctx, centro: CGPoint(x: p.x * size.width, y: p.y * size.height),
-                                  radio: p.tamano, luz: luz)
+                                  radio: p.tamano, luz: luz * luzMaxima)
                 }
             }
             if naciendo, let p = ultima {

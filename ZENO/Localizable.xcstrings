@@ -4,6 +4,26 @@
     "" : {
       "shouldTranslate" : false
     },
+    "Cielo azul" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blue sky"
+          }
+        }
+      }
+    },
+    "Cielo negro" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Black sky"
+          }
+        }
+      }
+    },
     "¡Qué buen ritmo! Una más si te apetece, sin prisa." : {
       "localizations" : {
         "en" : {

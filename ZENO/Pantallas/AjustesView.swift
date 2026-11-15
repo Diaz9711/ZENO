@@ -20,9 +20,10 @@ struct AjustesView: View {
     /// "Cómo funciona ZENO": una página dentro de Ajustes, nunca una hoja de sistema.
     @State private var leyendo = false
     @State private var calidadNueva = CalidadVisual.nivel > 0.5
+    @AppStorage(TonoDeCielo.clave) private var tonoDeCielo = TonoDeCielo.azulado
 
     var body: some View {
-        let apariencia = AparienciaLumi(semilla: persona.semilla)
+        let apariencia = AparienciaLumi(semilla: persona.semilla, cielo: tonoDeCielo)
 
         ScrollViewReader { lector in
         ScrollView {
@@ -60,6 +61,13 @@ struct AjustesView: View {
                     Text("Los colores y el movimiento son solo tuyos; la forma la eliges tú.")
                         .font(.zenoTexto(.caption))
                         .foregroundStyle(Lujo.marfilSecundario)
+                    // El cielo: el azul de siempre o uno negro, con su estrella hermana.
+                    HStack(spacing: 12) {
+                        ForEach([TonoDeCielo.azulado, .negro]) { tono in
+                            muestraDeCielo(tono)
+                        }
+                    }
+                    .padding(.top, 6)
                 }
 
                 // — Idioma —
@@ -389,6 +397,49 @@ struct AjustesView: View {
         .buttonStyle(EstiloLujo())
         .sensoryFeedback(.selection, trigger: elegida)
         .accessibilityAddTraits(elegida ? .isSelected : [])
+    }
+
+    /// Una muestra quieta de cada cielo (sin shader: no pesa al deslizar). Al elegir,
+    /// el cielo de verdad cambia detrás, fundiéndose.
+    private func muestraDeCielo(_ tono: TonoDeCielo) -> some View {
+        let elegido = tonoDeCielo == tono
+        let a = AparienciaLumi(semilla: persona.semilla, cielo: tono)
+        func color(_ c: SIMD3<Float>, _ k: Float = 1) -> Color {
+            Color(red: Double(min(c.x * k, 1)), green: Double(min(c.y * k, 1)), blue: Double(min(c.z * k, 1)))
+        }
+        return Button {
+            withAnimation(.easeInOut(duration: 0.9)) { tonoDeCielo = tono }
+        } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle().fill(RadialGradient(colors: [color(a.colorBrasa, 0.9), color(a.colorNube), color(a.colorFondo)],
+                                                 center: .center, startRadius: 0, endRadius: 20))
+                    Circle().fill(RadialGradient(colors: [color(a.colorNucleo), color(a.colorCorona, 0.9).opacity(0.6), .clear],
+                                                 center: .center, startRadius: 0, endRadius: 7))
+                }
+                .frame(width: 34, height: 34)
+                .overlay(Circle().strokeBorder(Lujo.marfil.opacity(0.14), lineWidth: 0.5))
+                Text(tono == .negro ? "Cielo negro" : "Cielo azul")
+                    .font(.zenoTexto(.callout, elegido ? .medium : .regular))
+                    .foregroundStyle(elegido ? Lujo.oro : Lujo.marfil.opacity(0.7))
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity)
+            .frame(height: Lujo.altoMinimo + 8)
+            .background {
+                RoundedRectangle(cornerRadius: Lujo.radioChip, style: .continuous).fill(Lujo.marfil.opacity(0.03))
+                if elegido {
+                    RoundedRectangle(cornerRadius: Lujo.radioChip, style: .continuous)
+                        .strokeBorder(Lujo.oro.opacity(0.85), lineWidth: 0.75)
+                        .matchedGeometryEffect(id: "cielo", in: espacio)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(EstiloLujo())
+        .sensoryFeedback(.selection, trigger: elegido)
+        .accessibilityAddTraits(elegido ? .isSelected : [])
     }
 
     private var mejorHora: Int {
