@@ -9,9 +9,9 @@ struct AnilloEnVivoWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: AtributosDelAnillo.self) { contexto in
             // Pantalla bloqueada: nunca el texto de la tarea (decisión de Diaz).
-            PantallaBloqueada(estado: contexto.state)
+            VistaDeBloqueo(estado: contexto.state, estilo: .linea)
                 .environment(\.locale, Locale(identifier: contexto.attributes.idioma))
-                .activityBackgroundTint(Tinta.cielo.opacity(0.92))
+                .activityBackgroundTint(Tinta.cielo.opacity(0.78))
                 .activitySystemActionForegroundColor(Tinta.marfil)
                 .widgetURL(EnlaceZeno.hoy)
         } dynamicIsland: { contexto in
@@ -58,36 +58,6 @@ struct AnilloEnVivoWidget: Widget {
             .widgetURL(EnlaceZeno.hoy)
             .keylineTint(Tinta.oro)
         }
-    }
-}
-
-private struct PantallaBloqueada: View {
-    let estado: AtributosDelAnillo.ContentState
-
-    var body: some View {
-        HStack(spacing: 16) {
-            Anillo(estado: estado, grosor: 4)
-                .frame(width: 58, height: 58)
-            VStack(alignment: .leading, spacing: 3) {
-                Text("En curso")
-                    .font(.texto(11, "SemiBold"))
-                    .kerning(1.4)
-                    .textCase(.uppercase)
-                    .foregroundStyle(Tinta.oro)
-                Text("Lumi te acompaña")
-                    .font(.titulo(19))
-                    .foregroundStyle(Tinta.marfil)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-                TiempoRestante(estado: estado, tamano: 15, alineacion: .leading)
-                    .opacity(0.8)
-            }
-            Spacer(minLength: 0)
-            BotonTermine()
-                .frame(width: 96)
-        }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 16)
     }
 }
 

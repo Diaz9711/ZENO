@@ -1589,6 +1589,16 @@
         }
       }
     },
+    "Lumi te acompaña": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lumi is with you"
+          }
+        }
+      }
+    },
     "Lumi, tu estrella": {
       "localizations": {
         "en": {
