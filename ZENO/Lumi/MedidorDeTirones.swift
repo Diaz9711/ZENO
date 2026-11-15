@@ -34,7 +34,8 @@ final class MedidorDeTirones: NSObject {
         anterior = ahora
         if ahora - desde >= 5 {
             let fps = Double(cuadros) / (ahora - desde)
-            print(String(format: "[fluidez] %.0f cuadros/s · %d tirones en 5 s · peor cuadro %.0f ms", fps, tirones, peor * 1000))
+            let linea = String(format: "[fluidez] %.0f cuadros/s · %d tirones en 5 s · peor cuadro %.0f ms\n", fps, tirones, peor * 1000)
+            FileHandle.standardError.write(Data(linea.utf8))   // sin búfer: llega al instante a la consola
             cuadros = 0; tirones = 0; peor = 0; desde = ahora
         }
     }
