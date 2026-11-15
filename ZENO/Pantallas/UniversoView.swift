@@ -97,6 +97,14 @@ struct UniversoView: View {
                         .scaleEffect(viajando ? 1.55 : 1)
                         .rotationEffect(.degrees(viajando ? -6 : 0))
 
+                    // Tu constelación: una estrellita por cada tarea terminada (encima de la nebulosa,
+                    // sin tocarla). No aparece en la presentación ni en el registro.
+                    if let persona, !presentando, sesionAbierta {
+                        ConstelacionView(hechas: eventos.filter { $0.tipo == .tareaTerminada },
+                                         semilla: persona.semilla)
+                            .transition(.opacity)
+                    }
+
                     let anchoLumi = min(geo.size.width, 430) * 0.98
                     RetiradaAlDeslizar(activa: enOtraPagina) {
                     // Se dibuja al tamaño en que se ve (no grande y luego encogida): el mismo dibujo,
@@ -238,6 +246,7 @@ struct UniversoView: View {
             }
             #if DEBUG
             DatosDeEjemplo.cargarSiHaceFalta(en: contexto, hayPersona: !personas.isEmpty)
+            DatosDeEjemplo.cargarCielo(en: contexto)
             // Atajos para probar sin tocar: -formaDePrueba 0|1, -paginaInicial 0|1|2, -sinPresentacion YES.
             let ajustes = UserDefaults.standard
             if let forma = ajustes.string(forKey: "formaDePrueba").flatMap(Int.init) { personas.first?.formaDeLumiCruda = forma }

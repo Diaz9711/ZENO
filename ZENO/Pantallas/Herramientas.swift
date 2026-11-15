@@ -59,6 +59,21 @@ enum DatosDeEjemplo {
         cargar(en: contexto)
     }
 
+    /// `-cieloDeEjemplo YES`: tareas terminadas repartidas en los últimos 12 días, para ver la constelación.
+    @MainActor
+    static func cargarCielo(en contexto: ModelContext) {
+        guard UserDefaults.standard.bool(forKey: "cieloDeEjemplo") else { return }
+        let tamanos: [TamanoDeTarea] = [.chica, .mediana, .grande, .chica, .mediana]
+        for dia in 1...12 {
+            for i in 0..<(2 + dia % 4) {
+                let fecha = Date.now.addingTimeInterval(-Double(dia) * 86_400 + Double(i) * 3_700)
+                let evento = EventoDeEnergia(tipo: .tareaTerminada, fecha: fecha, valor: 600)
+                evento.tamanoCrudo = tamanos[(dia + i) % tamanos.count].rawValue
+                contexto.insert(evento)
+            }
+        }
+    }
+
     @MainActor
     static func cargar(en contexto: ModelContext) {
         let pendientes: [(String, TamanoDeTarea, String?)] = [
