@@ -421,6 +421,7 @@ struct UniversoView: View {
         let escala: CGFloat = escuchando ? 1.12 : 1.0
         func tamano(_ p: Pagina) -> CGFloat { (p == .hoy ? 0.80 : 0.38) * escala }
         tamanoDeDibujo = max(tamanoDeDibujo ?? tamano(pagina), tamano(pagina), tamano(destino))
+        ModoAhorro.compartido.movimiento(0.9)
         viajeDeLumi += 1
         let este = viajeDeLumi
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {

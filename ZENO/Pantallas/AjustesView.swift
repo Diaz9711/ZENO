@@ -365,14 +365,8 @@ struct AjustesView: View {
             withAnimation(Lujo.curva()) { persona.formaDeLumi = forma }
         } label: {
             VStack(spacing: 4) {
-                // En foto (no en vivo): dentro de la lista, dos Lumis vivas frenaban toda la página.
-                Group {
-                    if UserDefaults.standard.bool(forKey: "lumiVivaEnAjustes") {
-                        LumiView(apariencia: apariencia, energia: 0.75, forma: forma, cuadros: 30)
-                    } else {
-                        LumiFija(apariencia: apariencia, forma: forma)
-                    }
-                }
+                // Viva, como siempre (medido: con el cielo en pausa al deslizar, ya no frena la página).
+                LumiView(apariencia: apariencia, energia: 0.75, forma: forma, cuadros: 30)
                     .frame(maxWidth: .infinity)
                     .frame(height: 124)
                     .clipShape(RoundedRectangle(cornerRadius: Lujo.radioTarjeta, style: .continuous))

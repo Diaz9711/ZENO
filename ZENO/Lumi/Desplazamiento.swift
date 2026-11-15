@@ -35,7 +35,10 @@ extension View {
             -geo.frame(in: .named("pagina")).minY
         } action: { nuevo in
             let d = Desplazamiento.compartido
-            if abs(d.valor - nuevo) > 0.5 { d.valor = nuevo }
+            if abs(d.valor - nuevo) > 0.5 {
+                d.valor = nuevo
+                ModoAhorro.compartido.movimiento(0.25)
+            }
         }
     }
 

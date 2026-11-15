@@ -62,6 +62,12 @@ Las reglas que nunca se rompen están en `CLAUDE.md`. Este archivo solo cuenta e
 - Para la App Store: `PrivacyInfo.xcprivacy` en la app y en el widget, `ITSAppUsesNonExemptEncryption = NO`, texto del micrófono corregido; la versión Release compila sin avisos.
 - **Ojo:** Diaz trabaja con la copia `~/Desktop/ZENO` (la que abre Xcode). Las copias `ZENO-main` de Descargas y Escritorio son viejas.
 
+## Fluidez medida con el autopiloto (15 nov 2026, iPhone 16 Pro Max, cuadros por segundo)
+- Cómo medir sin tocar el iPhone (desbloqueado, Bloqueo automático en Nunca): `script -q salida.txt xcrun devicectl device process launch --device 17C74077-06F2-5731-BACE-6E5EE451C30F --console --terminate-existing app.zeno.ZENO -- -medirFluidez YES -sinPresentacion YES -autopiloto YES`. Cada línea dice la pantalla, si hay ahorro de batería y la temperatura.
+- Antes → ahora: Ajustes al deslizar 39–55 → 116–120 · hojas 40–57 → 96–110 · cambio de página 49–77 → 86–101 · Hoy en reposo 120 · con ahorro de batería, Hoy 20 → 60 (el tope de iOS en ese modo).
+- Lo que lo logró: el cielo ya no es Animatable (no se redibuja a 120 en las transiciones); el cielo hace una pausa invisible mientras algo se mueve (`ModoAhorro.movimiento`); menos cuadros con ahorro de batería o con el iPhone caliente; Lumi se dibuja a tamaño fijo al viajar; sombra fija en las hojas; Llavero y "Tu ritmo" recordados; foto del widget solo al salir.
+- Sin cielo ni Lumi (`-sinCielo YES`) todo va a 105–120: lo que queda en el cambio de página es construir la página, no el cielo.
+
 ## Lista para subir a la App Store (lo que falta)
 1. **Cuenta Apple Developer de pago** (99 USD al año). Con el Personal Team gratis no se puede subir.
 2. **"Continuar con Apple"**: activar la capacidad Sign in with Apple con la cuenta de pago, o esconder ese botón antes de enviar. Si no funciona, Apple rechaza la app.

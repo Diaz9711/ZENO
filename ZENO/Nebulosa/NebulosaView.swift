@@ -28,8 +28,8 @@ struct NebulosaView: View {
                                  inmediato: reducirMovimiento)
         // 30 cuadros por segundo bastan: el gas se mueve muy despacio.
         // 30 cuadros por segundo; con el ahorro de batería, 12 (el gas se mueve tan despacio que no se nota).
-        TimelineView(.animation(minimumInterval: ModoAhorro.compartido.activo ? 1.0 / 12.0 : 1.0 / 30.0,
-                                paused: reducirMovimiento)) { linea in
+        TimelineView(.animation(minimumInterval: 1.0 / ModoAhorro.compartido.cuadrosDelCielo,
+                                paused: reducirMovimiento || ModoAhorro.compartido.enMovimiento)) { linea in
             GeometryReader { geo in
                 let t = reducirMovimiento || Pruebas.quieto ? 0 : linea.date.timeIntervalSince(Self.inicio)
                 let inclina = reducirMovimiento ? .zero : Inclinacion.compartida.leer()

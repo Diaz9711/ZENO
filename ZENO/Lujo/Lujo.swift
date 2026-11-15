@@ -523,13 +523,15 @@ final class Hojas {
     static let subida = Animation.spring(response: 0.44, dampingFraction: 0.90)
     static let bajada = Animation.spring(response: 0.36, dampingFraction: 0.95)
 
-    func mostrar<C: View>(@ViewBuilder _ contenido: () -> C) {
+    @MainActor func mostrar<C: View>(@ViewBuilder _ contenido: () -> C) {
+        ModoAhorro.compartido.movimiento(0.6)
         withAnimation(Self.subida) { pila.append(Hoja(contenido: AnyView(contenido()))) }
         Fluidez.marcar("hoja")
     }
 
-    func cerrar() {
+    @MainActor func cerrar() {
         guard !pila.isEmpty else { return }
+        ModoAhorro.compartido.movimiento(0.5)
         withAnimation(Self.bajada) { _ = pila.removeLast() }
         Fluidez.marcar("cierra-hoja")
     }
