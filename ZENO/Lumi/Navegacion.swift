@@ -83,9 +83,10 @@ private struct Aparece: ViewModifier {
             // Fundido + subida corta, escalonados. Sin desenfoque animado: con varias piezas a la vez
             // era lo que más frenaba la entrada a cada página. Con Reducir Movimiento, solo fundido.
             .opacity(visible ? 1 : 0)
-            .offset(y: visible || reducirMovimiento ? 0 : 10)
+            .offset(y: visible || reducirMovimiento ? 0 : 14)
             .onAppear {
-                withAnimation(Lujo.curva(0.38).delay(0.02 + 0.035 * Double(orden))) {
+                // Escalón de 60 ms y curva de 0,5 s (Fable): se nota que cada pieza llega en su turno.
+                withAnimation(Lujo.curva(0.5).delay(0.02 + 0.06 * Double(orden))) {
                     visible = true
                 }
             }
@@ -389,8 +390,9 @@ struct LineaDeLuz: View {
             .scaleEffect(x: visible ? llena : 0.05)
             .shadow(color: Lujo.oro.opacity(0.7), radius: 4)
             .frame(maxHeight: .infinity)
-            .onAppear { withAnimation(.easeOut(duration: 1.2).delay(0.3)) { visible = true } }
-            .animation(.easeInOut(duration: 0.8), value: cantidad)
+            // Se enciende cuando su tarjeta ya llegó, con la misma curva que el número de al lado.
+            .onAppear { withAnimation(Lujo.curva(0.9).delay(0.45)) { visible = true } }
+            .animation(Lujo.curva(0.8), value: cantidad)
     }
 }
 

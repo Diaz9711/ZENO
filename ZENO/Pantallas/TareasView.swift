@@ -73,7 +73,7 @@ struct TareaDelMomentoView: View {
             }
         }
         .onChange(of: dictado.activo) { _, activo in
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) { escuchando = activo }
+            withAnimation(Lujo.curva(0.4)) { escuchando = activo }
         }
         .onChange(of: pedirAgregar) { _, _ in abrirAgregar() }
         // El widget de inicio muestra la misma tarea de ahora.
@@ -86,7 +86,7 @@ struct TareaDelMomentoView: View {
             }
         }
         .onChange(of: modo) { _, nuevo in
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) { editando = nuevo != .ver }
+            withAnimation(Ritmo.contenido) { editando = nuevo != .ver }
         }
 
     }
@@ -109,22 +109,22 @@ struct TareaDelMomentoView: View {
         // Una tarjeta ancha con lo de ahora (la única acción), y debajo dos tarjetas medianas con datos.
         VStack(alignment: .leading, spacing: 14) {
             // El amigo: una sola frase según el momento; al tocarlo, ofrece ayuda.
+            // Cada pieza llega en su turno (Fable): Chispa, Ahora, el campo y las dos medianas.
             CoheteAmigo(frase: Cohete.consejo(momentoDelCohete)) { pedirAyuda() }
                 .aparece(1)
             tarjetaDeAhora
-                .aparece(1)
+                .aparece(2)
 
             if mostrarCampoRapido {
                 CampoRapido { abrirAgregar() }
-                    .aparece(2)
+                    .aparece(3)
             }
 
             HStack(alignment: .top, spacing: 12) {
-                tarjetaDelDia
-                tarjetaDeMejorHora
+                tarjetaDelDia.aparece(4)
+                tarjetaDeMejorHora.aparece(5)
             }
             .fixedSize(horizontal: false, vertical: true)
-            .aparece(3)
 
             if let aviso = dictado.aviso {
                 Text(aviso)
@@ -175,6 +175,7 @@ struct TareaDelMomentoView: View {
                 HStack {
                     EtiquetaLujo(enRacha && enCurso == nil ? "Vas en racha · ¿una más?"
                                  : (tarea.primerPaso != nil ? "Primer paso" : (enCurso == nil ? "Ahora" : "En curso")))
+                        .contentTransition(.opacity)
                     Spacer()
                     if let fecha = tarea.fechaPlaneada, Calendar.current.isDateInToday(fecha) {
                         Text(fecha, format: .dateTime.hour().minute())
@@ -182,9 +183,11 @@ struct TareaDelMomentoView: View {
                             .foregroundStyle(Lujo.oro.opacity(0.85))
                     }
                 }
+                // La siguiente tarea sube desde abajo mientras la anterior se va hacia arriba (sin desenfoque).
                 TareaTocable(tarea: tarea, enCurso: enMarcha)
                     .id(tarea.persistentModelID)
-                    .transition(.desenfoque)
+                    .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 12)),
+                                            removal: .opacity.combined(with: .offset(y: -8))))
                 // Un botón visible y claro (pedido de Diaz): Empezar y, en marcha, Terminé. Solo tocar.
                 HStack(alignment: .center, spacing: 10) {
                     BotonPrimarioLujo(enMarcha ? "Terminé" : "Empezar") {
@@ -192,6 +195,8 @@ struct TareaDelMomentoView: View {
                     }
                     BotonTerciarioLujo(titulo: enMarcha ? "Dejarla para después" : "Ahora no") { ahoraNo(tarea) }
                 }
+                // "Empezar" → "Terminé" se funde en vez de saltar.
+                .contentTransition(.opacity)
                 .padding(.top, 4)
 
             case .descanso:
@@ -513,18 +518,18 @@ struct TareaDelMomentoView: View {
         evento.tamanoCrudo = tarea.tamanoCrudo
     }
 
+    // Sin `toques += 1` en empezar, terminar y "Ahora no": el botón ya da su toque
+    // (antes vibraba dos veces; Fable).
     private func empezar(_ tarea: Tarea) {
-        toques += 1
         registrar(.tareaEmpezada, tarea: tarea)
-        withAnimation(.easeInOut(duration: 0.4)) { tarea.empezadaEn = .now }
+        withAnimation(Ritmo.contenido) { tarea.empezadaEn = .now }
     }
 
     private func terminar(_ tarea: Tarea) {
-        toques += 1
         let celebracion = Celebracion.para(tarea, eventos: eventos, puntaje: puntaje)
         alTerminar(celebracion)
         // La tarea se va despacio, mientras Lumi celebra. Guarda cuánto tardó (para su propio promedio).
-        withAnimation(.easeInOut(duration: 0.8).delay(0.4)) {
+        withAnimation(Ritmo.contenido.delay(0.4)) {
             AccionesDeTarea.terminar(tarea, en: contexto)
             quiereAlgoIgual = false
         }
@@ -532,9 +537,8 @@ struct TareaDelMomentoView: View {
 
     /// "Ahora no" nunca es un fracaso: la app aprende que esta hora no era, y lo intenta más tarde.
     private func ahoraNo(_ tarea: Tarea) {
-        toques += 1
         registrar(.ahoraNo, tarea: tarea)
-        withAnimation(.easeInOut(duration: 0.4)) { tarea.empezadaEn = nil }
+        withAnimation(Ritmo.contenido) { tarea.empezadaEn = nil }
     }
 }
 

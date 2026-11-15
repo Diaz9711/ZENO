@@ -30,6 +30,7 @@ struct MisTareasView: View {
     /// Dónde empieza el contenido, debajo de Lumi. Lo de encima se funde con el cielo.
     var arriba: CGFloat = 0
     @Environment(\.modelContext) private var contexto
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
     private var pendientes: [Tarea]
     @Query private var personas: [Persona]
@@ -265,8 +266,9 @@ struct MisTareasView: View {
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
-            .sensoryFeedback(.success, trigger: hecha)
+            // Con estado al presionar, y un toque suave en vez del agudo de "éxito" (Fable).
+            .buttonStyle(EstiloLujo(conReflejo: false))
+            .sensoryFeedback(.impact(weight: .light, intensity: 0.5), trigger: hecha)
             .accessibilityLabel(Text("Marcar como hecha"))
         }
         .padding(.leading, 16)
@@ -276,6 +278,8 @@ struct MisTareasView: View {
         .cantoPulido(radio: 18, intensidad: 0.7)
         .opacity(hecha ? 0.45 : 1)
         .scaleEffect(hecha ? 0.98 : 1)
+        // Hecha: se corre un poco a la derecha antes de irse, como quien la aparta.
+        .offset(x: hecha && !reducirMovimiento ? 8 : 0)
         .animation(Lujo.curva(), value: hecha)
         // Tocar la tarea la abre para editarla (día, hora, aviso).
         .contentShape(Rectangle())
@@ -284,7 +288,7 @@ struct MisTareasView: View {
         .contextMenu {
             Button("Editar") { withAnimation(Lujo.curva()) { editando = tarea } }
             Button("Borrar", role: .destructive) {
-                withAnimation { contexto.delete(tarea) }
+                withAnimation(Ritmo.contenido) { contexto.delete(tarea) }
                 Task { await AvisosDeTareas.sincronizar(contexto) }
             }
         }
