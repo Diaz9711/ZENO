@@ -102,7 +102,7 @@ struct SeparadorLujo: View {
 
 // MARK: - Iconos finos (una sola familia, trazo de 1,1 pt)
 
-enum IconoLujo { case calendario, reloj, papelera, campana, cerrar, mas, atras, check, ojo, ojoCerrado, cara, llave }
+enum IconoLujo { case calendario, reloj, papelera, campana, cerrar, mas, atras, check, ojo, ojoCerrado, cara, llave, microfono }
 
 struct IconoFino: View {
     let icono: IconoLujo
@@ -161,6 +161,13 @@ struct IconoFino: View {
                 camino.move(to: p(0.36, 0.38)); camino.addLine(to: p(0.36, 0.46))
                 camino.move(to: p(0.64, 0.38)); camino.addLine(to: p(0.64, 0.46))
                 camino.move(to: p(0.36, 0.64)); camino.addQuadCurve(to: p(0.64, 0.64), control: p(0.5, 0.74))
+            case .microfono:
+                camino.addRoundedRect(in: CGRect(x: 0.38 * s, y: 0.10 * s, width: 0.24 * s, height: 0.46 * s),
+                                      cornerSize: CGSize(width: 0.12 * s, height: 0.12 * s))
+                camino.move(to: p(0.24, 0.44))
+                camino.addQuadCurve(to: p(0.76, 0.44), control: p(0.5, 0.86))
+                camino.move(to: p(0.5, 0.66)); camino.addLine(to: p(0.5, 0.88))
+                camino.move(to: p(0.38, 0.88)); camino.addLine(to: p(0.62, 0.88))
             case .llave:
                 camino.addEllipse(in: CGRect(x: 0.12 * s, y: 0.32 * s, width: 0.36 * s, height: 0.36 * s))
                 camino.move(to: p(0.48, 0.5)); camino.addLine(to: p(0.88, 0.5))
@@ -250,10 +257,12 @@ struct EtiquetaPrimaria: View {
         Text(titulo)
             .font(.lujoEtiqueta(.footnote, .semibold))
             .versalitas(1.8)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
             .foregroundStyle(Lujo.tinta)
             .frame(maxWidth: ancho == nil ? .infinity : nil)
             .frame(width: ancho, height: Lujo.altoBoton)
-            .padding(.horizontal, 22)
+            .padding(.horizontal, 14)
             .background {
                 ZStack {
                     forma.fill(LinearGradient(colors: [Lujo.oroLuz, Lujo.oro, Lujo.oroHondo],
@@ -306,10 +315,12 @@ struct BotonSecundarioLujo: View {
             Text(titulo)
                 .font(.lujoEtiqueta(.footnote, .medium))
                 .versalitas(1.8)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .foregroundStyle(Lujo.marfil.opacity(0.88))
                 .frame(maxWidth: ancho == nil ? .infinity : nil)
                 .frame(width: ancho, height: Lujo.altoBoton)
-                .padding(.horizontal, 22)
+                .padding(.horizontal, 14)
                 .background(RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous).fill(Lujo.marfil.opacity(0.025)))
                 .cantoPulido(radio: Lujo.radioBoton)
                 .contentShape(Rectangle())
@@ -590,5 +601,16 @@ struct HojaDeFondo: View {
             .padding(.bottom, -60)          // sigue bajo la barra hasta el borde de la pantalla
             .allowsHitTesting(false)
             .accessibilityHidden(true)
+    }
+}
+
+/// El micrófono de dictar: fino; encendido en oro mientras escucha.
+struct IconoMicrofono: View {
+    var activo = false
+    var body: some View {
+        IconoFino(icono: .microfono, color: activo ? Lujo.oro : Lujo.marfil.opacity(0.75), tamano: 19)
+            .overlay(alignment: .topTrailing) {
+                if activo { Circle().fill(Lujo.oro).frame(width: 5, height: 5).offset(x: 3, y: -2) }
+            }
     }
 }

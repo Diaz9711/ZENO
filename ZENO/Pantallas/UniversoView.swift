@@ -52,6 +52,15 @@ struct UniversoView: View {
         #endif
     }
 
+    /// Para elegir el cohete (-galeriaCohetes YES, solo DEBUG).
+    private static var verCohetes: Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "galeriaCohetes")
+        #else
+        false
+        #endif
+    }
+
     /// El cielo antes de que exista la persona: tranquilo, sin dueño todavía.
     private static let semillaNeutra = Semilla(nombre: "zeno", anio: 2026, mes: 1, dia: 1)
 
@@ -181,6 +190,10 @@ struct UniversoView: View {
             if Self.verGaleria {
                 #if DEBUG
                 GaleriaDeLumi(apariencia: apariencia)
+                #endif
+            } else if Self.verCohetes {
+                #if DEBUG
+                GaleriaDeCohetes()
                 #endif
             } else if let persona {
                 if !sesionAbierta {

@@ -48,7 +48,7 @@ final class Dictado {
             AVAudioApplication.requestRecordPermission { micro in
                 DispatchQueue.main.async {
                     if estado == .authorized && micro {
-                        self.aviso = Idioma.texto("Listo. Mantén presionada a Lumi y habla.")
+                        self.aviso = Idioma.texto("Listo. Toca el micrófono y habla.")
                     } else {
                         self.aviso = Idioma.texto("Para hablarle a Lumi, activa el micrófono y el dictado en Ajustes. También puedes escribir.")
                     }

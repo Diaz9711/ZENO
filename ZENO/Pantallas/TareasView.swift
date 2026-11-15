@@ -50,15 +50,6 @@ struct TareaDelMomentoView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .foregroundStyle(Color.marfil)
-
-            // Zona invisible sobre Lumi: mantener presionada para hablar.
-            Circle()
-                .fill(.white.opacity(0.001))
-                .frame(width: 190, height: 190)
-                .position(centroDeLumi)
-                .gesture(mantenerParaHablar)
-                .accessibilityLabel(Text("Lumi"))
-                .accessibilityHint(Text("Mantén presionado para dictar una tarea"))
         }
         .ignoresSafeArea(.keyboard)
         .sensoryFeedback(.selection, trigger: toques)
@@ -106,6 +97,9 @@ struct TareaDelMomentoView: View {
     private var ver: some View {
         // Una tarjeta ancha con lo de ahora (la única acción), y debajo dos tarjetas medianas con datos.
         VStack(alignment: .leading, spacing: 14) {
+            // El amigo: una sola frase según el momento; al tocarlo, ofrece ayuda.
+            CoheteAmigo(frase: Cohete.consejo(momentoDelCohete)) { pedirAyuda() }
+                .aparece(1)
             tarjetaDeAhora
                 .aparece(1)
 
@@ -134,7 +128,33 @@ struct TareaDelMomentoView: View {
             .frame(minHeight: 96)      // deja sitio a la barra
     }
 
-    /// La tarjeta ancha: la tarea del momento (tocar empieza, mantener termina) o el estado del día.
+    /// Qué ve el cohete ahora mismo, para decir su frase.
+    private var momentoDelCohete: Cohete.Momento {
+        switch eleccion {
+        case .tarea(let tarea):
+            let minutos = tarea.primerPaso == nil
+                ? Aprendizaje.minutosReales(tarea.tamano, eventos: eventos).map { Int($0.rounded()) } : nil
+            return .tarea(enMarcha: enCurso == tarea.persistentModelID, primerPaso: tarea.primerPaso != nil,
+                          minutosReales: minutos, enRacha: enRacha && enCurso == nil)
+        case .descanso: return .descanso
+        case .masTarde: return .masTarde(vuelveA: vuelveA)
+        case .nadaPendiente: return .nada(hechasHoy: hechasHoy.count)
+        }
+    }
+
+    /// La ayuda del cohete: escribir, dictar y, si hay una tarea, dejarla para después.
+    private func pedirAyuda() {
+        var acciones = [
+            HojaDeAyuda.Accion(titulo: "Escribir una tarea", icono: .mas) { abrirAgregar() },
+            HojaDeAyuda.Accion(titulo: "Dictar una tarea", icono: .microfono) { alternarVoz() }
+        ]
+        if case .tarea(let tarea) = eleccion {
+            acciones.append(HojaDeAyuda.Accion(titulo: "Dejar esta para después", icono: .reloj) { ahoraNo(tarea) })
+        }
+        Hojas.compartidas.mostrar { HojaDeAyuda(acciones: acciones) }
+    }
+
+    /// La tarjeta ancha: la tarea del momento (con su botón Empezar / Terminé) o el estado del día.
     @ViewBuilder
     private var tarjetaDeAhora: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -151,42 +171,22 @@ struct TareaDelMomentoView: View {
                             .foregroundStyle(Lujo.oro.opacity(0.85))
                     }
                 }
-                // Sin botón: la tarea misma es el control (decisión de Diaz).
-                TareaTocable(tarea: tarea, enCurso: enMarcha,
-                             alEmpezar: { empezar(tarea) },
-                             alTerminar: { terminar(tarea) })
+                TareaTocable(tarea: tarea, enCurso: enMarcha)
                     .id(tarea.persistentModelID)
                     .transition(.desenfoque)
-                SeparadorLujo()
-                HStack(alignment: .center) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(enMarcha ? "Mantén presionada la tarea cuando termines" : "Toca la tarea para empezar")
-                            .font(.zenoTexto(.caption))
-                            .foregroundStyle(Lujo.marfilSecundario)
-                            .contentTransition(.opacity)
-                        // Lo aprendido, dicho en voz baja: cuánto suele tomarle de verdad algo así.
-                        if !enMarcha, tarea.primerPaso == nil,
-                           let minutos = Aprendizaje.minutosReales(tarea.tamano, eventos: eventos) {
-                            Text("Algo así suele tomarte unos \(Int(minutos.rounded())) min.")
-                                .font(.zenoTexto(.caption))
-                                .foregroundStyle(Lujo.oro.opacity(0.8))
-                        }
+                // Un botón visible y claro (pedido de Diaz): Empezar y, en marcha, Terminé. Solo tocar.
+                HStack(alignment: .center, spacing: 10) {
+                    BotonPrimarioLujo(enMarcha ? "Terminé" : "Empezar") {
+                        if enMarcha { terminar(tarea) } else { empezar(tarea) }
                     }
-                    .animation(Lujo.curva(), value: enMarcha)
-                    Spacer(minLength: 8)
                     BotonTerciarioLujo(titulo: enMarcha ? "Dejarla para después" : "Ahora no") { ahoraNo(tarea) }
-                        .padding(.trailing, -12)
                 }
+                .padding(.top, 4)
 
             case .descanso:
                 EtiquetaLujo("Descanso")
                 Titular(texto: Idioma.texto("Hoy descansa, mañana atacamos"), tamano: .title2, alineacion: .leading)
-                SeparadorLujo()
                 HStack {
-                    Text("Tu energía está baja, y está bien.")
-                        .font(.zenoTexto(.caption))
-                        .foregroundStyle(Lujo.marfilSecundario)
-                    Spacer(minLength: 8)
                     BotonTerciarioLujo(titulo: "Quiero hacer algo igual") {
                         toques += 1
                         withAnimation(Lujo.curva()) { quiereAlgoIgual = true }
@@ -199,17 +199,10 @@ struct TareaDelMomentoView: View {
                 Text("Por ahora, nada")
                     .font(.zenoTitulo(.title2))
                     .foregroundStyle(Lujo.marfil)
-                Text(vuelveA.map { Idioma.texto("Vuelvo a proponerte algo a las \($0.formatted(date: .omitted, time: .shortened)).") }
-                     ?? Idioma.texto("Lo intentamos más tarde."))
-                    .font(.zenoTexto(.caption))
-                    .foregroundStyle(Lujo.marfilSecundario)
 
             case .nadaPendiente:
                 EtiquetaLujo("Ahora")
                 Titular(texto: Idioma.texto("No tienes nada pendiente"), tamano: .title2, alineacion: .leading)
-                Text("Cuando quieras, agrega una sola cosa.")
-                    .font(.zenoTexto(.caption))
-                    .foregroundStyle(Lujo.marfilSecundario)
             }
         }
         .padding(.horizontal, 20)
@@ -332,6 +325,16 @@ struct TareaDelMomentoView: View {
                 }
                 .buttonStyle(EstiloLujo())
                 .accessibilityLabel(Text("Día y hora"))
+                // Dictar: un toque empieza a escuchar, otro toque termina. La voz no sale del teléfono.
+                Button { alternarVoz() } label: {
+                    IconoMicrofono(activo: dictado.activo)
+                        .frame(width: Lujo.altoBoton, height: Lujo.altoBoton)
+                        .background(RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous)
+                            .fill(Lujo.marfil.opacity(dictado.activo ? 0.06 : 0.03)))
+                        .cantoPulido(radio: Lujo.radioBoton, oro: dictado.activo)
+                }
+                .buttonStyle(EstiloLujo())
+                .accessibilityLabel(dictado.activo ? Text("Dejar de dictar") : Text("Dictar la tarea"))
                 botonChico("Guardar", fuerte: true) { guardarFrase() }
                     .disabled(limpio(frase).isEmpty)
             }
@@ -339,7 +342,7 @@ struct TareaDelMomentoView: View {
                 EtiquetaDePlanBorrador(plan: plan)
                     .transition(.opacity)
             }
-            Text(dictado.aviso ?? Idioma.texto("También puedes mantener presionada a Lumi y hablar."))
+            Text(dictado.aviso ?? Idioma.texto("Toca el micrófono para dictarla."))
                 .font(.zenoTexto(.caption))
                 .foregroundStyle(Lujo.marfilSecundario)
                 .multilineTextAlignment(.center)
@@ -409,26 +412,13 @@ struct TareaDelMomentoView: View {
 
     // MARK: Voz
 
-    /// Mantener presionada a Lumi: empieza a escuchar; al soltar, deja de escuchar.
-    private var mantenerParaHablar: some Gesture {
-        LongPressGesture(minimumDuration: 0.3)
-            .sequenced(before: DragGesture(minimumDistance: 0))
-            .onChanged { valor in
-                if case .second(true, _) = valor, !dictado.activo, dictado.aviso == nil || !escuchando {
-                    empezarAEscuchar()
-                }
-            }
-            .onEnded { _ in
-                dictado.detener()
-                yaPidioEscuchar = false
-            }
-    }
-
-    @State private var yaPidioEscuchar = false
-
-    private func empezarAEscuchar() {
-        guard !yaPidioEscuchar else { return }
-        yaPidioEscuchar = true
+    /// El micrófono: un toque empieza a escuchar, otro toque deja de escuchar.
+    private func alternarVoz() {
+        toques += 1
+        if dictado.activo {
+            dictado.detener()
+            return
+        }
         escribiendo = false
         if modo == .ver {
             frase = ""
@@ -629,17 +619,14 @@ struct FlechaDibujada: Shape {
     }
 }
 
-/// La tarea del momento como control: tocar empieza; mantener presionada termina.
-/// Terminar pide un gesto deliberado porque no tiene vuelta atrás.
+/// La tarea del momento, en grande. Ya no tiene gestos ocultos: se empieza y se termina
+/// con el botón de debajo (pedido de Diaz: era difícil de descubrir).
 private struct TareaTocable: View {
     let tarea: Tarea
     let enCurso: Bool
-    let alEmpezar: () -> Void
-    let alTerminar: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     @State private var respira = false
-    @State private var presionando = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -658,25 +645,10 @@ private struct TareaTocable: View {
             Titular(texto: tarea.textoVisible, tamano: .largeTitle, alineacion: .leading)
                 .colorMultiply(Lujo.oro)
                 .blur(radius: 18)
-                .opacity(presionando ? 0.95 : (!enCurso && respira ? 0.6 : 0.15))
+                .opacity(enCurso ? 0.35 : (respira ? 0.5 : 0.15))
                 .accessibilityHidden(true)
         }
-        .scaleEffect(presionando ? 1.04 : 1)
-        .contentShape(Rectangle())
-        .onTapGesture { if !enCurso { alEmpezar() } }
-        .onLongPressGesture(minimumDuration: 0.7, pressing: { ahora in
-            guard enCurso else { return }
-            withAnimation(.easeInOut(duration: ahora ? 0.7 : 0.3)) { presionando = ahora }
-        }, perform: {
-            if enCurso { alTerminar() }
-        })
-        .sensoryFeedback(.selection, trigger: presionando) { _, ahora in ahora }
         .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isButton)
-        .accessibilityHint(enCurso ? Text("Mantén presionado para marcarla como terminada")
-                                   : Text("Toca para empezar"))
-        .accessibilityAction { if !enCurso { alEmpezar() } }
-        .accessibilityAction(named: Text("Terminé")) { if enCurso { alTerminar() } }
         .onAppear {
             guard !reducirMovimiento else { return }
             withAnimation(.easeInOut(duration: 2.8).repeatForever(autoreverses: true)) { respira = true }

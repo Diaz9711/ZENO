@@ -166,12 +166,12 @@
         }
       }
     },
-    "Algo así suele tomarte unos %lld min.": {
+    "Algo así suele tomarte unos %lld min. ¿Despegamos?": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Something like this usually takes you about %lld min."
+            "value": "Something like this usually takes you about %lld min. Shall we lift off?"
           }
         }
       }
@@ -526,12 +526,12 @@
         }
       }
     },
-    "Cuando quieras, agrega una sola cosa.": {
+    "Cuando quieras, toca Empezar. Yo te acompaño.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Whenever you like, add just one thing."
+            "value": "Whenever you're ready, tap Start. I'm with you."
           }
         }
       }
@@ -542,6 +542,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "When"
+          }
+        }
+      }
+    },
+    "Dejar de dictar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop dictating"
+          }
+        }
+      }
+    },
+    "Dejar esta para después": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave this one for later"
           }
         }
       }
@@ -636,6 +656,26 @@
         }
       }
     },
+    "Dictar la tarea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dictate the task"
+          }
+        }
+      }
+    },
+    "Dictar una tarea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dictate a task"
+          }
+        }
+      }
+    },
     "Día y hora": {
       "localizations": {
         "en": {
@@ -682,6 +722,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "This is Lumi."
+          }
+        }
+      }
+    },
+    "Empezar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
           }
         }
       }
@@ -956,6 +1006,16 @@
         }
       }
     },
+    "Escribe una sola cosa y despegamos juntos.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write just one thing and we'll lift off together."
+          }
+        }
+      }
+    },
     "Escribe una tarea": {
       "localizations": {
         "en": {
@@ -972,6 +1032,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Write a task…"
+          }
+        }
+      }
+    },
+    "Escribir una tarea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write a task"
           }
         }
       }
@@ -1196,6 +1266,16 @@
         }
       }
     },
+    "Hoy ya encendiste %lld estrellas. Tu cielo las guarda.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You've lit %lld stars today. Your sky keeps them."
+          }
+        }
+      }
+    },
     "Hoy, con calma.": {
       "localizations": {
         "en": {
@@ -1286,12 +1366,12 @@
         }
       }
     },
-    "Listo. Mantén presionada a Lumi y habla.": {
+    "Listo. Toca el micrófono y habla.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "All set. Press and hold Lumi and speak."
+            "value": "All set. Tap the microphone and speak."
           }
         }
       }
@@ -1306,12 +1386,12 @@
         }
       }
     },
-    "Lo intentamos más tarde.": {
+    "Lo intentamos más tarde. Aquí sigo.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "We'll try again later."
+            "value": "We'll try again later. I'm still here."
           }
         }
       }
@@ -1375,36 +1455,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lumi, your star"
-          }
-        }
-      }
-    },
-    "Mantén presionada la tarea cuando termines": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Press and hold the task when you finish"
-          }
-        }
-      }
-    },
-    "Mantén presionado para dictar una tarea": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Press and hold to dictate a task"
-          }
-        }
-      }
-    },
-    "Mantén presionado para marcarla como terminada": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Press and hold to mark it as done"
           }
         }
       }
@@ -1949,6 +1999,16 @@
         }
       }
     },
+    "Solo dos minutos. Yo te acompaño.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Just two minutes. I'm right here with you."
+          }
+        }
+      }
+    },
     "Solo lo siguiente.": {
       "localizations": {
         "en": {
@@ -1975,16 +2035,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "You tend to get the most done between %lld:00 and %lld:00. That's when I suggest what asks the most of you."
-          }
-        }
-      }
-    },
-    "También puedes mantener presionada a Lumi y hablar.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You can also press and hold Lumi and speak."
           }
         }
       }
@@ -2019,6 +2069,16 @@
         }
       }
     },
+    "Te propongo algo otra vez a las %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I'll suggest something again at %@."
+          }
+        }
+      }
+    },
     "Terminado, sin prisa": {
       "localizations": {
         "en": {
@@ -2049,22 +2109,22 @@
         }
       }
     },
-    "Toca la tarea para empezar": {
+    "Toca el micrófono para dictarla.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tap the task to start"
+            "value": "Tap the microphone to dictate it."
           }
         }
       }
     },
-    "Toca para empezar": {
+    "Toca para pedir ayuda": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tap to start"
+            "value": "Tap to ask for help"
           }
         }
       }
@@ -2129,12 +2189,22 @@
         }
       }
     },
-    "Tu energía está baja, y está bien.": {
+    "Tu cohete": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your energy is low, and that's okay."
+            "value": "Your rocket"
+          }
+        }
+      }
+    },
+    "Tu energía está baja, y está bien. Descansar también cuenta.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your energy is low, and that's okay. Resting counts too."
           }
         }
       }
@@ -2379,6 +2449,16 @@
         }
       }
     },
+    "Vas bien. Cuando acabes, toca Terminé.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're doing great. When you finish, tap I'm done."
+          }
+        }
+      }
+    },
     "Vas en racha · ¿una más?": {
       "localizations": {
         "en": {
@@ -2415,16 +2495,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Turn them back on"
-          }
-        }
-      }
-    },
-    "Vuelvo a proponerte algo a las %@.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "I'll suggest something again at %@."
           }
         }
       }
@@ -2478,6 +2548,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "medium"
+          }
+        }
+      }
+    },
+    "¡Qué buen ritmo! Una más si te apetece, sin prisa.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What a rhythm! One more if you feel like it, no rush."
           }
         }
       }
@@ -2588,6 +2668,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "When do you have the most energy?"
+          }
+        }
+      }
+    },
+    "¿En qué te ayudo?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How can I help?"
           }
         }
       }
