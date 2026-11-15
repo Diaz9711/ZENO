@@ -68,6 +68,21 @@ Las reglas que nunca se rompen están en `CLAUDE.md`. Este archivo solo cuenta e
 - Lo que lo logró: el cielo ya no es Animatable (no se redibuja a 120 en las transiciones); el cielo hace una pausa invisible mientras algo se mueve (`ModoAhorro.movimiento`); menos cuadros con ahorro de batería o con el iPhone caliente; Lumi se dibuja a tamaño fijo al viajar; sombra fija en las hojas; Llavero y "Tu ritmo" recordados; foto del widget solo al salir.
 - Sin cielo ni Lumi (`-sinCielo YES`) todo va a 105–120: lo que queda en el cambio de página es construir la página, no el cielo.
 
+## DONDE NOS QUEDAMOS (15 nov 2026, tarde) — leer primero
+Diaz se quejó: al cambiar de página (Hoy ↔ Tareas ↔ Ajustes) la nebulosa "salta", se ve como un cambio de imagen.
+- **Causa (confirmada con Fable):** mi cambio de fluidez `f0c8b2c` pausaba el cielo mientras algo se movía y quitaba el `Animatable` de `NebulosaView`. El brillo se quedaba quieto y luego saltaba.
+- **Arreglo hecho y en el iPhone, sin probar todavía por Diaz:** `NebulosaView` y `LumiView` vuelven a ser como en `a24fbb6` (cielo `Animatable`, sin pausas, sin el truco `tamanoDeDibujo`). Solo queda el recorte con **ahorro de batería** (cielo 15 cuadros, Lumi 30). Se quitaron la pausa del cielo, el recorte por calor y la sombra falsa de las hojas.
+- Se conservan: autopiloto y medidor (DEBUG), Llavero y "Tu ritmo" recordados, foto del widget solo al salir, Lumis vivas en Ajustes.
+- **f0c8b2c no se debe subir solo; subir junto con este arreglo.**
+
+Pasos siguientes, uno por uno (Diaz pidió paso a paso, "razona bien", usar a Fable):
+1. Que Diaz confirme en el iPhone que la nebulosa ya no salta al cambiar de página. Si aún salta, grabar el simulador con el autopiloto y mirar los cuadros del cambio.
+2. Medir con el iPhone frío: `-calidadVisual 0` y `-sinMascara YES` para saber qué cuesta en el cambio de página (sin pausar el cielo).
+3. **Estrella por cada tarea:** ya existe (`EstrellasGanadas`). Diaz no la ha visto porque no tiene tareas terminadas. Enseñarla con `-cieloDeEjemplo YES` y comprobar que se distingue de las estrellas con puntas nuevas.
+4. **Cielo negro opcional** (pedido de Diaz): un tono nuevo en `TonoDeCielo` (no tocar el shader ni el cielo azul por defecto), con una estrella parecida pero no igual (derivada de la misma semilla). Guardar la elección y añadirla a la firma del retrato del widget. Enseñar 2–3 opciones en una foto, incluido casi negro frente a negro puro (CLAUDE.md prohíbe el negro puro: lo decide Diaz). Preguntar si la presentación también lo usa.
+5. "Más premium, que la app tenga vida": sin efectos nuevos hasta que lo de arriba esté aprobado.
+- **No tocar** la estrella ni la nebulosa por defecto ni sus colores (Diaz lo repitió).
+
 ## Lista para subir a la App Store (lo que falta)
 1. **Cuenta Apple Developer de pago** (99 USD al año). Con el Personal Team gratis no se puede subir.
 2. **"Continuar con Apple"**: activar la capacidad Sign in with Apple con la cuenta de pago, o esconder ese botón antes de enviar. Si no funciona, Apple rechaza la app.

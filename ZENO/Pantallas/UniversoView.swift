@@ -28,10 +28,7 @@ struct UniversoView: View {
     @State private var pagina = Pagina.hoy
     @State private var sentido: CGFloat = 1   // hacia dónde se mueve el cambio de página
     @State private var viajes = 0             // cada cambio de página: Lumi toma impulso
-    /// Mientras Lumi viaja entre páginas se dibuja a un tamaño fijo y solo se escala (transformación):
-    /// antes se redibujaba a cada tamaño intermedio, en cada cuadro del viaje. nil = su tamaño de siempre.
-    @State private var tamanoDeDibujo: CGFloat?
-    @State private var viajeDeLumi = 0
+
     @State private var pedirAgregar = 0
     @State private var editando = false
     @AppStorage("modoPrueba") private var modoPrueba = false
@@ -126,8 +123,7 @@ struct UniversoView: View {
                     // con muchos menos píxeles que calcular en cada cuadro cuando Lumi está pequeña.
                     LumiView(apariencia: apariencia, energia: energia, forma: forma, destello: destelloDeHoy)
                         .opacity(Pruebas.sinCielo ? 0 : 1)
-                        .frame(width: anchoLumi * (tamanoDeDibujo ?? tamano))
-                        .scaleEffect(tamano / (tamanoDeDibujo ?? tamano))
+                        .frame(width: anchoLumi * tamano)
                         // Al terminar una tarea: inhala, se encoge un instante y suelta la onda.
                         .keyframeAnimator(initialValue: 1.0, trigger: celebraciones) { vista, escala in
                             vista.scaleEffect(escala)
@@ -416,17 +412,6 @@ struct UniversoView: View {
     private func ir(a destino: Pagina) {
         guard destino != pagina else { return }
         sentido = destino.rawValue > pagina.rawValue ? 1 : -1
-        // Lumi se dibuja al mayor de los dos tamaños durante el viaje (nítida) y se escala;
-        // al llegar vuelve a dibujarse a su tamaño real. A la vista no cambia nada.
-        let escala: CGFloat = escuchando ? 1.12 : 1.0
-        func tamano(_ p: Pagina) -> CGFloat { (p == .hoy ? 0.80 : 0.38) * escala }
-        tamanoDeDibujo = max(tamanoDeDibujo ?? tamano(pagina), tamano(pagina), tamano(destino))
-        ModoAhorro.compartido.movimiento(0.9)
-        viajeDeLumi += 1
-        let este = viajeDeLumi
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
-            if viajeDeLumi == este { tamanoDeDibujo = nil }
-        }
         DispatchQueue.main.async {
             if !reducirMovimiento { viajes += 1 }
             withAnimation(reducirMovimiento ? .easeInOut(duration: 0.3) : Ritmo.contenido) {
