@@ -50,7 +50,7 @@ a { color: inherit; }
 
 /* — Barra — */
 .barra { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 22px; }
-.logo { display: flex; align-items: center; gap: 4px; text-decoration: none; }
+.logo { display: flex; align-items: center; gap: 7px; text-decoration: none; }
 .logo .o { width: 34px; height: 22px; overflow: visible; }
 .logo span { font-family: var(--marca); font-size: 26px; letter-spacing: 0.2em;
   background: linear-gradient(180deg, var(--marfil), var(--oro)); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -197,9 +197,15 @@ p { margin: 0; }
     <a class="logo" href="#inicio" aria-label="ZENO">
       <span>ZEN</span>
       <svg class="o" viewBox="0 0 40 24" aria-hidden="true">
-        <ellipse cx="18" cy="12" rx="17" ry="4.2" transform="rotate(-18 18 12)" fill="none" stroke="#d9c08a" stroke-opacity=".5" stroke-width=".9"/>
-        <circle cx="18" cy="12" r="8" fill="none" stroke="#d9c08a" stroke-width="1.6"/>
-        <circle cx="33" cy="7" r="1.6" fill="#ecdeb8"/>
+        <defs><linearGradient id="metalO" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2ecdd"/><stop offset=".5" stop-color="#ecdeb8"/><stop offset="1" stop-color="#d9c08a"/></linearGradient></defs>
+        <g transform="rotate(-18 18 12)" fill="none" stroke="url(#metalO)" stroke-linecap="round" stroke-width=".9">
+          <path d="M2.4 12 A15.6 4 0 0 1 33.6 12" stroke-opacity=".75"/>
+        </g>
+        <circle cx="18" cy="12" r="7.05" fill="none" stroke="url(#metalO)" stroke-width="1.9"/>
+        <g transform="rotate(-18 18 12)" fill="none" stroke="url(#metalO)" stroke-linecap="round" stroke-width=".9">
+          <path d="M33.6 12 A15.6 4 0 0 1 2.4 12"/>
+        </g>
+        <circle cx="31.7" cy="6.2" r="1.4" fill="#f2ecdd" style="filter: drop-shadow(0 0 1.2px rgba(236,222,184,.7))"/>
       </svg>
     </a>
     <nav class="menu" aria-label="Secciones">

@@ -15,9 +15,8 @@ struct IconoDeLaApp: View {
                                  energia: 0.45, calidez: 0.15, centro: .center)
                     if UserDefaults.standard.bool(forKey: "iconoLogo") {
                         // Ícono con el logo elegido por Diaz: la O de ZENO es una órbita.
-                        LogoOrbita(diseno: .laO, tamano: lado * 0.86)
-                            .shadow(color: .black.opacity(0.45), radius: lado * 0.03)
-                            .offset(x: -lado * 0.035)
+                        ContenidoDelIcono(estilo: EstiloDeO(rawValue: UserDefaults.standard.integer(forKey: "estiloO")) ?? .planeta,
+                                          soloO: UserDefaults.standard.bool(forKey: "iconoSoloO"), lado: lado)
                     } else {
                         LumiView(apariencia: AparienciaLumi(semilla: Semilla(nombre: UserDefaults.standard.string(forKey: "semillaIcono") ?? "lumi", anio: 2026, mes: 1, dia: 1)),
                                  energia: 0.85, forma: .estrella)
