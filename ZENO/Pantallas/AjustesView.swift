@@ -162,7 +162,7 @@ struct AjustesView: View {
                         }
                         SeparadorLujo()
                         fila(icono: .cara,
-                             titulo: persona.cuentaApple == nil ? "Entraste como invitado" : "Entraste con Apple",
+                             titulo: persona.cuentaApple != nil ? "Entraste con Apple" : (Sesion.conApple ? "Entraste como invitado" : "Sin cuenta"),
                              detalle: "Todo vive solo en este teléfono.", accion: nil)
                     }
                     .padding(.horizontal, 20)

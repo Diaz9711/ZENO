@@ -25,7 +25,7 @@ struct ComoFuncionaView: View {
         Idea(id: 0,
              etiqueta: "Tareas pequeñas",
              titulo: "Empezar es lo más difícil",
-             texto: "En un estudio con 360 niños y jóvenes con TDAH, elegían más que otros una recompensa pequeña y rápida en vez de una mayor que tardaba, sobre todo cuando así esperaban menos. Una tarea grande es una recompensa lejana. Y en un ensayo con adultos con TDAH que ya tomaban medicación, una terapia que enseñaba, entre otras cosas, a partir las tareas abrumadoras en pasos mejoró los síntomas más que unas sesiones de relajación con información, y la mejora seguía a los 12 meses.",
+             texto: "En un estudio con 360 niños y jóvenes con TDAH, elegían más que otros una recompensa pequeña y rápida en vez de una mayor que tardaba, sobre todo cuando así esperaban menos. Una tarea grande es una recompensa lejana. Y en un ensayo con adultos con TDAH que ya tomaban medicación, un programa con un terapeuta, que enseñaba entre otras cosas a partir las tareas abrumadoras en pasos, dio mejores resultados que unas sesiones de relajación con información, y la mejora se mantenía a los 12 meses. ZENO no es esa terapia ni la sustituye: solo toma la idea de los pasos pequeños.",
              enZeno: "Por eso ZENO te pregunta el primer paso de dos minutos y te propone una sola cosa a la vez.",
              fuentes: [
                 Fuente(cita: "Marco R et al. (2009). Delay and reward choice in ADHD: an experimental test of the role of delay aversion. Neuropsychology 23(3):367–380.",

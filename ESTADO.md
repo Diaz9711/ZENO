@@ -89,6 +89,12 @@ Pasos siguientes, uno por uno (Diaz pidió paso a paso, "razona bien", usar a Fa
 5. "Más premium, que la app tenga vida": sin efectos nuevos hasta que lo de arriba esté aprobado.
 - **No tocar** la estrella ni la nebulosa por defecto ni sus colores (Diaz lo repitió).
 
+## Arreglos rápidos para la App Store (15 nov 2026, revisados por Fable)
+- "Continuar con Apple" escondido (`Sesion.conApple = false`); la entrada es "Empezar" (o "Entrar" al volver) y "Crear una clave". Ajustes dice "Sin cuenta". Poner `true` cuando haya cuenta de pago y la capacidad activada.
+- Frase de Safren reescrita (app, catálogo y web): describe el estudio y dice que ZENO no es esa terapia.
+- Permisos en inglés (Face ID, voz) revisados. Versión 1.0.
+- `Web/privacidad.html` (ES + EN), enlazada desde el pie de la web. **Falta:** un correo de contacto de Diaz (privacidad y página de soporte), una dirección pública (los enlaces de Claude son privados: GitHub Pages u otro), y una fila "Privacidad" en Ajustes → Saber más con esa dirección.
+
 ## Qué le falta a ZENO para ser número uno (Fable, 15 nov 2026)
 Ya resuelve bien: una sola tarea, sin culpa ("Ahora no" sin castigo), energía según la hora, anillo de tiempo, capturar con voz/Siri/widget.
 Huecos principales: (1) empezar sigue siendo trabajo de la persona (escribe ella el primer paso); (2) nada la acompaña durante la tarea; (3) volver tras días sin usarla muestra una lista acumulada; (4) la recompensa es siempre igual (se aburre a las 2 semanas); (5) no se puede anotar algo en descanso o con una tarea en marcha; (6) no avisa del próximo compromiso; (7) la presentación de 5,5 s cada vez frena (decide Diaz).

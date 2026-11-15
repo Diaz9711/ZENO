@@ -42,35 +42,46 @@ struct MenuDeEntrada: View {
 
     private var menu: some View {
         VStack(spacing: 12) {
-            SignInWithAppleButton(.continue) { pedido in
-                pedido.requestedScopes = [.fullName]
-                withAnimation(Lujo.curva()) { cargando = true; aviso = nil }
-            } onCompletion: { resultado in
-                withAnimation(Lujo.curva()) { cargando = false }
-                switch resultado {
-                case .success(let autorizacion):
-                    guard let credencial = autorizacion.credential as? ASAuthorizationAppleIDCredential else {
-                        aviso = Idioma.texto("Apple no envió tus datos. Inténtalo otra vez o entra como invitado.")
-                        return
+            if Sesion.conApple {
+                SignInWithAppleButton(.continue) { pedido in
+                    pedido.requestedScopes = [.fullName]
+                    withAnimation(Lujo.curva()) { cargando = true; aviso = nil }
+                } onCompletion: { resultado in
+                    withAnimation(Lujo.curva()) { cargando = false }
+                    switch resultado {
+                    case .success(let autorizacion):
+                        guard let credencial = autorizacion.credential as? ASAuthorizationAppleIDCredential else {
+                            aviso = Idioma.texto("Apple no envió tus datos. Inténtalo otra vez o entra como invitado.")
+                            return
+                        }
+                        entrando = true
+                        alApple?(credencial.user, credencial.fullName?.givenName)
+                    case .failure(let error):
+                        withAnimation(Lujo.curva()) { aviso = Self.mensaje(para: error) }
                     }
+                }
+                .signInWithAppleButtonStyle(.white)
+                .frame(height: Lujo.altoBoton)
+                .clipShape(RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous))
+                .opacity(cargando ? 0.55 : 1)
+                .allowsHitTesting(!cargando && !entrando)
+            }
+
+            if Sesion.conApple {
+                BotonSecundarioLujo("Entrar como invitado") {
+                    guard !entrando else { return }
                     entrando = true
-                    alApple?(credencial.user, credencial.fullName?.givenName)
-                case .failure(let error):
-                    withAnimation(Lujo.curva()) { aviso = Self.mensaje(para: error) }
+                    alEntrar()
+                }
+                .disabled(cargando)
+            } else {
+                // Sin Apple, entrar es la acción principal.
+                BotonPrimarioLujo(vuelve ? "Entrar" : "Empezar") {
+                    guard !entrando else { return }
+                    entrando = true
+                    alEntrar()
                 }
             }
-            .signInWithAppleButtonStyle(.white)
-            .frame(height: Lujo.altoBoton)
-            .clipShape(RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous))
-            .opacity(cargando ? 0.55 : 1)
-            .allowsHitTesting(!cargando && !entrando)
-
-            BotonSecundarioLujo("Entrar como invitado") {
-                guard !entrando else { return }
-                entrando = true
-                alEntrar()
-            }
-            .disabled(cargando)
 
             if !vuelve {
                 BotonTerciarioLujo(titulo: "Crear una clave", icono: .llave) {

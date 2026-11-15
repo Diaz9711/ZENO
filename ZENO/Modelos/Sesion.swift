@@ -10,6 +10,11 @@ enum Sesion {
     /// Clave de `@AppStorage`. Por defecto abierta, para quien ya usaba ZENO antes de existir esto.
     static let clave = "sesionAbierta"
 
+    /// "Continuar con Apple" (Fable, 15 nov 2026): escondido en la versión 1.0. Sin la capacidad
+    /// Sign in with Apple (cuenta de desarrollador de pago) el botón falla y Apple rechaza la app.
+    /// Poner `true` el día que se active la capacidad (y luego iCloud). El código sigue intacto.
+    static let conApple = false
+
     /// Si entró con Apple y luego quitó el permiso (Ajustes del iPhone → Apple ID), la sesión se cierra.
     static func sigueValida(cuentaApple: String?) async -> Bool {
         guard let cuentaApple else { return true }          // invitado: siempre válida

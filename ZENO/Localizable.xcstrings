@@ -24,6 +24,16 @@
         }
       }
     },
+    "Sin cuenta" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No account"
+          }
+        }
+      }
+    },
     "¡Qué buen ritmo! Una más si te apetece, sin prisa." : {
       "localizations" : {
         "en" : {
@@ -1112,12 +1122,12 @@
         }
       }
     },
-    "En un estudio con 360 niños y jóvenes con TDAH, elegían más que otros una recompensa pequeña y rápida en vez de una mayor que tardaba, sobre todo cuando así esperaban menos. Una tarea grande es una recompensa lejana. Y en un ensayo con adultos con TDAH que ya tomaban medicación, una terapia que enseñaba, entre otras cosas, a partir las tareas abrumadoras en pasos mejoró los síntomas más que unas sesiones de relajación con información, y la mejora seguía a los 12 meses." : {
+    "En un estudio con 360 niños y jóvenes con TDAH, elegían más que otros una recompensa pequeña y rápida en vez de una mayor que tardaba, sobre todo cuando así esperaban menos. Una tarea grande es una recompensa lejana. Y en un ensayo con adultos con TDAH que ya tomaban medicación, un programa con un terapeuta, que enseñaba entre otras cosas a partir las tareas abrumadoras en pasos, dio mejores resultados que unas sesiones de relajación con información, y la mejora se mantenía a los 12 meses. ZENO no es esa terapia ni la sustituye: solo toma la idea de los pasos pequeños." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "In a study of 360 children and young people with ADHD, they chose a small, quick reward over a bigger, later one more often than others, especially when it meant waiting less. A big task is a distant reward. And in a trial with adults with ADHD who were already taking medication, a therapy that taught, among other things, how to break overwhelming tasks into steps improved symptoms more than relaxation sessions with information, and the improvement was still there at 12 months."
+            "value" : "In a study of 360 children and young people with ADHD, they chose a small, quick reward over a bigger, later one more often than others, especially when it meant waiting less. A big task is a distant reward. And in a trial with adults with ADHD who were already taking medication, a program led by a therapist, which taught among other things how to break overwhelming tasks into steps, did better than relaxation sessions with information, and the gains held at 12 months. ZENO is not that therapy and does not replace it: it only borrows the idea of small steps."
           }
         }
       }

@@ -32,8 +32,8 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "ZENO uses Face ID only so you can get in or recover your password. Nothing leaves your phone."
+            "state" : "translated",
+            "value" : "ZENO uses Face ID only to let you in or recover your passcode. Nothing leaves your iPhone."
           }
         },
         "es" : {
@@ -67,8 +67,8 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "ZENO turns your voice into text on your phone to add tasks. Your voice never leaves the device."
+            "state" : "translated",
+            "value" : "ZENO turns your voice into text on your iPhone to add tasks. Your voice never leaves your device."
           }
         },
         "es" : {
