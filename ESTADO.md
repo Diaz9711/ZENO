@@ -51,7 +51,7 @@ Las reglas que nunca se rompen están en `CLAUDE.md`. Este archivo solo cuenta e
 3. **Siri y botón de Acción**: "Agrega una tarea a ZENO" y "Escribe una tarea en ZENO". Probados con `-probarSiri` y `zeno://escribir`; falta probar la voz real de Siri en el iPhone.
 4. **Chispa** (nombre elegido por Diaz): vuela alrededor de Lumi al terminar y aparece discreta en Tareas y Ajustes.
 5. **Cómo funciona ZENO** en Ajustes → Saber más, con cinco estudios verificados.
-- Catálogo: 308 textos de la app y 10 del widget, todos con inglés (comparado con los `.stringsdata` de la compilación).
+- Catálogo: 309 textos de la app y 10 del widget, todos con inglés (comparado con los `.stringsdata` de la compilación).
 - **Para instalar en el iPhone hace falta** que Diaz conecte su Apple ID en Xcode → Settings → Accounts. Sin cuenta, `xcodebuild` no puede crear los perfiles de la extensión ni del App Group. Si el Personal Team no permite App Groups, hay que quitar `ZENO.entitlements` y `ZENOWidgets.entitlements` de los ajustes: el widget seguiría mostrando solo la luz.
 
 ## Pendiente (en este orden)

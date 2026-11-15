@@ -10,6 +10,7 @@ struct AnilloEnVivoWidget: Widget {
         ActivityConfiguration(for: AtributosDelAnillo.self) { contexto in
             // Pantalla bloqueada: nunca el texto de la tarea (decisión de Diaz).
             PantallaBloqueada(estado: contexto.state)
+                .environment(\.locale, Locale(identifier: contexto.attributes.idioma))
                 .activityBackgroundTint(Tinta.cielo.opacity(0.92))
                 .activitySystemActionForegroundColor(Tinta.marfil)
                 .widgetURL(EnlaceZeno.hoy)
@@ -27,6 +28,7 @@ struct AnilloEnVivoWidget: Widget {
                 DynamicIslandExpandedRegion(.center) {
                     VStack(spacing: 2) {
                         Text("En curso")
+                            .environment(\.locale, Locale(identifier: contexto.attributes.idioma))
                             .font(.texto(11, "SemiBold"))
                             .kerning(1.4)
                             .textCase(.uppercase)
@@ -40,6 +42,7 @@ struct AnilloEnVivoWidget: Widget {
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     BotonTermine()
+                        .environment(\.locale, Locale(identifier: contexto.attributes.idioma))
                         .padding(.top, 6)
                 }
             } compactLeading: {
@@ -74,12 +77,14 @@ private struct PantallaBloqueada: View {
                 Text("Lumi te acompaña")
                     .font(.titulo(19))
                     .foregroundStyle(Tinta.marfil)
-                TiempoRestante(estado: estado, tamano: 15)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                TiempoRestante(estado: estado, tamano: 15, alineacion: .leading)
                     .opacity(0.8)
             }
             Spacer(minLength: 0)
             BotonTermine()
-                .frame(width: 112)
+                .frame(width: 96)
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 16)
@@ -113,13 +118,14 @@ private struct Anillo: View {
 private struct TiempoRestante: View {
     let estado: AtributosDelAnillo.ContentState
     var tamano: CGFloat
+    var alineacion: TextAlignment = .trailing
 
     var body: some View {
         Text(timerInterval: estado.inicio...estado.fin, countsDown: true)
             .font(.texto(tamano, "Medium"))
             .monospacedDigit()
             .foregroundStyle(Tinta.marfil)
-            .multilineTextAlignment(.trailing)
+            .multilineTextAlignment(alineacion)
     }
 }
 

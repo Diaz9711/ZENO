@@ -25,18 +25,18 @@ struct ComoFuncionaView: View {
         Idea(id: 0,
              etiqueta: "Tareas pequeñas",
              titulo: "Empezar es lo más difícil",
-             texto: "Con TDAH, esperar una recompensa lejana suele costar más: hay una tendencia a evitar la espera. Una tarea grande se siente lejana y pesada. En un ensayo con adultos con TDAH, una terapia que enseñaba, entre otras cosas, a partir las tareas abrumadoras en pasos mejoró los síntomas más que la relajación, y la mejora seguía a los 12 meses.",
+             texto: "En un estudio con 360 niños y jóvenes con TDAH, elegían más que otros una recompensa pequeña y rápida en vez de una mayor que tardaba, sobre todo cuando así esperaban menos. Una tarea grande es una recompensa lejana. Y en un ensayo con adultos con TDAH que ya tomaban medicación, una terapia que enseñaba, entre otras cosas, a partir las tareas abrumadoras en pasos mejoró los síntomas más que unas sesiones de relajación con información, y la mejora seguía a los 12 meses.",
              enZeno: "Por eso ZENO te pregunta el primer paso de dos minutos y te propone una sola cosa a la vez.",
              fuentes: [
-                Fuente(cita: "Sonuga-Barke EJ (2003). The dual pathway model of AD/HD. Neurosci Biobehav Rev 27(7):593–604.",
-                       enlace: URL(string: "https://doi.org/10.1016/j.neubiorev.2003.08.005")!),
+                Fuente(cita: "Marco R et al. (2009). Delay and reward choice in ADHD: an experimental test of the role of delay aversion. Neuropsychology 23(3):367–380.",
+                       enlace: URL(string: "https://doi.org/10.1037/a0014914")!),
                 Fuente(cita: "Safren SA et al. (2010). Cognitive behavioral therapy vs relaxation with educational support for medication-treated adults with ADHD. JAMA 304(8):875–880.",
                        enlace: URL(string: "https://doi.org/10.1001/jama.2010.1192")!)
              ]),
         Idea(id: 1,
              etiqueta: "Energía",
              titulo: "Tu reloj es tuyo",
-             texto: "Una revisión de 62 estudios encontró, de forma consistente, que el TDAH se asocia a un reloj interno más tardío: más energía hacia la tarde o la noche y sueño más tarde. No todas las horas son iguales para todos.",
+             texto: "Una revisión de 62 estudios encontró, de forma consistente, que el TDAH se asocia a un cronotipo más tardío (más \"de noche\"): el reloj interno y el sueño llegan más tarde. No todas las horas son iguales para todos.",
              enZeno: "Por eso ZENO parte de tus horas, aprende cuándo rindes y propone lo difícil cuando tienes más energía. Con poca, te deja descansar.",
              fuentes: [
                 Fuente(cita: "Coogan AN, McGowan NM (2017). A systematic review of circadian function, chronotype and chronotherapy in ADHD. Atten Defic Hyperact Disord 9(3):129–147.",
@@ -54,7 +54,7 @@ struct ComoFuncionaView: View {
         Idea(id: 3,
              etiqueta: "Sin culpa",
              titulo: "Nada de regaños",
-             texto: "En un estudio con 1203 adultos, quienes tenían TDAH contaban recibir más críticas de los demás y tenían menos autocompasión, es decir, menos amabilidad consigo mismos en los momentos difíciles.",
+             texto: "En un estudio con 1203 adultos, quienes decían tener un diagnóstico de TDAH contaban recibir más críticas de los demás y tenían menos autocompasión, es decir, menos amabilidad consigo mismos en los momentos difíciles.",
              enZeno: "Por eso ZENO nunca regaña: no hay rachas rotas, ni números en rojo, ni tareas vencidas. \"Ahora no\" también es una respuesta válida.",
              fuentes: [
                 Fuente(cita: "Beaton DM, Sirois F, Milne E (2020). Self-compassion and perceived criticism in adults with ADHD. Mindfulness 11:2506–2518.",

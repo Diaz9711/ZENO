@@ -24,6 +24,8 @@ enum AccionesDeTarea {
         if let tarea = pendientes.first(where: \.estaEnCurso) {
             terminar(tarea, en: contexto)
             try? contexto.save()
+            // Fuera de la app iOS puede dormirla pronto: se espera a que los avisos queden al día.
+            await AvisosDeTareas.sincronizar(contexto)
         }
         await AnilloEnVivo.terminarTodo()
         Widgets.tareaTerminadaFuera()

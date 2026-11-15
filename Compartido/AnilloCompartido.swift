@@ -12,6 +12,8 @@ struct AtributosDelAnillo: ActivityAttributes {
     /// El texto de la tarea. Solo se muestra en la Isla Dinámica abierta, nunca en la pantalla
     /// bloqueada (decisión de Diaz, 14 nov 2026).
     var titulo: String
+    /// El idioma elegido dentro de ZENO, para que el anillo hable igual que la app.
+    var idioma: String = "es"
 }
 
 /// "Terminé" desde la Isla Dinámica o la pantalla bloqueada. iOS lo corre dentro de la app

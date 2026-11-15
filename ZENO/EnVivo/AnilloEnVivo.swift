@@ -23,7 +23,7 @@ enum AnilloEnVivo {
         }
         for vieja in actuales { await vieja.end(nil, dismissalPolicy: .immediate) }
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-        _ = try? Activity.request(attributes: AtributosDelAnillo(titulo: titulo), content: contenido, pushType: nil)
+        _ = try? Activity.request(attributes: AtributosDelAnillo(titulo: titulo, idioma: Idioma.actual.rawValue), content: contenido, pushType: nil)
     }
 
     static func terminarTodo() async {

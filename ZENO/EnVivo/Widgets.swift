@@ -44,7 +44,15 @@ enum Widgets {
         WidgetCenter.shared.reloadAllTimelines()
     }
 
+    /// Si la tarea del widget ya no está pendiente (terminada, borrada o editada en Tareas), se quita.
+    static func revisarTarea(pendientes: Set<String>) {
+        guard let foto = FotoDeZeno.leer(), let visible = foto.tarea, !pendientes.contains(visible) else { return }
+        tarea(nil, inicio: nil, minutos: 0)
+    }
+
     private static func guardarSiCambia(_ foto: FotoDeZeno) {
+        var foto = foto
+        foto.idioma = Idioma.actual.rawValue
         var comparable = foto
         comparable.guardadaEn = ultima?.guardadaEn ?? foto.guardadaEn
         guard comparable != ultima else { return }

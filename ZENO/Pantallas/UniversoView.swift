@@ -436,6 +436,7 @@ struct UniversoView: View {
         guard let persona = personas.first else { return }
         Widgets.luz(apariencia: AparienciaLumi(semilla: persona.semilla), forma: persona.formaDeLumi,
                     energia: puntaje / 100)
+        Widgets.revisarTarea(pendientes: Set(tareas.filter { $0.terminadaEn == nil }.map(\.textoVisible)))
     }
 
     /// zeno://hoy (widget, anillo) y zeno://escribir (atajo): siempre a Hoy.

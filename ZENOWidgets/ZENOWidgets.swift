@@ -77,6 +77,7 @@ struct VistaDelWidget: View {
                 }
             }
         }
+        .environment(\.locale, Locale(identifier: foto.idioma))
         .containerBackground(for: .widget) {
             CieloDelWidget(foto: foto, centro: familia == .systemMedium ? UnitPoint(x: 0.2, y: 0.5) : UnitPoint(x: 0.5, y: 0.32))
         }

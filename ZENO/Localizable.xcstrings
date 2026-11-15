@@ -486,16 +486,6 @@
         }
       }
     },
-    "Con TDAH, esperar una recompensa lejana suele costar más: hay una tendencia a evitar la espera. Una tarea grande se siente lejana y pesada. En un ensayo con adultos con TDAH, una terapia que enseñaba, entre otras cosas, a partir las tareas abrumadoras en pasos mejoró los síntomas más que la relajación, y la mejora seguía a los 12 meses.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "With ADHD, waiting for a distant reward is often harder: there is a tendency to avoid waiting. A big task feels distant and heavy. In a trial with adults with ADHD, a therapy that taught, among other things, how to break overwhelming tasks into steps improved symptoms more than relaxation, and the improvement was still there at 12 months."
-          }
-        }
-      }
-    },
     "Con aviso": {
       "localizations": {
         "en": {
@@ -866,12 +856,22 @@
         }
       }
     },
-    "En un estudio con 1203 adultos, quienes tenían TDAH contaban recibir más críticas de los demás y tenían menos autocompasión, es decir, menos amabilidad consigo mismos en los momentos difíciles.": {
+    "En un estudio con 1203 adultos, quienes decían tener un diagnóstico de TDAH contaban recibir más críticas de los demás y tenían menos autocompasión, es decir, menos amabilidad consigo mismos en los momentos difíciles.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "In a study of 1,203 adults, those with ADHD reported more criticism from others and less self-compassion, that is, less kindness toward themselves in hard moments."
+            "value": "In a study of 1,203 adults, those who reported an ADHD diagnosis described more criticism from others and had less self-compassion, that is, less kindness toward themselves in hard moments."
+          }
+        }
+      }
+    },
+    "En un estudio con 360 niños y jóvenes con TDAH, elegían más que otros una recompensa pequeña y rápida en vez de una mayor que tardaba, sobre todo cuando así esperaban menos. Una tarea grande es una recompensa lejana. Y en un ensayo con adultos con TDAH que ya tomaban medicación, una terapia que enseñaba, entre otras cosas, a partir las tareas abrumadoras en pasos mejoró los síntomas más que unas sesiones de relajación con información, y la mejora seguía a los 12 meses.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In a study of 360 children and young people with ADHD, they chose a small, quick reward over a bigger, later one more often than others, especially when it meant waiting less. A big task is a distant reward. And in a trial with adults with ADHD who were already taking medication, a therapy that taught, among other things, how to break overwhelming tasks into steps improved symptoms more than relaxation sessions with information, and the improvement was still there at 12 months."
           }
         }
       }
@@ -2679,12 +2679,12 @@
         }
       }
     },
-    "Una revisión de 62 estudios encontró, de forma consistente, que el TDAH se asocia a un reloj interno más tardío: más energía hacia la tarde o la noche y sueño más tarde. No todas las horas son iguales para todos.": {
+    "Una revisión de 62 estudios encontró, de forma consistente, que el TDAH se asocia a un cronotipo más tardío (más \"de noche\"): el reloj interno y el sueño llegan más tarde. No todas las horas son iguales para todos.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A review of 62 studies consistently found that ADHD is linked to a later internal clock: more energy toward the evening or night, and falling asleep later. Not every hour is the same for everyone."
+            "value": "A review of 62 studies consistently found that ADHD is linked to a later chronotype (more of a \"night owl\"): the internal clock and sleep come later. Not every hour is the same for everyone."
           }
         }
       }

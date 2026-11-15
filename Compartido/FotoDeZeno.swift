@@ -19,6 +19,8 @@ struct FotoDeZeno: Codable, Equatable {
     var inicio: Date?
     var fin: Date?
     var guardadaEn: Date = .now
+    /// El idioma elegido dentro de ZENO ("es" o "en"): el widget habla igual que la app.
+    var idioma: String = "es"
 
     static let grupo = "group.app.zeno.ZENO"
     private static let clave = "fotoDeZeno"

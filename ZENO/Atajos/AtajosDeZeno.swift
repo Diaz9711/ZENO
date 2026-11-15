@@ -26,7 +26,10 @@ struct AgregarTareaIntent: AppIntent {
         let tamano = ClasificadorDeTamano.tamano(de: texto)
         contexto.insert(Tarea(titulo: texto, tamano: tamano))
         try? contexto.save()
-        await AvisosDeTareas.sincronizar(contexto)
+        // Con la sesión cerrada no se programa ningún aviso (lo promete "Cerrar sesión").
+        if UserDefaults.standard.object(forKey: Sesion.clave) as? Bool ?? true {
+            await AvisosDeTareas.sincronizar(contexto)
+        }
         if tamano == .grande {
             return .result(dialog: IntentDialog("Guardada. Es grande: en ZENO puedes elegir su primer paso de dos minutos."))
         }
