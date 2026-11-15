@@ -1,12 +1,42 @@
 {
   "sourceLanguage": "es",
   "strings": {
+    "Ahora": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now"
+          }
+        }
+      }
+    },
     "En curso": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "In progress"
+          }
+        }
+      }
+    },
+    "Lumi": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lumi"
+          }
+        }
+      }
+    },
+    "Lumi sigue aquí": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lumi is still here"
           }
         }
       }
@@ -57,6 +87,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Task time"
+          }
+        }
+      }
+    },
+    "Tu estrella y la tarea de ahora.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your star and the task for now."
           }
         }
       }
