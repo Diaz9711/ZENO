@@ -4,6 +4,166 @@
     "" : {
       "shouldTranslate" : false
     },
+    "¡Qué buen ritmo! Una más si te apetece, sin prisa." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What a rhythm! One more if you feel like it, no rush."
+          }
+        }
+      }
+    },
+    "¿A qué hora se te acaba la energía?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When does your energy run out?"
+          }
+        }
+      }
+    },
+    "¿A qué hora sueles despertar?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What time do you usually wake up?"
+          }
+        }
+      }
+    },
+    "¿Borrar esta tarea?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this task?"
+          }
+        }
+      }
+    },
+    "¿Borrar todo?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete everything?"
+          }
+        }
+      }
+    },
+    "¿Cerrar sesión?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign out?"
+          }
+        }
+      }
+    },
+    "¿Cómo quieres verla?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How would you like to see her?"
+          }
+        }
+      }
+    },
+    "¿Cómo te llamas?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's your name?"
+          }
+        }
+      }
+    },
+    "¿Cuál es el primer paso de dos minutos?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's the two-minute first step?"
+          }
+        }
+      }
+    },
+    "¿Cuándo naciste?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When were you born?"
+          }
+        }
+      }
+    },
+    "¿En qué momento tienes más energía?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When do you have the most energy?"
+          }
+        }
+      }
+    },
+    "¿En qué te ayudo?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How can I help?"
+          }
+        }
+      }
+    },
+    "¿Olvidaste tu clave?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forgot your password?"
+          }
+        }
+      }
+    },
+    "¿Qué quieres hacer?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What do you want to do?"
+          }
+        }
+      }
+    },
+    "¿Quitar la clave?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove the password?"
+          }
+        }
+      }
+    },
+    "· con aviso" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "· with reminder"
+          }
+        }
+      }
+    },
     "%lld" : {
       "shouldTranslate" : false
     },
@@ -50,22 +210,22 @@
         }
       }
     },
-    "Abre ZENO listo para escribir o dictar una tarea." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens ZENO ready to write or dictate a task."
-          }
-        }
-      }
-    },
     "Abre el estudio" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opens the study"
+          }
+        }
+      }
+    },
+    "Abre ZENO listo para escribir o dictar una tarea." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens ZENO ready to write or dictate a task."
           }
         }
       }
@@ -110,6 +270,16 @@
         }
       }
     },
+    "Ahí te propondrá lo que pide más de ti." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That's when it will suggest what asks the most of you."
+          }
+        }
+      }
+    },
     "Ahora" : {
       "localizations" : {
         "en" : {
@@ -126,16 +296,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Not now"
-          }
-        }
-      }
-    },
-    "Ahí te propondrá lo que pide más de ti." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "That's when it will suggest what asks the most of you."
           }
         }
       }
@@ -160,22 +320,22 @@
         }
       }
     },
-    "Al menos %lld caracteres. Solo vive en este iPhone." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "At least %lld characters. It lives only on this iPhone."
-          }
-        }
-      }
-    },
     "Al menos %lld caracteres. Solo vive en este iPhone; si la olvidas, la recuperas con Face ID." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "At least %lld characters. It lives only on this iPhone; if you forget it, recover it with Face ID."
+          }
+        }
+      }
+    },
+    "Al menos %lld caracteres. Solo vive en este iPhone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At least %lld characters. It lives only on this iPhone."
           }
         }
       }
@@ -216,6 +376,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Something very small (optional)"
+          }
+        }
+      }
+    },
+    "alta" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "high"
           }
         }
       }
@@ -317,6 +487,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scheduled reminders:"
+          }
+        }
+      }
+    },
+    "baja" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "low"
           }
         }
       }
@@ -472,6 +652,16 @@
         }
       }
     },
+    "Cómo funciona ZENO" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How ZENO works"
+          }
+        }
+      }
+    },
     "Como mucho uno, a las %lld:00, tu mejor hora. Nunca un día en que ya abriste ZENO." : {
       "localizations" : {
         "en" : {
@@ -562,6 +752,16 @@
         }
       }
     },
+    "Cuándo" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When"
+          }
+        }
+      }
+    },
     "Cuando quieras" : {
       "localizations" : {
         "en" : {
@@ -588,26 +788,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Whenever you're ready, tap Start. I'm with you."
-          }
-        }
-      }
-    },
-    "Cuándo" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "When"
-          }
-        }
-      }
-    },
-    "Cómo funciona ZENO" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How ZENO works"
           }
         }
       }
@@ -722,6 +902,16 @@
         }
       }
     },
+    "Día y hora" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day and time"
+          }
+        }
+      }
+    },
     "Dictar la tarea" : {
       "localizations" : {
         "en" : {
@@ -742,16 +932,6 @@
         }
       }
     },
-    "Día y hora" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Day and time"
-          }
-        }
-      }
-    },
     "Editar" : {
       "localizations" : {
         "en" : {
@@ -762,22 +942,22 @@
         }
       }
     },
-    "El dictado no está disponible ahora. Puedes escribir." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictation isn't available right now. You can type instead."
-          }
-        }
-      }
-    },
     "El día" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "The day"
+          }
+        }
+      }
+    },
+    "El dictado no está disponible ahora. Puedes escribir." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictation isn't available right now. You can type instead."
           }
         }
       }
@@ -852,22 +1032,22 @@
         }
       }
     },
-    "En un estudio con 1203 adultos, quienes decían tener un diagnóstico de TDAH contaban recibir más críticas de los demás y tenían menos autocompasión, es decir, menos amabilidad consigo mismos en los momentos difíciles." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In a study of 1,203 adults, those who reported an ADHD diagnosis described more criticism from others and had less self-compassion, that is, less kindness toward themselves in hard moments."
-          }
-        }
-      }
-    },
     "En un estudio con 360 niños y jóvenes con TDAH, elegían más que otros una recompensa pequeña y rápida en vez de una mayor que tardaba, sobre todo cuando así esperaban menos. Una tarea grande es una recompensa lejana. Y en un ensayo con adultos con TDAH que ya tomaban medicación, una terapia que enseñaba, entre otras cosas, a partir las tareas abrumadoras en pasos mejoró los síntomas más que unas sesiones de relajación con información, y la mejora seguía a los 12 meses." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "In a study of 360 children and young people with ADHD, they chose a small, quick reward over a bigger, later one more often than others, especially when it meant waiting less. A big task is a distant reward. And in a trial with adults with ADHD who were already taking medication, a therapy that taught, among other things, how to break overwhelming tasks into steps improved symptoms more than relaxation sessions with information, and the improvement was still there at 12 months."
+          }
+        }
+      }
+    },
+    "En un estudio con 1203 adultos, quienes decían tener un diagnóstico de TDAH contaban recibir más críticas de los demás y tenían menos autocompasión, es decir, menos amabilidad consigo mismos en los momentos difíciles." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In a study of 1,203 adults, those who reported an ADHD diagnosis described more criticism from others and had less self-compassion, that is, less kindness toward themselves in hard moments."
           }
         }
       }
@@ -994,16 +1174,6 @@
         }
       }
     },
-    "Entre las 11 y la 1" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Between 11 and 1"
-          }
-        }
-      }
-    },
     "Entre las 6 y las 8" : {
       "localizations" : {
         "en" : {
@@ -1030,6 +1200,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Between 9 and 11"
+          }
+        }
+      }
+    },
+    "Entre las 11 y la 1" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Between 11 and 1"
           }
         }
       }
@@ -1165,6 +1345,26 @@
         }
       }
     },
+    "Estás aquí. Eso ya cuenta." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're here. That already counts."
+          }
+        }
+      }
+    },
+    "Estás justo donde toca." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're right where you need to be."
+          }
+        }
+      }
+    },
     "Este iPhone no tiene Face ID ni código. Escribe tu clave." : {
       "localizations" : {
         "en" : {
@@ -1211,26 +1411,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@'s star"
-          }
-        }
-      }
-    },
-    "Estás aquí. Eso ya cuenta." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You're here. That already counts."
-          }
-        }
-      }
-    },
-    "Estás justo donde toca." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You're right where you need to be."
           }
         }
       }
@@ -1305,22 +1485,22 @@
         }
       }
     },
-    "Hechas hoy" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Done today"
-          }
-        }
-      }
-    },
     "Hechas · %lld′ en foco" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Done · %lld′ in focus"
+          }
+        }
+      }
+    },
+    "Hechas hoy" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done today"
           }
         }
       }
@@ -1607,6 +1787,16 @@
         }
       }
     },
+    "Mañana" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morning"
+          }
+        }
+      }
+    },
     "Marca como terminada la tarea en curso." : {
       "localizations" : {
         "en" : {
@@ -1627,12 +1817,12 @@
         }
       }
     },
-    "Mañana" : {
+    "media" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Morning"
+            "value" : "medium"
           }
         }
       }
@@ -1840,6 +2030,7 @@
       }
     },
     "Ordenar el escritorio" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2069,6 +2260,16 @@
         }
       }
     },
+    "Qué quieres hacer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you want to do"
+          }
+        }
+      }
+    },
     "Quedan %lld minutos" : {
       "localizations" : {
         "en" : {
@@ -2105,16 +2306,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Remove password"
-          }
-        }
-      }
-    },
-    "Qué quieres hacer" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What you want to do"
           }
         }
       }
@@ -2460,16 +2651,6 @@
         }
       }
     },
-    "Tu Lumi" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your Lumi"
-          }
-        }
-      }
-    },
     "Tu clave" : {
       "localizations" : {
         "en" : {
@@ -2556,6 +2737,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your iPhone couldn't show Sign in with Apple. Try again."
+          }
+        }
+      }
+    },
+    "Tu Lumi" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your Lumi"
           }
         }
       }
@@ -2877,196 +3068,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ZENO will stop asking for it."
-          }
-        }
-      }
-    },
-    "alta" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "high"
-          }
-        }
-      }
-    },
-    "baja" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "low"
-          }
-        }
-      }
-    },
-    "media" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "medium"
-          }
-        }
-      }
-    },
-    "¡Qué buen ritmo! Una más si te apetece, sin prisa." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What a rhythm! One more if you feel like it, no rush."
-          }
-        }
-      }
-    },
-    "· con aviso" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "· with reminder"
-          }
-        }
-      }
-    },
-    "¿A qué hora se te acaba la energía?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "When does your energy run out?"
-          }
-        }
-      }
-    },
-    "¿A qué hora sueles despertar?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What time do you usually wake up?"
-          }
-        }
-      }
-    },
-    "¿Borrar esta tarea?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete this task?"
-          }
-        }
-      }
-    },
-    "¿Borrar todo?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete everything?"
-          }
-        }
-      }
-    },
-    "¿Cerrar sesión?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign out?"
-          }
-        }
-      }
-    },
-    "¿Cuál es el primer paso de dos minutos?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What's the two-minute first step?"
-          }
-        }
-      }
-    },
-    "¿Cuándo naciste?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "When were you born?"
-          }
-        }
-      }
-    },
-    "¿Cómo quieres verla?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How would you like to see her?"
-          }
-        }
-      }
-    },
-    "¿Cómo te llamas?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What's your name?"
-          }
-        }
-      }
-    },
-    "¿En qué momento tienes más energía?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "When do you have the most energy?"
-          }
-        }
-      }
-    },
-    "¿En qué te ayudo?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How can I help?"
-          }
-        }
-      }
-    },
-    "¿Olvidaste tu clave?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forgot your password?"
-          }
-        }
-      }
-    },
-    "¿Quitar la clave?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove the password?"
-          }
-        }
-      }
-    },
-    "¿Qué quieres hacer?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What do you want to do?"
           }
         }
       }

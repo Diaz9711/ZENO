@@ -518,13 +518,18 @@ final class Hojas {
 
     var pila: [Hoja] = []
 
+    /// El movimiento de las hojas: un resorte sin rebote, como las hojas del propio iPhone.
+    /// Sigue al dedo, se puede interrumpir a mitad y nunca hace un corte.
+    static let subida = Animation.spring(response: 0.44, dampingFraction: 0.90)
+    static let bajada = Animation.spring(response: 0.36, dampingFraction: 0.95)
+
     func mostrar<C: View>(@ViewBuilder _ contenido: () -> C) {
-        withAnimation(Lujo.curva(0.6)) { pila.append(Hoja(contenido: AnyView(contenido()))) }
+        withAnimation(Self.subida) { pila.append(Hoja(contenido: AnyView(contenido()))) }
     }
 
     func cerrar() {
         guard !pila.isEmpty else { return }
-        withAnimation(Lujo.curva(0.5)) { _ = pila.removeLast() }
+        withAnimation(Self.bajada) { _ = pila.removeLast() }
     }
 }
 
@@ -533,11 +538,17 @@ struct CapaDeHojas: View {
     @State private var arrastre: CGFloat = 0
     private var hojas: Hojas { .compartidas }
 
+    /// Hacia abajo la hoja sigue al dedo; hacia arriba se resiste, como una goma.
+    private var desplazamiento: CGFloat {
+        arrastre >= 0 ? arrastre : -6 * log(1 + (-arrastre) / 22)
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
             if !hojas.pila.isEmpty {
-                // Recoge el toque de fuera, sin oscurecer el cielo.
-                Color.black.opacity(0.001)
+                // Recoge el toque de fuera. Un velo muy leve da profundidad (la hoja queda delante)
+                // sin tapar el cielo; se aclara al arrastrar la hoja hacia abajo.
+                Color.black.opacity(0.20 * (1 - min(max(arrastre, 0) / 300, 1)))
                     .ignoresSafeArea()
                     .onTapGesture { hojas.cerrar() }
                     .transition(.opacity)
@@ -558,7 +569,7 @@ struct CapaDeHojas: View {
                                            style: .continuous)
                         .fill(Color(red: 0.065, green: 0.07, blue: 0.12))
                         .padding(.bottom, -60)          // llega hasta el borde de abajo de la pantalla
-                        .shadow(color: .black.opacity(0.45), radius: 40, y: -6)
+                        .shadow(color: .black.opacity(0.35), radius: 22, y: -4)
                 }
                 .overlay(alignment: .top) {
                     UnevenRoundedRectangle(topLeadingRadius: Lujo.radioHoja, topTrailingRadius: Lujo.radioHoja,
@@ -567,20 +578,27 @@ struct CapaDeHojas: View {
                                                      startPoint: .top, endPoint: .init(x: 0.5, y: 0.25)), lineWidth: 0.75)
                         .allowsHitTesting(false)
                 }
-                .offset(y: esLaUltima ? max(arrastre, 0) : 0)
+                .offset(y: esLaUltima ? desplazamiento : 0)
                 .scaleEffect(esLaUltima ? 1 : 0.96, anchor: .top)
                 .opacity(esLaUltima ? 1 : 0.6)
-                .gesture(DragGesture()
+                .gesture(DragGesture(minimumDistance: 4)
                     .onChanged { arrastre = $0.translation.height }
                     .onEnded { v in
-                        if v.translation.height > 90 { hojas.cerrar() }
-                        withAnimation(Lujo.curva(0.4)) { arrastre = 0 }
+                        // Se cierra si se arrastró lo bastante o si el dedo la lanzó hacia abajo.
+                        if v.translation.height > 110 || v.predictedEndTranslation.height > 260 {
+                            hojas.cerrar()
+                            // Sigue bajando desde donde la soltó el dedo; no vuelve a subir.
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { arrastre = 0 }
+                        } else {
+                            withAnimation(Hojas.subida) { arrastre = 0 }
+                        }
                     })
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+                // Solo movimiento (sin fundido): la hoja entra entera, como un objeto real.
+                .transition(.move(edge: .bottom))
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-        .animation(Lujo.curva(0.45), value: hojas.pila.count)
+        .sensoryFeedback(.impact(weight: .light, intensity: 0.5), trigger: hojas.pila.count) { viejo, nuevo in nuevo > viejo }
     }
 }
 

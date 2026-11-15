@@ -369,8 +369,13 @@ struct UniversoView: View {
                             }
                             // Encima y no debajo: si empujan el contenido, la barra se sale de la pantalla.
                             .overlay(alignment: .top) {
-                                botonesDePrueba(persona, puntaje: puntaje)
-                                    .padding(.top, 96)
+                                // Arriba a la derecha, pequeños y en columna: nunca encima de Lumi.
+                                VStack(alignment: .trailing, spacing: 4) {
+                                    botonesDePrueba(persona, puntaje: puntaje)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .padding(.trailing, 18)
+                                .padding(.top, 4)
                             }
                             EncabezadoDeHoy(nombre: persona.nombre, puntaje: puntaje)
                                 .padding(.horizontal, 22)
@@ -563,10 +568,9 @@ struct UniversoView: View {
             default: energiaDePrueba = nil
             }
         }
-        .font(.zenoTexto(.footnote))
-        .foregroundStyle(.white.opacity(0.6))
-        .padding(.bottom, 6)
-        HStack(spacing: 20) {
+        .font(.zenoTexto(.caption2))
+        .foregroundStyle(.white.opacity(0.5))
+        VStack(alignment: .trailing, spacing: 4) {
             Button("Ver presencia") {
                 visita += 1
                 withAnimation(movimientoDeLumi) { momento = .presencia }
@@ -576,11 +580,9 @@ struct UniversoView: View {
                 withAnimation(.easeInOut(duration: 0.8)) { contexto.delete(persona) }
             }
         }
-        .font(.zenoTexto(.footnote))
-        .foregroundStyle(.white.opacity(0.6))
-        .padding(.bottom, 8)
+        .font(.zenoTexto(.caption2))
+        .foregroundStyle(.white.opacity(0.5))
         }
-        Color.clear.frame(height: modoPrueba ? 76 : 0)   // los controles de prueba quedan sobre la barra
         #endif
     }
 }

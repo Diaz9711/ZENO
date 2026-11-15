@@ -18,7 +18,8 @@ private struct Desenfoque: ViewModifier {
 /// El ritmo común de ZENO: el contenido cambia rápido y suave; Lumi viaja con su propio resorte, más lento.
 enum Ritmo {
     /// Páginas, secciones y contenido: lento y delicado, sin rebote. cubic-bezier(0.22, 1, 0.36, 1).
-    static let contenido = Animation.timingCurve(0.22, 1, 0.36, 1, duration: 0.34)
+    /// Es un resorte sin rebote: se puede interrumpir a mitad (cambiar de página rápido) sin saltos.
+    static let contenido = Animation.spring(response: 0.40, dampingFraction: 0.92)
     /// Lumi y el cielo: un objeto físico, con un poco de inercia. Es el resorte original de Lumi
     /// (su comportamiento no se toca): 0,95 s y amortiguación 0,68.
     static let lumi = Animation.spring(response: 0.95, dampingFraction: 0.68)
