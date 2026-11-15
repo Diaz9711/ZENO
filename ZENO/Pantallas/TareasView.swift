@@ -36,6 +36,8 @@ struct TareaDelMomentoView: View {
     @State private var plan = BorradorDePlan()
     @State private var dictado = Dictado()
     @State private var toques = 0
+    /// Recuerda la tarea elegida: la pantalla la pide muchas veces por dibujo y calcularla recorre el historial.
+    @State private var memoria = MemoriaDeEleccion()
     @FocusState private var escribiendo: Bool
 
     var body: some View {
@@ -298,8 +300,8 @@ struct TareaDelMomentoView: View {
         if let id = enCurso, let tarea = pendientes.first(where: { $0.persistentModelID == id }) {
             return .tarea(tarea)
         }
-        return MotorDeEnergia.elegir(pendientes: pendientes, puntaje: puntaje, eventos: eventos,
-                                     quiereAlgoIgual: quiereAlgoIgual)
+        return memoria.eleccion(pendientes: pendientes, puntaje: puntaje, eventos: eventos,
+                                quiereAlgoIgual: quiereAlgoIgual)
     }
 
     private var firmaParaWidget: String {
@@ -655,6 +657,8 @@ private struct TareaTocable: View {
             Titular(texto: tarea.textoVisible, tamano: .largeTitle, alineacion: .leading)
                 .colorMultiply(Lujo.oro)
                 .blur(radius: 18)
+                // Se dibuja una sola vez como imagen: el latido solo cambia la opacidad (no recalcula el desenfoque).
+                .drawingGroup()
                 .opacity(enCurso ? 0.35 : (respira ? 0.5 : 0.15))
                 .accessibilityHidden(true)
         }
@@ -663,5 +667,35 @@ private struct TareaTocable: View {
             guard !reducirMovimiento else { return }
             withAnimation(.easeInOut(duration: 2.8).repeatForever(autoreverses: true)) { respira = true }
         }
+    }
+}
+
+/// Guarda la última elección de `MotorDeEnergia` y la repite mientras nada relevante cambie
+/// (las tareas, la energía, el historial, "quiero algo igual" o el minuto). No es observable a propósito.
+final class MemoriaDeEleccion {
+    private var clave: Int?
+    private var guardada: Eleccion = .nadaPendiente
+
+    func eleccion(pendientes: [Tarea], puntaje: Double, eventos: [Senal], quiereAlgoIgual: Bool) -> Eleccion {
+        var h = Hasher()
+        for t in pendientes {
+            h.combine(t.persistentModelID)
+            h.combine(t.textoVisible)
+            h.combine(t.tamanoCrudo)
+            h.combine(t.fechaPlaneada)
+            h.combine(t.empezadaEn)
+        }
+        h.combine(Int(puntaje.rounded()))
+        h.combine(eventos.count)
+        h.combine(eventos.last?.fecha)
+        h.combine(quiereAlgoIgual)
+        h.combine(Int(Date.now.timeIntervalSinceReferenceDate / 60))
+        let nueva = h.finalize()
+        if nueva != clave {
+            guardada = MotorDeEnergia.elegir(pendientes: pendientes, puntaje: puntaje, eventos: eventos,
+                                             quiereAlgoIgual: quiereAlgoIgual)
+            clave = nueva
+        }
+        return guardada
     }
 }

@@ -69,10 +69,13 @@ struct AnilloDeTiempoView: View {
 
                 if !terminado {
                     // Brillo difuso detrás de la línea.
+                    // (Sin desenfoque: se recalculaba 20 veces por segundo. Dos trazos suaves dan el mismo halo.)
                     Circle()
                         .trim(from: 0, to: restante)
-                        .stroke(color.opacity(0.55), style: StrokeStyle(lineWidth: 9, lineCap: .round))
-                        .blur(radius: 7)
+                        .stroke(color.opacity(0.10), style: StrokeStyle(lineWidth: 14, lineCap: .round))
+                    Circle()
+                        .trim(from: 0, to: restante)
+                        .stroke(color.opacity(0.20), style: StrokeStyle(lineWidth: 7, lineCap: .round))
                     // La línea de luz.
                     Circle()
                         .trim(from: 0, to: restante)

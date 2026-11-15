@@ -9,6 +9,9 @@ struct ZENOApp: App {
     init() {
         // Antes de que termine el arranque: así no se pierde el toque que abre ZENO desde un aviso.
         UNUserNotificationCenter.current().delegate = CentroDeAvisos.compartido
+        #if DEBUG
+        if UserDefaults.standard.bool(forKey: "medirFluidez") { MedidorDeTirones.compartido.empezar() }
+        #endif
     }
 
     var body: some Scene {

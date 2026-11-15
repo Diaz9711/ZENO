@@ -144,14 +144,13 @@ struct HojaDeAyuda: View {
 /// Chispa, discreta, en Tareas y Ajustes: pequeña, quieta salvo un leve flote, con una pista útil.
 struct ChispaDiscreta: View {
     let frase: String
-    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
-    @State private var flota = false
 
     var body: some View {
         HStack(spacing: 10) {
-            DibujoDeCohete(diseno: .clasico)
+            // Quieta a propósito: dentro de una lista con desplazamiento, una animación sin fin
+            // obligaba a redibujar toda la página en cada cuadro.
+            DibujoDeCohete(diseno: .clasico, llamaQuieta: true)
                 .frame(width: 20, height: 24)
-                .offset(y: flota ? -1.5 : 1.5)
             Text(verbatim: frase)
                 .font(.zenoTexto(.caption))
                 .foregroundStyle(Lujo.marfilSecundario)
@@ -159,10 +158,6 @@ struct ChispaDiscreta: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text(verbatim: "\(Cohete.nombre): \(frase)"))
-        .onAppear {
-            guard !reducirMovimiento else { return }
-            withAnimation(.easeInOut(duration: 2.8).repeatForever(autoreverses: true)) { flota = true }
-        }
     }
 }
 
@@ -174,8 +169,10 @@ struct VueloDeChispa: View {
     /// Radio de la vuelta alrededor de Lumi.
     let radio: CGFloat
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+    /// Chispa solo existe mientras vuela (antes quedaba invisible y su llama seguía latiendo).
+    @State private var volando = false
 
-    private struct Vuelo {
+    struct Estado {
         var angulo: Double = -.pi / 2   // empieza arriba
         var distancia: Double = 0       // 0 = dentro de Lumi, 1 = en la órbita
         var escala: Double = 0.5
@@ -183,10 +180,33 @@ struct VueloDeChispa: View {
     }
 
     var body: some View {
-        if !reducirMovimiento {
+        ZStack {
+            if volando && !reducirMovimiento {
+                UnVuelo(radio: radio).id(numero)
+            }
+        }
+        .onChange(of: numero) { _, _ in
+            guard !reducirMovimiento else { return }
+            volando = true
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(4.2))
+                volando = false
+            }
+        }
+    }
+
+}
+
+/// Una sola vuelta de Chispa: arranca al aparecer y luego desaparece.
+private struct UnVuelo: View {
+    let radio: CGFloat
+    @State private var disparo = 0
+    private typealias Vuelo = VueloDeChispa.Estado
+
+    var body: some View {
             DibujoDeCohete(diseno: .clasico)
                 .frame(width: 22, height: 26)
-                .keyframeAnimator(initialValue: Vuelo(), trigger: numero) { vista, v in
+                .keyframeAnimator(initialValue: Vuelo(), trigger: disparo) { vista, v in
                     vista
                         // La nariz mira hacia donde va (vuelta en el sentido del reloj).
                         .rotationEffect(.radians(v.angulo + .pi))
@@ -220,15 +240,18 @@ struct VueloDeChispa: View {
                 }
                 .allowsHitTesting(false)
                 .accessibilityHidden(true)
-        }
+                .onAppear { disparo += 1 }
     }
 }
+
 
 // MARK: - Los tres dibujos
 
 /// Trazo fino en oro champán y marfil; la llama es luz pálida, nunca naranja.
 struct DibujoDeCohete: View {
     let diseno: DisenoDeCohete
+    /// Sin el latido de la llama (para los sitios donde Chispa está quieta).
+    var llamaQuieta = false
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     @State private var llama = false
 
@@ -304,7 +327,7 @@ struct DibujoDeCohete: View {
         }
         .accessibilityHidden(true)
         .onAppear {
-            guard !reducirMovimiento else { return }
+            guard !reducirMovimiento, !llamaQuieta else { return }
             withAnimation(.easeInOut(duration: 0.45).repeatForever(autoreverses: true)) { llama = true }
         }
     }
