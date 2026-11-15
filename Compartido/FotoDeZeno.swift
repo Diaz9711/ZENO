@@ -19,6 +19,8 @@ struct FotoDeZeno: Codable, Equatable {
     var inicio: Date?
     var fin: Date?
     var guardadaEn: Date = .now
+    /// Cuándo se guardó el último retrato real de Lumi (para que el widget se redibuje).
+    var retratoEn: Date?
     /// El idioma elegido dentro de ZENO ("es" o "en"): el widget habla igual que la app.
     var idioma: String = "es"
 

@@ -1,66 +1,92 @@
 {
-  "sourceLanguage": "es",
-  "strings": {
-    "Agrega una tarea a ${applicationName}": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add a task to ${applicationName}"
+  "sourceLanguage" : "es",
+  "strings" : {
+    "Abre ${applicationName} para escribir" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open ${applicationName} to write"
           }
         }
       }
     },
-    "Agrega a ${applicationName}": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add to ${applicationName}"
+    "Agrega a ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to ${applicationName}"
           }
         }
       }
     },
-    "Añade una tarea en ${applicationName}": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add a task in ${applicationName}"
+    "Agrega una tarea a ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Add a task to ${applicationName}"
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Agrega una tarea a ${applicationName}",
+              "Agrega a ${applicationName}",
+              "Añade una tarea en ${applicationName}",
+              "Nueva tarea en ${applicationName}"
+            ]
           }
         }
       }
     },
-    "Nueva tarea en ${applicationName}": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "New task in ${applicationName}"
+    "Añade una tarea en ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a task in ${applicationName}"
           }
         }
       }
     },
-    "Escribe una tarea en ${applicationName}": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Write a task in ${applicationName}"
+    "Escribe una tarea en ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Write a task in ${applicationName}"
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Escribe una tarea en ${applicationName}",
+              "Abre ${applicationName} para escribir"
+            ]
           }
         }
       }
     },
-    "Abre ${applicationName} para escribir": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open ${applicationName} to write"
+    "Nueva tarea en ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New task in ${applicationName}"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

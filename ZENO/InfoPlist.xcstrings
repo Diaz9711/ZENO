@@ -1,39 +1,85 @@
 {
-  "sourceLanguage": "es",
-  "strings": {
-    "CFBundleDisplayName": {
-      "shouldTranslate": false
+  "sourceLanguage" : "es",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "ZENO"
+          }
+        }
+      },
+      "shouldTranslate" : false
     },
-    "NSFaceIDUsageDescription": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ZENO uses Face ID only so you can get in or recover your password. Nothing leaves your phone."
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "ZENO"
           }
         }
       }
     },
-    "NSMicrophoneUsageDescription": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ZENO uses the microphone only while you press and hold Lumi, to write the task you say."
+    "NSFaceIDUsageDescription" : {
+      "comment" : "Privacy - Face ID Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ZENO uses Face ID only so you can get in or recover your password. Nothing leaves your phone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "ZENO usa Face ID solo para que entres o recuperes tu clave. Nada sale del teléfono."
           }
         }
       }
     },
-    "NSSpeechRecognitionUsageDescription": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ZENO turns your voice into text on your phone to add tasks. Your voice never leaves the device."
+    "NSMicrophoneUsageDescription" : {
+      "comment" : "Privacy - Microphone Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ZENO uses the microphone only while you press and hold Lumi, to write the task you say."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "ZENO usa el micrófono solo mientras mantienes presionada a Lumi, para escribir la tarea que dices."
+          }
+        }
+      }
+    },
+    "NSSpeechRecognitionUsageDescription" : {
+      "comment" : "Privacy - Speech Recognition Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ZENO turns your voice into text on your phone to add tasks. Your voice never leaves the device."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "ZENO convierte tu voz en texto dentro del teléfono para agregar tareas. Tu voz no sale del dispositivo."
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

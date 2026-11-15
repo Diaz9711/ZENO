@@ -48,3 +48,56 @@ struct GaleriaDeAnillos: View {
     }
 }
 #endif
+
+#if DEBUG
+/// Para elegir el widget de inicio (`-galeriaWidget YES`, solo DEBUG): los tres diseños,
+/// mediano y pequeño, con el retrato real de Lumi que verá el widget.
+struct GaleriaDeWidgets: View {
+    let apariencia: AparienciaLumi
+    let forma: FormaDeLumi
+    @State private var ancho: UIImage?
+    @State private var cuadrado: UIImage?
+
+    private var foto: FotoDeZeno {
+        var f = FotoDeZeno()
+        f.tarea = Idioma.texto("Ordenar el escritorio")
+        return f
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                ForEach(EstiloDeWidget.allCases) { estilo in
+                    HStack(alignment: .top, spacing: 8) {
+                        Text(verbatim: "\(estilo.rawValue + 1)")
+                            .font(.zenoTitulo(.title2)).foregroundStyle(Lujo.oro).frame(width: 18)
+                        HStack(alignment: .top, spacing: 10) {
+                            VistaDeWidget(foto: foto, mediano: true, estilo: estilo, retrato: ancho, retratoCuadrado: cuadrado)
+                                .frame(width: 338, height: 158)
+                                .background(Tinta.cielo)
+                                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                                .scaleEffect(0.62, anchor: .topLeading)
+                                .frame(width: 210, height: 98, alignment: .topLeading)
+                            VistaDeWidget(foto: foto, mediano: false, estilo: estilo, retrato: cuadrado, retratoCuadrado: cuadrado)
+                                .frame(width: 158, height: 158)
+                                .background(Tinta.cielo)
+                                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                                .scaleEffect(0.62, anchor: .topLeading)
+                                .frame(width: 98, height: 98, alignment: .topLeading)
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 10)
+            .padding(.top, 60)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(LinearGradient(colors: [Color(red: 0.16, green: 0.17, blue: 0.30), Color(red: 0.06, green: 0.06, blue: 0.12)],
+                                   startPoint: .top, endPoint: .bottom).ignoresSafeArea())
+        .task {
+            ancho = RetratoDeLumi.imagen(apariencia: apariencia, forma: forma, energia: 0.7, ancho: true)
+            cuadrado = RetratoDeLumi.imagen(apariencia: apariencia, forma: forma, energia: 0.7, ancho: false)
+        }
+    }
+}
+#endif

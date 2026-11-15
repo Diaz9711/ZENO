@@ -199,6 +199,10 @@ struct UniversoView: View {
                 #if DEBUG
                 GaleriaDeCohetes()
                 #endif
+            } else if UserDefaults.standard.bool(forKey: "galeriaWidget") {
+                #if DEBUG
+                GaleriaDeWidgets(apariencia: apariencia, forma: forma)
+                #endif
             } else if UserDefaults.standard.bool(forKey: "galeriaAnillo") {
                 #if DEBUG
                 GaleriaDeAnillos()
@@ -286,7 +290,7 @@ struct UniversoView: View {
             if ajustes.bool(forKey: "sesionCerrada") { sesionAbierta = false }
             // -probarSiri "texto": corre el mismo atajo que usa Siri para agregar una tarea.
             if let frase = ajustes.string(forKey: "probarSiri") {
-                var atajo = AgregarTareaIntent()
+                let atajo = AgregarTareaIntent()
                 atajo.tarea = frase
                 _ = try? await atajo.perform()
             }

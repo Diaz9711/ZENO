@@ -263,9 +263,6 @@ struct DibujoDeCohete: View {
             let metal = GraphicsContext.Shading.linearGradient(
                 Gradient(colors: [Lujo.oroLuz, Lujo.oro, Lujo.oroHondo]), startPoint: p(0.3, 0), endPoint: p(0.7, 1))
             let cuerpo = GraphicsContext.Shading.color(Color(red: 0.10, green: 0.11, blue: 0.20).opacity(0.85))
-            let luzLlama = GraphicsContext.Shading.radialGradient(
-                Gradient(colors: [Color.marfil, Lujo.oroLuz.opacity(0.7), .clear]),
-                center: p(0.5, 0.86), startRadius: 0, endRadius: h * 0.16)
 
             switch diseno {
             case .clasico:

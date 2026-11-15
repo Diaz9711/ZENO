@@ -56,62 +56,11 @@ struct VistaDelWidget: View {
     @Environment(\.widgetFamily) private var familia
 
     var body: some View {
-        let foto = entrada.foto
-        Group {
-            if familia == .systemMedium {
-                HStack(spacing: 0) {
-                    LuzDeLumi(foto: foto)
-                        .frame(width: 150)
-                    textos(foto, grande: true)
-                        .padding(.trailing, 18)
-                        .padding(.vertical, 20)
-                }
-            } else {
-                ZStack(alignment: .bottomLeading) {
-                    LuzDeLumi(foto: foto)
-                        .frame(width: 120, height: 120)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                        .padding(.top, -6)
-                    textos(foto, grande: false)
-                        .padding(14)
-                }
-            }
-        }
-        .environment(\.locale, Locale(identifier: foto.idioma))
-        .containerBackground(for: .widget) {
-            CieloDelWidget(foto: foto, centro: familia == .systemMedium ? UnitPoint(x: 0.2, y: 0.5) : UnitPoint(x: 0.5, y: 0.32))
-        }
-    }
-
-    @ViewBuilder
-    private func textos(_ foto: FotoDeZeno, grande: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            if !grande { Spacer(minLength: 0) }
-            Text(foto.inicio != nil ? "En curso" : "Ahora")
-                .font(.texto(10, "SemiBold"))
-                .kerning(1.3)
-                .textCase(.uppercase)
-                .foregroundStyle(Tinta.oro)
-            if let tarea = foto.tarea {
-                // El texto es de la persona: se oculta si el iPhone está bloqueado.
-                Text(verbatim: tarea)
-                    .font(.titulo(grande ? 20 : 16))
-                    .foregroundStyle(Tinta.marfil)
-                    .lineLimit(grande ? 3 : 2)
-                    .minimumScaleFactor(0.8)
-                    .privacySensitive()
-            } else {
-                Text("Lumi sigue aquí")
-                    .font(.titulo(grande ? 20 : 16))
-                    .foregroundStyle(Tinta.marfil)
-            }
-            if let inicio = foto.inicio, let fin = foto.fin, fin > .now {
-                Text(timerInterval: inicio...fin, countsDown: true)
-                    .font(.texto(12, "Medium"))
-                    .monospacedDigit()
-                    .foregroundStyle(Tinta.marfilSecundario)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        let mediano = familia == .systemMedium
+        VistaDeWidget(foto: entrada.foto, mediano: mediano, estilo: .cielo,
+                      retrato: RetratoGuardado.imagen(ancho: mediano),
+                      retratoCuadrado: RetratoGuardado.imagen(ancho: false))
+            .environment(\.locale, Locale(identifier: entrada.foto.idioma))
+            .containerBackground(for: .widget) { Tinta.cielo }
     }
 }
