@@ -56,7 +56,7 @@ enum Avisos {
 
     /// Al abrir ZENO: revisa si el último aviso se ignoró y vuelve a programar.
     @MainActor
-    static func alAbrir(_ persona: Persona, eventos: [EventoDeEnergia]) async {
+    static func alAbrir(_ persona: Persona, eventos: [Senal]) async {
         let centro = UNUserNotificationCenter.current()
         let ajustes = await centro.notificationSettings()
 
@@ -80,12 +80,12 @@ enum Avisos {
 
     /// Al salir de ZENO: los tres días de "Lumi sigue aquí" se cuentan desde este momento.
     @MainActor
-    static func alSalir(_ persona: Persona, eventos: [EventoDeEnergia]) async {
+    static func alSalir(_ persona: Persona, eventos: [Senal]) async {
         await programar(persona, eventos: eventos)
     }
 
     @MainActor
-    static func programar(_ persona: Persona, eventos: [EventoDeEnergia], ahora: Date = .now) async {
+    static func programar(_ persona: Persona, eventos: [Senal], ahora: Date = .now) async {
         let centro = UNUserNotificationCenter.current()
         centro.removePendingNotificationRequests(withIdentifiers: [idDiario, idSigueAqui])
 
@@ -109,7 +109,7 @@ enum Avisos {
 
     /// Solo se pide permiso cuando la persona enciende el interruptor (nunca "provisional").
     @MainActor
-    static func activar(_ persona: Persona, eventos: [EventoDeEnergia]) async -> Resultado {
+    static func activar(_ persona: Persona, eventos: [Senal]) async -> Resultado {
         let centro = UNUserNotificationCenter.current()
         let permitido = (try? await centro.requestAuthorization(options: [.alert])) ?? false
         guard permitido else {
@@ -134,7 +134,7 @@ enum Avisos {
 
     /// Volver a encender el aviso diario después de una pausa.
     @MainActor
-    static func reanudar(_ persona: Persona, eventos: [EventoDeEnergia]) async {
+    static func reanudar(_ persona: Persona, eventos: [Senal]) async {
         persona.avisosEnPausa = false
         persona.avisosIgnorados = 0
         await programar(persona, eventos: eventos)

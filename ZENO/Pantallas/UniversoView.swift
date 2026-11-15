@@ -12,7 +12,9 @@ struct UniversoView: View {
     @Environment(\.scenePhase) private var fase
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     @Query private var personas: [Persona]
-    @Query(sort: \EventoDeEnergia.fecha) private var eventos: [EventoDeEnergia]
+    @Query(sort: \EventoDeEnergia.fecha) private var eventosGuardados: [EventoDeEnergia]
+    /// El historial como copia ligera en memoria (ver `Memoria`): rápido de recorrer.
+    private var eventos: [Senal] { eventosGuardados.senales }
     @Query private var tareas: [Tarea]
 
     @State private var paso = PasoDeRegistro.bienvenida
@@ -63,7 +65,9 @@ struct UniversoView: View {
         let hayLumi = (persona != nil && !presentando && sesionAbierta) || lumiNacida
         let viajando = (enRegistro || presentando) && !llegada
         // El puntaje de energía real: cronotipo + comportamiento en la app.
-        let puntaje = energiaDePrueba ?? Pruebas.energia ?? persona.map { MotorDeEnergia.puntaje(persona: $0, eventos: eventos, ahora: ahora) } ?? 72
+        // El cerebro se calcula una vez y se recuerda hasta que cambie el historial o pase un minuto.
+        let cerebro = persona.map { Memoria.compartida.cerebro(persona: $0, senales: eventos, ahora: ahora) }
+        let puntaje = energiaDePrueba ?? Pruebas.energia ?? cerebro?.puntaje ?? 72
         let energia = hayLumi ? puntaje / 100 : 0.30
 
         // Dónde está Lumi: en el centro durante la presencia, arriba cuando llega la tarea.
@@ -95,8 +99,10 @@ struct UniversoView: View {
 
                     let anchoLumi = min(geo.size.width, 430) * 0.98
                     RetiradaAlDeslizar(activa: enOtraPagina) {
+                    // Se dibuja al tamaño en que se ve (no grande y luego encogida): el mismo dibujo,
+                    // con muchos menos píxeles que calcular en cada cuadro cuando Lumi está pequeña.
                     LumiView(apariencia: apariencia, energia: energia, forma: forma, destello: destelloDeHoy)
-                        .frame(width: anchoLumi)
+                        .frame(width: anchoLumi * tamano)
                         // Al terminar una tarea: inhala, se encoge un instante y suelta la onda.
                         .keyframeAnimator(initialValue: 1.0, trigger: celebraciones) { vista, escala in
                             vista.scaleEffect(escala)
@@ -119,7 +125,7 @@ struct UniversoView: View {
                         }
                         .rotationEffect(.degrees(vueltas))
                     }
-                        .scaleEffect(hayLumi ? tamano : 0.04)
+                        .scaleEffect(hayLumi ? 1 : 0.04)
                         .opacity(hayLumi ? 1 : 0)
                         .position(x: geo.size.width * centro.x,
                                   y: geo.size.height * centro.y)
@@ -293,7 +299,7 @@ struct UniversoView: View {
                                     puntaje: puntaje,
                                     eventos: eventos,
                                     alTerminar: celebrar,
-                                    mejorHora: MotorDeEnergia.mejorHora(persona: persona, eventos: eventos),
+                                    mejorHora: Memoria.compartida.cerebro(persona: persona, senales: eventos, ahora: ahora).mejorHora,
                                     pedirAgregar: pedirAgregar,
                                     editando: $editando)
                             }
@@ -314,7 +320,7 @@ struct UniversoView: View {
                             .transition(.pasoDePagina(sentido: sentido))
 
                     case .ajustes:
-                        AjustesView(persona: persona, arriba: altoTotal * 0.185 - arriba)
+                        AjustesView(persona: persona, eventos: eventos, arriba: altoTotal * 0.185 - arriba)
                             .transition(.pasoDePagina(sentido: sentido))
                     }
 
@@ -361,7 +367,7 @@ struct UniversoView: View {
     private var destelloDeHoy: Double {
         let grandesHoy = eventos.filter {
             $0.tipo == .tareaTerminada && Calendar.current.isDateInToday($0.fecha)
-                && $0.tarea?.tamano == .grande && $0.tarea?.primerPaso == nil
+                && $0.tamano == .grande && !$0.conPrimerPaso
         }.count
         // Cada tarea terminada hoy suma luz; las difíciles, más. Nunca se resta.
         let hechasHoy = eventos.filter { $0.tipo == .tareaTerminada && Calendar.current.isDateInToday($0.fecha) }.count

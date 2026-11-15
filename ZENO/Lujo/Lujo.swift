@@ -84,9 +84,10 @@ extension View {
     /// Tarjeta de lujo: cristal oscuro sutil, esquinas de 22 pt, reflejo fino arriba y sombra larga y suave.
     func tarjetaLujo(radio: CGFloat = Lujo.radioTarjeta) -> some View {
         background {
+            // Sin sombra difuminada: con muchas tarjetas en pantalla se recalculaba en cada cuadro
+            // al desplazar. El canto pulido ya las separa del cielo.
             RoundedRectangle(cornerRadius: radio, style: .continuous)
                 .fill(Lujo.cristal)
-                .shadow(color: .black.opacity(0.28), radius: 30, y: 18)
         }
         .cantoPulido(radio: radio)
     }

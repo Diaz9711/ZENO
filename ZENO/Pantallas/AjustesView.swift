@@ -4,8 +4,6 @@ import SwiftData
 /// Ajustes: lo poco que la persona decide, con el sistema de lujo (tarjetas, oro champán, hojas propias).
 struct AjustesView: View {
     @Bindable var persona: Persona
-    /// Dónde empieza el contenido, debajo de Lumi. Lo de encima se funde con el cielo.
-    var arriba: CGFloat = 0
 
     @Environment(\.modelContext) private var contexto
     @AppStorage(Sesion.clave) private var sesionAbierta = true
@@ -13,7 +11,10 @@ struct AjustesView: View {
     @State private var permisoDenegado = false
     @State private var hayClave = Clave.existe
     @State private var pendientes: [(id: String, fecha: Date?)] = []
-    @Query(sort: \EventoDeEnergia.fecha) private var eventos: [EventoDeEnergia]
+    /// El historial ligero que ya tiene el universo (no se vuelve a leer de la base de datos).
+    var eventos: [Senal] = []
+    /// Dónde empieza el contenido, debajo de Lumi. Lo de encima se funde con el cielo.
+    var arriba: CGFloat = 0
     @AppStorage("modoPrueba") private var modoPrueba = false
     @Namespace private var espacio
 
@@ -345,7 +346,7 @@ struct AjustesView: View {
     }
 
     private var mejorHora: Int {
-        MotorDeEnergia.mejorHora(persona: persona, eventos: eventos)
+        Memoria.compartida.cerebro(persona: persona, senales: eventos, ahora: .now).mejorHora
     }
 
     /// Encender pide permiso (solo entonces); apagar borra solo el aviso diario.

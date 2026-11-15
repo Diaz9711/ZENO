@@ -18,7 +18,7 @@ private struct Desenfoque: ViewModifier {
 /// El ritmo común de ZENO: el contenido cambia rápido y suave; Lumi viaja con su propio resorte, más lento.
 enum Ritmo {
     /// Páginas, secciones y contenido: lento y delicado, sin rebote. cubic-bezier(0.22, 1, 0.36, 1).
-    static let contenido = Animation.timingCurve(0.22, 1, 0.36, 1, duration: 0.5)
+    static let contenido = Animation.timingCurve(0.22, 1, 0.36, 1, duration: 0.34)
     /// Lumi y el cielo: un objeto físico, con un poco de inercia. Es el resorte original de Lumi
     /// (su comportamiento no se toca): 0,95 s y amortiguación 0,68.
     static let lumi = Animation.spring(response: 0.95, dampingFraction: 0.68)
@@ -56,7 +56,6 @@ private struct PasoLateral: ViewModifier {
     func body(content: Content) -> some View {
         let fuera = lado != 0
         content
-            .blur(radius: fuera && !reducirMovimiento ? 4 : 0)
             .opacity(fuera ? 0 : 1)
             .scaleEffect(fuera && !reducirMovimiento ? 0.98 : 1)
             .offset(x: reducirMovimiento ? 0 : lado * 28)
@@ -80,12 +79,12 @@ private struct Aparece: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            // Fundido + subida corta + un desenfoque leve que se aclara. Con Reducir Movimiento, solo fundido.
-            .blur(radius: visible || reducirMovimiento ? 0 : 5)
+            // Fundido + subida corta, escalonados. Sin desenfoque animado: con varias piezas a la vez
+            // era lo que más frenaba la entrada a cada página. Con Reducir Movimiento, solo fundido.
             .opacity(visible ? 1 : 0)
-            .offset(y: visible || reducirMovimiento ? 0 : 12)
+            .offset(y: visible || reducirMovimiento ? 0 : 10)
             .onAppear {
-                withAnimation(Lujo.curva(0.6).delay(0.08 + 0.055 * Double(orden))) {
+                withAnimation(Lujo.curva(0.38).delay(0.02 + 0.035 * Double(orden))) {
                     visible = true
                 }
             }

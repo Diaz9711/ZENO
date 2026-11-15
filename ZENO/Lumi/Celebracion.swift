@@ -33,7 +33,7 @@ struct Celebracion: Equatable {
     var conEnergiaBaja = false
 
     /// A partir del historial de hoy (incluido el evento recién guardado).
-    static func para(_ tarea: Tarea, eventos: [EventoDeEnergia], puntaje: Double,
+    static func para(_ tarea: Tarea, eventos: [Senal], puntaje: Double,
                      calendario: Calendar = .current) -> Celebracion {
         let hoy = eventos.filter { calendario.isDateInToday($0.fecha) }
         // Las últimas tres decisiones de hoy fueron "terminé".

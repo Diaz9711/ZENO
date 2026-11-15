@@ -218,7 +218,6 @@ struct MisTareasView: View {
                                                    tinte(parte).opacity(0.03)],
                                           startPoint: .top, endPoint: .bottom))
             }
-            .shadow(color: .black.opacity(0.3), radius: 22, y: -4)
         }
         .cantoPulido(radio: 28)
     }
@@ -283,7 +282,7 @@ struct MisTareasView: View {
     /// El check se dibuja y la tarjeta se atenúa; un instante después la tarea se va.
     private func completar(_ tarea: Tarea) {
         withAnimation(Lujo.curva(0.5)) { _ = marcando.insert(tarea.persistentModelID) }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             let evento = EventoDeEnergia(tipo: .tareaTerminada)
             contexto.insert(evento)
             evento.tarea = tarea

@@ -13,7 +13,7 @@ struct TareaDelMomentoView: View {
     @Binding var escuchando: Bool
     /// Puntaje de energía actual (0–100) y el historial del que sale.
     var puntaje: Double
-    var eventos: [EventoDeEnergia]
+    var eventos: [Senal]
     /// Avisa a Lumi que celebre una tarea terminada.
     var alTerminar: (Celebracion) -> Void = { _ in }
     /// La hora de más energía, para la tarjeta de hoy.
@@ -70,7 +70,12 @@ struct TareaDelMomentoView: View {
         }
         .onChange(of: idPropuesta, initial: true) { _, nueva in
             // Queda registrado qué se propuso y con cuánta energía, para aprender.
-            if let nueva, let tarea = pendientes.first(where: { $0.persistentModelID == nueva }), enCurso != nueva {
+            // Sin repetir: una misma propuesta se anota como mucho una vez cada media hora
+            // (si no, el historial crecía en cada redibujado y la app se volvía lenta).
+            let yaAnotada = eventos.reversed().prefix(40).contains {
+                $0.tipo == .tareaPropuesta && $0.tareaID == nueva && Date.now.timeIntervalSince($0.fecha) < 30 * 60
+            }
+            if let nueva, !yaAnotada, let tarea = pendientes.first(where: { $0.persistentModelID == nueva }), enCurso != nueva {
                 registrar(.tareaPropuesta, valor: puntaje, tarea: tarea)
             }
         }
@@ -278,7 +283,7 @@ struct TareaDelMomentoView: View {
             .min()
     }
 
-    private var hechasHoy: [EventoDeEnergia] {
+    private var hechasHoy: [Senal] {
         eventos.filter { $0.tipo == .tareaTerminada && Calendar.current.isDateInToday($0.fecha) }
     }
 

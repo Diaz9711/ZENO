@@ -23,7 +23,7 @@ enum MotorDeEnergia {
 
     // MARK: Puntaje
 
-    static func puntaje(persona: Persona, eventos: [EventoDeEnergia], ahora: Date = .now,
+    static func puntaje(persona: Persona, eventos: [Senal], ahora: Date = .now,
                         calendario: Calendar = .current) -> Double {
         let c = calendario.dateComponents([.hour, .minute], from: ahora)
         let hora = Double(c.hour ?? 12) + Double(c.minute ?? 0) / 60
@@ -64,7 +64,7 @@ enum MotorDeEnergia {
 
     /// Confianza de una hora del día: sube cuando ahí se terminan tareas,
     /// baja con los "Ahora no". Los eventos viejos pesan cada vez menos.
-    static func ajusteAprendido(franja: Int, eventos: [EventoDeEnergia], ahora: Date) -> Double {
+    static func ajusteAprendido(franja: Int, eventos: [Senal], ahora: Date) -> Double {
         var suma = 0.0
         for evento in eventos {
             let dias = ahora.timeIntervalSince(evento.fecha) / 86_400
@@ -88,7 +88,7 @@ enum MotorDeEnergia {
 
     // MARK: B2. Lo que pasa hoy
 
-    static func ajusteDeHoy(eventos: [EventoDeEnergia], ahora: Date, calendario: Calendar = .current) -> Double {
+    static func ajusteDeHoy(eventos: [Senal], ahora: Date, calendario: Calendar = .current) -> Double {
         let deHoy = eventos.filter { calendario.isDate($0.fecha, inSameDayAs: ahora) && $0.fecha <= ahora }
         var ajuste = 0.0
 
@@ -126,13 +126,13 @@ enum MotorDeEnergia {
 
     /// Energía alta: la más difícil. Media: una rutinaria. Baja: algo de dos minutos, o descanso.
     /// Lo que recibió un "Ahora no" hace menos de 90 minutos no se vuelve a ofrecer todavía.
-    static func elegir(pendientes: [Tarea], puntaje: Double, eventos: [EventoDeEnergia],
+    static func elegir(pendientes: [Tarea], puntaje: Double, eventos: [Senal],
                        quiereAlgoIgual: Bool = false, ahora: Date = .now) -> Eleccion {
         guard !pendientes.isEmpty else { return .nadaPendiente }
 
         let rechazadas = Set(eventos
             .filter { $0.tipo == .ahoraNo && ahora.timeIntervalSince($0.fecha) < 90 * 60 }
-            .compactMap { $0.tarea?.persistentModelID })
+            .compactMap(\.tareaID))
         let calendario = Calendar.current
         let manana = calendario.startOfDay(for: ahora).addingTimeInterval(86_400)
         // Lo planeado para otro día no se propone hoy.
@@ -179,13 +179,13 @@ enum MotorDeEnergia {
     // MARK: Para las notificaciones (Fase 7)
 
     /// La hora del día con más energía según la curva base y lo aprendido.
-    static func mejorHora(persona: Persona, eventos: [EventoDeEnergia], ahora: Date = .now) -> Int {
+    static func mejorHora(persona: Persona, eventos: [Senal], ahora: Date = .now) -> Int {
         (0..<24).max { a, b in
             valor(a, persona, eventos, ahora) < valor(b, persona, eventos, ahora)
         } ?? Int(persona.horaPico)
     }
 
-    private static func valor(_ hora: Int, _ persona: Persona, _ eventos: [EventoDeEnergia], _ ahora: Date) -> Double {
+    private static func valor(_ hora: Int, _ persona: Persona, _ eventos: [Senal], _ ahora: Date) -> Double {
         curvaBase(hora: Double(hora) + 0.5, despertar: persona.horaDespertar,
                   pico: persona.horaPico, apagado: persona.horaApagado)
             + ajusteAprendido(franja: hora, eventos: eventos, ahora: ahora)
