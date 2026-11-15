@@ -97,11 +97,11 @@ struct UniversoView: View {
                         .scaleEffect(viajando ? 1.55 : 1)
                         .rotationEffect(.degrees(viajando ? -6 : 0))
 
-                    // Tu constelación: una estrellita por cada tarea terminada (encima de la nebulosa,
-                    // sin tocarla). No aparece en la presentación ni en el registro.
+                    // Cada tarea terminada es una estrella nueva en tu cielo (encima de la nebulosa,
+                    // sin tocarla). Nace de Lumi. No aparece en la presentación ni en el registro.
                     if let persona, !presentando, sesionAbierta {
-                        ConstelacionView(hechas: eventos.filter { $0.tipo == .tareaTerminada },
-                                         semilla: persona.semilla)
+                        EstrellasGanadas(hechas: eventos.filter { $0.tipo == .tareaTerminada },
+                                         semilla: persona.semilla, origen: centro)
                             .transition(.opacity)
                     }
 
@@ -156,6 +156,8 @@ struct UniversoView: View {
                 .animation(.easeInOut(duration: 2.6), value: semilla)
                 // La energía nunca salta: Lumi y el cielo cambian despacio.
                 .animation(.easeInOut(duration: 1.8), value: energia)
+                // Al ganar luz, Lumi se enciende despacio (cuando la estrella nueva ya salió de ella).
+                .animation(.easeInOut(duration: 2.4).delay(1.2), value: destelloDeHoy)
             }
             .ignoresSafeArea()
             .ignoresSafeArea(.keyboard)
@@ -372,15 +374,19 @@ struct UniversoView: View {
         Date.now.formatted(.iso8601.year().month().day())
     }
 
-    /// Lumi queda un poco más brillante el resto del día por cada tarea difícil terminada.
+    /// La luz que Lumi gana con lo que haces (Diaz: "nuestra estrella ilumina más").
+    /// Una parte es para siempre (crece despacio con todas las tareas terminadas y nunca baja) y otra
+    /// es del día: cada tarea de hoy suma, las difíciles más. Nunca se resta como castigo.
     private var destelloDeHoy: Double {
+        let total = eventos.filter { $0.tipo == .tareaTerminada }.count
+        let paraSiempre = min(Double(total) / 120, 0.35)
         let grandesHoy = eventos.filter {
             $0.tipo == .tareaTerminada && Calendar.current.isDateInToday($0.fecha)
                 && $0.tamano == .grande && !$0.conPrimerPaso
         }.count
         // Cada tarea terminada hoy suma luz; las difíciles, más. Nunca se resta.
         let hechasHoy = eventos.filter { $0.tipo == .tareaTerminada && Calendar.current.isDateInToday($0.fecha) }.count
-        return min(Double(grandesHoy) * 0.5 + Double(hechasHoy) * 0.14, 1)
+        return min(paraSiempre + Double(grandesHoy) * 0.4 + Double(hechasHoy) * 0.18, 1)
     }
 
     private func celebrar(_ nueva: Celebracion) {

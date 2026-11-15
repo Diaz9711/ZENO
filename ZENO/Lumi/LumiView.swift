@@ -21,9 +21,9 @@ struct LumiView: View, Animatable {
     var cuadros: Double = 60
 
     // Permite que la energía cambie poco a poco con `withAnimation`.
-    var animatableData: Double {
-        get { energia }
-        set { energia = newValue }
+    var animatableData: AnimatablePair<Double, Double> {
+        get { AnimatablePair(energia, destello) }
+        set { energia = newValue.first; destello = newValue.second }
     }
 
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
