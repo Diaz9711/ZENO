@@ -89,6 +89,10 @@ Pasos siguientes, uno por uno (Diaz pidió paso a paso, "razona bien", usar a Fa
 5. "Más premium, que la app tenga vida": sin efectos nuevos hasta que lo de arriba esté aprobado.
 - **No tocar** la estrella ni la nebulosa por defecto ni sus colores (Diaz lo repitió).
 
+## Web con movimiento y cielo (15 nov 2026, plan de Fable)
+- Web: titular palabra por palabra con brillo de oro, teléfono que llega y se inclina con el cursor, todo aparece al bajar (con respaldo para que nada quede invisible), barra fija con línea de progreso dorada, cielo con estrellas que titilan y una fugaz cada 14–22 s, gráfica que se dibuja sola, reflejo en botones y luz en el canto de las tarjetas. Sin desenfoque en las tarjetas (era lo que más frenaba). Con Reducir movimiento todo se ve quieto y completo.
+- App: +20 % de estrellas pequeñas en los dos cielos (pedido de Diaz) y el cielo negro negro de verdad: humo carbón y luz plateada (uniforme `negro` también quita los tintes violeta). Foto: `Comparaciones/estrellas-y-negro-real.jpg`.
+
 ## Arreglos rápidos para la App Store (15 nov 2026, revisados por Fable)
 - "Continuar con Apple" escondido (`Sesion.conApple = false`); la entrada es "Empezar" (o "Entrar" al volver) y "Crear una clave". Ajustes dice "Sin cuenta". Poner `true` cuando haya cuenta de pago y la capacidad activada.
 - Frase de Safren reescrita (app, catálogo y web): describe el estudio y dice que ZENO no es esa terapia.
