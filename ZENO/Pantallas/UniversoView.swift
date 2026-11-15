@@ -367,16 +367,6 @@ struct UniversoView: View {
                                     pedirAgregar: pedirAgregar,
                                     editando: $editando)
                             }
-                            // Encima y no debajo: si empujan el contenido, la barra se sale de la pantalla.
-                            .overlay(alignment: .top) {
-                                // Arriba a la derecha, pequeños y en columna: nunca encima de Lumi.
-                                VStack(alignment: .trailing, spacing: 4) {
-                                    botonesDePrueba(persona, puntaje: puntaje)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-                                .padding(.trailing, 18)
-                                .padding(.top, 4)
-                            }
                             EncabezadoDeHoy(nombre: persona.nombre, puntaje: puntaje)
                                 .padding(.horizontal, 22)
                                 .padding(.top, 6)
