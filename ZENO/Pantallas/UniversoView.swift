@@ -38,6 +38,9 @@ struct UniversoView: View {
     @State private var energiaDePrueba: Double?   // solo para probar (DEBUG)
     @State private var celebracion = Celebracion()
     @State private var celebraciones = 0
+    /// Cada toque a Lumi en Hoy: se hincha un poco y se asienta (Diaz echaba de menos que reaccionara).
+    /// Solo la reacción: no activa la voz ni ninguna acción (eso se quitó a su pedido el 14 nov).
+    @State private var caricias = 0
     @State private var vueltas = 0.0          // giros lentos de Lumi (tres tareas seguidas)
     @AppStorage("diaCalido") private var diaCalido = ""   // terminó algo con energía baja
     @State private var llegada = false        // al abrir, el universo se acerca
@@ -156,7 +159,28 @@ struct UniversoView: View {
                                 SpringKeyframe(CGSize(width: 1, height: 1), duration: 0.6, spring: .smooth)
                             }
                         }
+                        // Al tocarla: se hincha un poco, como si respirara hondo, y se asienta. Con Reducir
+                        // Movimiento solo vibra.
+                        .keyframeAnimator(initialValue: 1.0, trigger: caricias) { vista, escala in
+                            vista.scaleEffect(escala)
+                        } keyframes: { _ in
+                            KeyframeTrack {
+                                if reducirMovimiento {
+                                    LinearKeyframe(1.0, duration: 0.1)
+                                } else {
+                                    CubicKeyframe(1.07, duration: 0.22)
+                                    SpringKeyframe(0.98, duration: 0.30, spring: .smooth)
+                                    SpringKeyframe(1.0, duration: 0.55, spring: .smooth)
+                                }
+                            }
+                        }
                         .rotationEffect(.degrees(vueltas))
+                        // Solo el corazón de Lumi recibe el toque, y solo en Hoy.
+                        .contentShape(Circle().scale(0.42))
+                        .onTapGesture { caricias += 1 }
+                        .allowsHitTesting(enTarea && pagina == .hoy && hayLumi && !presentando)
+                        .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: caricias)
+                        .accessibilityLabel(Text("Lumi"))
                     }
                         .scaleEffect(hayLumi ? 1 : 0.04)
                         .opacity(hayLumi ? 1 : 0)

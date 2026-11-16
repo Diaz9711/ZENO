@@ -336,7 +336,8 @@ struct TareaDelMomentoView: View {
     /// así la pantalla sigue teniendo una sola acción principal.
     /// Con una tarea propuesta la tarjeta Ahora es alta: en iPhones bajos el campo no cabe (queda el "+").
     private var hayTareaPropuesta: Bool {
-        if case .tarea = eleccion { return true }
+        // Solo propuesta (no en marcha): en marcha el campo se esconde y sí sobra espacio.
+        if case .tarea = eleccion, enCurso == nil { return true }
         return false
     }
 
