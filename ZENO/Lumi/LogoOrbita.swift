@@ -250,9 +250,9 @@ struct ContenidoDelIcono: View {
             OOrbita(diametro: lado * 0.40, estilo: estilo)
                 .shadow(color: .black.opacity(0.45), radius: lado * 0.03)
         } else {
-            LogoOrbita(diseno: .laO, tamano: lado * 0.86, estiloO: estilo)
+            // Diaz eligió el logo 1 · ZENO, las cuatro letras (16 nov 2026). Antes: ZEN + la O-planeta (`.laO`).
+            LogoIdea(idea: .zeno, tamano: lado * 0.86)
                 .shadow(color: .black.opacity(0.45), radius: lado * 0.03)
-                .offset(x: -lado * 0.035)
         }
     }
 }
