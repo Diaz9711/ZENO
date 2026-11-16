@@ -750,7 +750,6 @@ private struct TareaTocable: View {
         VStack(alignment: .leading, spacing: 6) {
             // Los pasos de Divídemela son frases más largas: un poco más pequeñas, para que se lean enteras.
             Titular(texto: tarea.textoVisible, tamano: tarea.pasoDeAhora != nil ? .title : .largeTitle, alineacion: .leading)
-                .fixedSize(horizontal: false, vertical: true)
             if tarea.pasoDeAhora != nil {
                 Text("Paso de: \(tarea.titulo)")
                     .font(.zenoTexto(.footnote))

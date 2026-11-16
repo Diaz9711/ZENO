@@ -400,6 +400,9 @@ struct UniversoView: View {
                 // fuera de la pantalla: ahí empieza un poco más arriba (en el Pro Max, igual que siempre).
                 let inicioHoy = altoTotal * 0.405
                 ZStack(alignment: .bottom) {
+                    // La página nunca puede agrandar este espacio: así la barra queda siempre anclada
+                    // al fondo de la pantalla, aunque una tarea tenga un título largo (Diaz, 16 nov 2026).
+                    Group {
                     switch pagina {
                     case .hoy:
                         ZStack(alignment: .top) {
@@ -434,6 +437,8 @@ struct UniversoView: View {
                         AjustesView(persona: persona, eventos: eventos, arriba: altoTotal * 0.185 - arriba)
                             .transition(.pasoDePagina(sentido: sentido))
                     }
+                    }
+                    .frame(width: geo.size.width, height: geo.size.height, alignment: .top)
 
                     if !editando {
                         BarraZeno(pagina: Binding(get: { pagina }, set: { ir(a: $0) })) {
