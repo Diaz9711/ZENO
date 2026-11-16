@@ -321,6 +321,16 @@ struct UniversoView: View {
             Task(priority: .background) { await ServicioDeIA.compartido.refrescarFrases() }
             #if DEBUG
             DatosDeEjemplo.cargarSiHaceFalta(en: contexto, hayPersona: !personas.isEmpty)
+            // -probarCaptura YES: abre la vista previa de la captura por voz con tareas de ejemplo (para verla).
+            if UserDefaults.standard.bool(forKey: "probarCaptura") {
+                try? await Task.sleep(for: .seconds(1.5))
+                Hojas.compartidas.mostrar {
+                    HojaCaptura(tareas: [TareaCapturada(titulo: "Llamar al dentista", tamano: .chica,
+                                                        fecha: Calendar.current.date(byAdding: .day, value: 1, to: .now).flatMap { Calendar.current.date(bySettingHour: 17, minute: 0, second: 0, of: $0) }),
+                                         TareaCapturada(titulo: "Comprar pan", tamano: .chica),
+                                         TareaCapturada(titulo: "Terminar el informe del trabajo", tamano: .grande)], conIA: true)
+                }
+            }
             DatosDeEjemplo.cargarCielo(en: contexto)
             // Atajos para probar sin tocar: -formaDePrueba 0|1, -paginaInicial 0|1|2, -sinPresentacion YES.
             let ajustes = UserDefaults.standard

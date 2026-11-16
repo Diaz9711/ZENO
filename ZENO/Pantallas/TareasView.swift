@@ -240,8 +240,7 @@ struct TareaDelMomentoView: View {
                                             removal: .opacity.combined(with: .offset(y: -8))))
                 // Un botón visible y claro (pedido de Diaz): Empezar y, en marcha, Terminé. Solo tocar.
                 HStack(alignment: .center, spacing: 10) {
-                    BotonDeAhora(enMarcha: enMarcha,
-                                 minutos: Int(Aprendizaje.minutosPrevistos(tarea, eventos: eventos).rounded())) {
+                    BotonDeAhora(enMarcha: enMarcha) {
                         if enMarcha { terminar(tarea) } else { empezar(tarea) }
                     }
                     BotonTerciarioLujo(titulo: enMarcha ? "Dejarla para después" : "Ahora no") { ahoraNo(tarea) }
@@ -554,8 +553,16 @@ struct TareaDelMomentoView: View {
 
     /// Captura por voz (fase IA): de lo dicho a tareas, con vista previa. Si es una sola, queda en el campo.
     private func procesarDictado() {
+        // Las últimas palabras pueden llegar un instante después de dejar de escuchar.
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(0.7))
+            separarLoDicho()
+        }
+    }
+
+    private func separarLoDicho() {
         let dicho = limpio(frase)
-        guard !dicho.isEmpty else { return }
+        guard !dicho.isEmpty, modo == .agregar else { return }
         if Cuidado.suenaACrisis(dicho) {
             Hojas.compartidas.mostrar { VistaDeCuidado() }
             return

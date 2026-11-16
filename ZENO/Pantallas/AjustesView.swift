@@ -21,6 +21,8 @@ struct AjustesView: View {
     @State private var leyendo = false
     @State private var calidadNueva = CalidadVisual.nivel > 0.5
     @AppStorage(TonoDeCielo.clave) private var tonoDeCielo = TonoDeCielo.azulado
+    @AppStorage(DisenoDeBotonDeAhora.clave) private var disenoBoton = 0
+    @AppStorage("frasesIA") private var frasesIA = false
 
     var body: some View {
         let apariencia = AparienciaLumi(semilla: persona.semilla, cielo: tonoDeCielo)
@@ -237,6 +239,26 @@ struct AjustesView: View {
                             UserDefaults.standard.set(CalidadVisual.nivel, forKey: CalidadVisual.clave)
                         })) {
                             Text(verbatim: "Nueva calidad del cielo y Lumi").font(.zenoTexto(.subheadline))
+                        }
+                        .toggleStyle(InterruptorLujo())
+                        // El botón Empezar de Hoy: probar los diseños en vivo (Diaz elige).
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(verbatim: "Botón Empezar de Hoy").font(.zenoTexto(.subheadline, .medium))
+                            HStack(spacing: 6) {
+                                ForEach(DisenoDeBotonDeAhora.allCases, id: \.rawValue) { d in
+                                    Button { disenoBoton = d.rawValue } label: {
+                                        Text(verbatim: d.nombre.components(separatedBy: " · ").first ?? "")
+                                            .font(.zenoTexto(.caption, disenoBoton == d.rawValue ? .semibold : .regular))
+                                            .foregroundStyle(disenoBoton == d.rawValue ? Lujo.oro : Lujo.marfilSecundario)
+                                            .frame(width: 44, height: 32)
+                                            .background(Capsule().strokeBorder(disenoBoton == d.rawValue ? Lujo.oro : Lujo.marfil.opacity(0.15), lineWidth: 0.75))
+                                    }
+                                    .buttonStyle(EstiloLujo(conReflejo: false))
+                                }
+                            }
+                        }
+                        Toggle(isOn: $frasesIA) {
+                            Text(verbatim: "Frases de Chispa escritas por la IA").font(.zenoTexto(.subheadline))
                         }
                         .toggleStyle(InterruptorLujo())
                         // Fase IA: qué motor se usa ahora, el estado de cada uno y lo último generado.

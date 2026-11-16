@@ -647,103 +647,147 @@ struct IconoMicrofono: View {
 
 // MARK: - El botón de Hoy (Empezar / Terminé)
 
-/// El botón principal de la tarjeta Ahora. Diaz (16 nov 2026): "se ve súper genérico".
-/// Diseños para comparar con `-disenoBoton N` (0 = el de siempre). Solo en Hoy: el resto de la app no cambia.
-enum DisenoDeBotonDeAhora: Int {
-    case siempre, grabado, lineaFina, emblema, emblemaConMinutos
-    static var elegido: DisenoDeBotonDeAhora {
-        DisenoDeBotonDeAhora(rawValue: UserDefaults.standard.integer(forKey: "disenoBoton")) ?? .siempre
+/// El botón principal de la tarjeta Ahora. Diaz (16 nov 2026): "súper genérico… que no parezca hecho por IA,
+/// calidad y premium". Dos diseños de verdad distintos (consejo de Fable) y el de siempre; se cambian en vivo en
+/// Ajustes → Modo de prueba (`disenoBoton`). Solo en Hoy: el resto de la app no cambia.
+enum DisenoDeBotonDeAhora: Int, CaseIterable {
+    case siempre, metal, capsula
+    static let clave = "disenoBoton"
+    var nombre: String {
+        switch self { case .siempre: "0 · El de siempre"; case .metal: "A · Metal"; case .capsula: "B · Cápsula con flecha" }
     }
 }
 
 struct BotonDeAhora: View {
     let enMarcha: Bool
     var minutos: Int? = nil
-    var diseno: DisenoDeBotonDeAhora = .elegido
     let accion: () -> Void
+    @AppStorage(DisenoDeBotonDeAhora.clave) private var diseno = 0
     @State private var toques = 0
 
     var body: some View {
-        if diseno == .siempre {
+        switch DisenoDeBotonDeAhora(rawValue: diseno) ?? .siempre {
+        case .siempre:
             BotonPrimarioLujo(enMarcha ? "Terminé" : "Empezar", accion: accion)
-        } else {
-            Button {
-                toques += 1
-                accion()
-            } label: { etiqueta }
-                .buttonStyle(EstiloLujo(conReflejo: diseno != .lineaFina))
+        case .metal:
+            Button { toques += 1; accion() } label: { PlacaDeMetal(titulo: enMarcha ? "Terminé" : "Empezar") }
+                .buttonStyle(EstiloHundido())
+                .sensoryFeedback(.impact(weight: .medium, intensity: 0.55), trigger: toques)
+        case .capsula:
+            Button { toques += 1; accion() } label: { CapsulaConFlecha(titulo: enMarcha ? "Terminé" : "Empezar", enMarcha: enMarcha) }
+                .buttonStyle(EstiloHundido())
                 .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: toques)
         }
     }
+}
 
-    private var titulo: LocalizedStringKey { enMarcha ? "Terminé" : "Empezar" }
-    private var forma: RoundedRectangle { RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous) }
-
-    @ViewBuilder
-    private var etiqueta: some View {
-        switch diseno {
-        case .grabado:
-            // Placa grabada: la palabra en Fraunces (no en mayúsculas espaciadas) y una línea fina por dentro.
-            Text(titulo)
-                .font(.zenoTitulo(.title3, .regular))
-                .foregroundStyle(Lujo.tinta)
-                .frame(maxWidth: .infinity)
-                .frame(height: Lujo.altoBoton)
-                .background { fondoOro }
-                .overlay { forma.inset(by: 4).strokeBorder(Lujo.tinta.opacity(0.22), lineWidth: 0.6) }
-                .contentShape(forma)
-        case .lineaFina:
-            // Línea fina: cristal oscuro con un hilo de oro y la palabra en oro (como la pantalla bloqueada).
-            HStack(spacing: 8) {
-                Text(titulo)
-                    .font(.lujoEtiqueta(.footnote, .semibold))
-                    .versalitas(2.2)
-                    .foregroundStyle(Lujo.oro)
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: Lujo.altoBoton)
-            .background { forma.fill(Lujo.oro.opacity(0.08)) }
-            .overlay { forma.strokeBorder(LinearGradient(colors: [Lujo.oroLuz, Lujo.oro.opacity(0.55)], startPoint: .top, endPoint: .bottom), lineWidth: 1) }
-            .contentShape(forma)
-        case .emblema, .emblemaConMinutos:
-            // Emblema: una estrellita de cuatro puntas delante, que se vuelve el check al estar en marcha.
-            HStack(spacing: 10) {
-                ZStack {
-                    if enMarcha {
-                        TrazoDeCheck()
-                            .stroke(Lujo.tinta, style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
-                            .frame(width: 13, height: 10)
-                    } else {
-                        EstrellitaDeCuatro().fill(Lujo.tinta.opacity(0.85)).frame(width: 13, height: 13)
-                    }
-                }
-                .frame(width: 18)
-                Text(titulo)
-                    .font(.lujoEtiqueta(.footnote, .semibold))
-                    .versalitas(1.8)
-                    .foregroundStyle(Lujo.tinta)
-                if diseno == .emblemaConMinutos, let minutos, !enMarcha {
-                    Text(verbatim: "· \(minutos) min")
-                        .font(.zenoTexto(.footnote, .medium))
-                        .foregroundStyle(Lujo.tinta.opacity(0.62))
-                }
-            }
-            .lineLimit(1)
-            .minimumScaleFactor(0.8)
-            .frame(maxWidth: .infinity)
-            .frame(height: Lujo.altoBoton)
-            .background { fondoOro }
-            .contentShape(forma)
-        case .siempre:
-            EmptyView()
-        }
+/// Al presionar se hunde de verdad (baja y se aprieta), y vuelve con un resorte sin rebote.
+private struct EstiloHundido: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.975 : 1)
+            .offset(y: configuration.isPressed ? 1.5 : 0)
+            .brightness(configuration.isPressed ? -0.03 : 0)
+            .animation(.spring(response: 0.28, dampingFraction: 0.86), value: configuration.isPressed)
     }
+}
 
-    private var fondoOro: some View {
-        forma.fill(LinearGradient(colors: [Lujo.oroLuz, Lujo.oro, Lujo.oroHondo], startPoint: .top, endPoint: .bottom))
-            .overlay(alignment: .top) {
-                forma.strokeBorder(LinearGradient(colors: [.white.opacity(0.55), .white.opacity(0.0)], startPoint: .top, endPoint: .center), lineWidth: 0.75)
+/// A · Metal: una placa de oro cepillado con canto oscuro abajo (grosor), luz arriba y la palabra grabada
+/// (en Fraunces, con un hilo de luz debajo de cada letra, como el bajorrelieve).
+private struct PlacaDeMetal: View {
+    let titulo: LocalizedStringKey
+    @Environment(\.isEnabled) private var activo
+
+    var body: some View {
+        let forma = RoundedRectangle(cornerRadius: 15, style: .continuous)
+        ZStack {
+            // El canto: la placa tiene grosor (una franja más oscura asoma abajo).
+            forma.fill(Lujo.oroHondo.opacity(0.95)).offset(y: 2.5)
+            forma.fill(LinearGradient(stops: [.init(color: Color(red: 0.96, green: 0.90, blue: 0.75), location: 0),
+                                              .init(color: Lujo.oro, location: 0.45),
+                                              .init(color: Color(red: 0.78, green: 0.65, blue: 0.40), location: 1)],
+                                      startPoint: .top, endPoint: .bottom))
+            // Cepillado fino, como metal satinado.
+            Canvas { ctx, size in
+                var y: CGFloat = 0.5
+                var n = 0
+                while y < size.height {
+                    var l = Path(); l.move(to: CGPoint(x: 0, y: y)); l.addLine(to: CGPoint(x: size.width, y: y))
+                    ctx.stroke(l, with: .color(.white.opacity(n % 3 == 0 ? 0.07 : 0.03)), lineWidth: 0.5)
+                    y += 1.3; n += 1
+                }
             }
-            .shadow(color: Lujo.oroHondo.opacity(0.22), radius: 18, y: 10)
+            .clipShape(forma)
+            // Luz en el borde de arriba y sombra fina abajo (dentro de la placa).
+            forma.strokeBorder(LinearGradient(colors: [.white.opacity(0.7), .white.opacity(0), Lujo.oroHondo.opacity(0.6)],
+                                              startPoint: .top, endPoint: .bottom), lineWidth: 0.8)
+            // La palabra grabada: oscura, con un hilo de luz justo debajo.
+            ZStack {
+                Text(titulo).font(.zenoTitulo(.title3, .regular)).foregroundStyle(.white.opacity(0.45)).offset(y: 0.8)
+                Text(titulo).font(.zenoTitulo(.title3, .regular)).foregroundStyle(Color(red: 0.20, green: 0.15, blue: 0.08))
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: Lujo.altoBoton)
+        .shadow(color: .black.opacity(0.35), radius: 10, y: 6)
+        .opacity(activo ? 1 : 0.45)
+        .contentShape(forma)
+    }
+}
+
+/// B · Cápsula con flecha (del video de referencia de Diaz): una cápsula de luz marfil→oro con la palabra
+/// a la izquierda, en minúsculas, y un círculo oscuro con una flecha fina a la derecha. En marcha, la flecha es un check.
+private struct CapsulaConFlecha: View {
+    let titulo: LocalizedStringKey
+    let enMarcha: Bool
+    @Environment(\.isEnabled) private var activo
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Text(titulo)
+                .font(.zenoTexto(.callout, .semibold))
+                .foregroundStyle(Color(red: 0.14, green: 0.11, blue: 0.06))
+                .padding(.leading, 22)
+            Spacer(minLength: 8)
+            ZStack {
+                Circle().fill(Color(red: 0.11, green: 0.10, blue: 0.13))
+                Circle().strokeBorder(.white.opacity(0.10), lineWidth: 0.6)
+                if enMarcha {
+                    TrazoDeCheck()
+                        .stroke(Lujo.oroLuz, style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
+                        .frame(width: 14, height: 11)
+                        .transition(.scale(scale: 0.6).combined(with: .opacity))
+                } else {
+                    FlechaFina()
+                        .stroke(Lujo.oroLuz, style: StrokeStyle(lineWidth: 1.4, lineCap: .round, lineJoin: .round))
+                        .frame(width: 15, height: 12)
+                        .transition(.scale(scale: 0.6).combined(with: .opacity))
+                }
+            }
+            .frame(width: Lujo.altoBoton - 10, height: Lujo.altoBoton - 10)
+            .padding(.trailing, 5)
+            .animation(.spring(response: 0.35, dampingFraction: 0.85), value: enMarcha)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: Lujo.altoBoton)
+        .background {
+            Capsule().fill(LinearGradient(colors: [Color(red: 0.97, green: 0.94, blue: 0.86), Lujo.oroLuz, Lujo.oro],
+                                          startPoint: .leading, endPoint: .trailing))
+                .overlay(Capsule().strokeBorder(LinearGradient(colors: [.white.opacity(0.75), .white.opacity(0)], startPoint: .top, endPoint: .center), lineWidth: 0.8))
+                .shadow(color: Lujo.oro.opacity(0.30), radius: 16, y: 6)
+        }
+        .opacity(activo ? 1 : 0.45)
+        .contentShape(Capsule())
+    }
+}
+
+/// Una flecha fina hacia la derecha.
+struct FlechaFina: Shape {
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: r.minX, y: r.midY)); p.addLine(to: CGPoint(x: r.maxX, y: r.midY))
+        p.move(to: CGPoint(x: r.maxX - r.height * 0.5, y: r.minY)); p.addLine(to: CGPoint(x: r.maxX, y: r.midY))
+        p.addLine(to: CGPoint(x: r.maxX - r.height * 0.5, y: r.maxY))
+        return p
     }
 }

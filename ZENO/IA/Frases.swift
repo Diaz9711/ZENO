@@ -128,7 +128,10 @@ final class MemoriaDeFrases {
     func frase(_ c: CategoriaDeFrase, turno: String, idioma: Idioma) -> String {
         let clave = "\(c.rawValue)|\(turno)|\(idioma.rawValue)"
         if clave == claveActual { return fraseActual }
-        let opciones = deposito(c, idioma) + BancoDeFrases.frases(c, idioma)
+        // Las frases de la IA quedan apagadas hasta que Diaz las apruebe (algunas sonaban raras):
+        // por defecto, solo el banco escrito a mano. Ajustes → Modo de prueba las enciende (`frasesIA`).
+        let conIA = UserDefaults.standard.bool(forKey: "frasesIA")
+        let opciones = (conIA ? deposito(c, idioma) : []) + BancoDeFrases.frases(c, idioma)
         let usadas = Set(recientes.map { $0.lowercased() })
         let libres = opciones.filter { !usadas.contains($0.lowercased()) }
         let lista = libres.isEmpty ? opciones : libres
