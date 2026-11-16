@@ -247,6 +247,10 @@ struct UniversoView: View {
                 #if DEBUG
                 GaleriaDeAnillos()
                 #endif
+            } else if UserDefaults.standard.bool(forKey: "galeriaIdeasLogo") {
+                #if DEBUG
+                GaleriaDeIdeasDeLogo()
+                #endif
             } else if UserDefaults.standard.bool(forKey: "galeriaLogos") {
                 #if DEBUG
                 GaleriaDeLogos()

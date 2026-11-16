@@ -167,6 +167,8 @@ final class MemoriaDeFrases {
 extension ServicioDeIA {
     /// En segundo plano: si la IA local está, rellena un poco el depósito de cada momento.
     func refrescarFrases() async {
+        // Solo si las frases de la IA están encendidas (por defecto no): así no compite con el cielo al abrir.
+        guard UserDefaults.standard.bool(forKey: "frasesIA") || UserDefaults.standard.bool(forKey: "probarIA") else { return }
         let idioma = Idioma.actual
         let m = motor
         guard !(m is MotorSimple) else { return }

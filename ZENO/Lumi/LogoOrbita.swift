@@ -256,3 +256,156 @@ struct ContenidoDelIcono: View {
         }
     }
 }
+
+// MARK: - Ideas nuevas del logo (Diaz, 16 nov 2026): "que diga ZENO" o "ZEN y una órbita que lo rodee y se haga la O"
+
+enum IdeaDeLogo: Int, CaseIterable, Identifiable {
+    /// 0 · El de hoy: ZEN + la O-planeta.
+    case hoy
+    /// 1 · ZENO, las cuatro letras.
+    case zeno
+    /// 2a · La órbita rodea ZEN: el anillo entero es la O.
+    case zenDentro
+    /// 2b · Un trazo pasa por detrás de ZEN, sale por delante y se cierra en la O.
+    case zenCierra
+    var id: Int { rawValue }
+    var etiqueta: String {
+        switch self { case .hoy: "0"; case .zeno: "1"; case .zenDentro: "2a"; case .zenCierra: "2b" }
+    }
+}
+
+struct LogoIdea: View {
+    let idea: IdeaDeLogo
+    var tamano: CGFloat = 220
+
+    private var metal: LinearGradient {
+        LinearGradient(colors: [Lujo.marfil, Lujo.oroLuz, Lujo.oro], startPoint: .top, endPoint: .bottom)
+    }
+    /// Grosor del trazo de las letras de Bebas Neue a este tamaño (la órbita nunca es más fina: si no, desaparece en el ícono).
+    private var grosor: CGFloat { tamano * 0.30 * 0.11 }
+
+    var body: some View {
+        Group {
+            switch idea {
+            case .hoy: LogoOrbita(diseno: .laO, tamano: tamano, estiloO: .planeta)
+            case .zeno:
+                Text(verbatim: "ZENO")
+                    .font(.zenoMarca(tamano * 0.30))
+                    .tracking(tamano * 0.05)
+                    .padding(.leading, tamano * 0.05)
+                    .foregroundStyle(metal)
+            case .zenDentro: zenDentro
+            case .zenCierra: zenCierra
+            }
+        }
+        .frame(width: tamano, height: tamano * 0.5)
+        .accessibilityElement()
+        .accessibilityLabel(Text(verbatim: "ZENO"))
+    }
+
+    // 2a · La palabra ZEN dentro de un anillo ladeado: el anillo es la O (pasa por detrás arriba y por delante abajo).
+    private var zenDentro: some View {
+        let ancho = tamano * 0.92, alto = tamano * 0.40
+        return ZStack {
+            MitadDeElipse(inclinacion: -9, arriba: true)
+                .stroke(metal.opacity(0.55), style: StrokeStyle(lineWidth: grosor * 0.8, lineCap: .round))
+                .frame(width: ancho, height: alto)
+            Text(verbatim: "ZEN")
+                .font(.zenoMarca(tamano * 0.27))
+                .tracking(tamano * 0.045)
+                .padding(.leading, tamano * 0.045)
+                .foregroundStyle(metal)
+            MitadDeElipse(inclinacion: -9, arriba: false)
+                .stroke(metal, style: StrokeStyle(lineWidth: grosor, lineCap: .round))
+                .frame(width: ancho, height: alto)
+        }
+    }
+
+    // 2b · ZEN, y un trazo que pasa por detrás de las letras, vuelve por delante y se cierra en la O.
+    private var zenCierra: some View {
+        let letra = tamano * 0.30
+        let diametroO = letra * 0.74
+        return HStack(spacing: tamano * 0.035) {
+            Text(verbatim: "ZEN")
+                .font(.zenoMarca(letra))
+                .tracking(tamano * 0.05)
+                .foregroundStyle(metal)
+            Circle()
+                .strokeBorder(metal, lineWidth: grosor)
+                .frame(width: diametroO, height: diametroO)
+        }
+        .background {
+            GeometryReader { g in
+                // La órbita rodea ZEN y termina en el borde izquierdo de la O.
+                let finX = g.size.width - diametroO
+                MitadDeElipse(inclinacion: -6, arriba: true)
+                    .stroke(metal.opacity(0.5), style: StrokeStyle(lineWidth: grosor * 0.7, lineCap: .round))
+                    .frame(width: finX * 1.42 + diametroO * 0.5, height: g.size.height * 1.15)
+                    .position(x: finX * 0.5 + diametroO * 0.25, y: g.size.height * 0.52)
+            }
+        }
+        .overlay {
+            GeometryReader { g in
+                let finX = g.size.width - diametroO
+                MitadDeElipse(inclinacion: -6, arriba: false)
+                    .stroke(metal, style: StrokeStyle(lineWidth: grosor * 0.85, lineCap: .round))
+                    .frame(width: finX * 1.42 + diametroO * 0.5, height: g.size.height * 1.15)
+                    .position(x: finX * 0.5 + diametroO * 0.25, y: g.size.height * 0.52)
+            }
+        }
+    }
+}
+
+/// Media elipse ladeada (la de arriba va detrás de las letras; la de abajo, delante).
+private struct MitadDeElipse: Shape {
+    var inclinacion: Double
+    var arriba: Bool
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        let desde: Double = arriba ? .pi : 0
+        for i in 0...72 {
+            let a = desde + .pi * Double(i) / 72
+            let pt = CGPoint(x: r.midX + r.width / 2 * cos(a), y: r.midY + r.height / 2 * sin(a))
+            if i == 0 { p.move(to: pt) } else { p.addLine(to: pt) }
+        }
+        return p.applying(CGAffineTransform(translationX: -r.midX, y: -r.midY)
+            .concatenating(CGAffineTransform(rotationAngle: inclinacion * .pi / 180))
+            .concatenating(CGAffineTransform(translationX: r.midX, y: r.midY)))
+    }
+}
+
+#if DEBUG
+/// `-galeriaIdeasLogo YES`: las ideas nuevas en grande, como ícono (cielo azul y negro) y al tamaño de la cabecera de la web.
+struct GaleriaDeIdeasDeLogo: View {
+    var body: some View {
+        VStack(spacing: 14) {
+            ForEach(IdeaDeLogo.allCases) { idea in
+                HStack(spacing: 12) {
+                    Text(verbatim: idea.etiqueta)
+                        .font(.zenoTitulo(.title3)).foregroundStyle(Lujo.oro).frame(width: 30)
+                    icono(idea, lado: 128, negro: false)
+                    icono(idea, lado: 60, negro: false)
+                    icono(idea, lado: 60, negro: true)
+                    LogoIdea(idea: idea, tamano: 96)
+                        .frame(width: 96, height: 30)
+                    Spacer(minLength: 0)
+                }
+            }
+        }
+        .padding(.horizontal, 14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(red: 0.08, green: 0.09, blue: 0.13).ignoresSafeArea())
+    }
+
+    private func icono(_ idea: IdeaDeLogo, lado: CGFloat, negro: Bool) -> some View {
+        ZStack {
+            NebulosaView(apariencia: AparienciaLumi(semilla: Semilla(nombre: "lumi", anio: 2026, mes: 1, dia: 1), cielo: negro ? .negro : .azulado),
+                         energia: 0.45, calidez: 0.15, centro: .center)
+            LogoIdea(idea: idea, tamano: lado * 0.86)
+                .shadow(color: .black.opacity(0.45), radius: lado * 0.03)
+        }
+        .frame(width: lado, height: lado)
+        .clipShape(RoundedRectangle(cornerRadius: lado * 0.2237, style: .continuous))
+    }
+}
+#endif
