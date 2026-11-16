@@ -651,10 +651,14 @@ struct IconoMicrofono: View {
 /// calidad y premium". Dos diseños de verdad distintos (consejo de Fable) y el de siempre; se cambian en vivo en
 /// Ajustes → Modo de prueba (`disenoBoton`). Solo en Hoy: el resto de la app no cambia.
 enum DisenoDeBotonDeAhora: Int, CaseIterable {
-    case siempre, metal, capsula
+    case siempre, metal, capsula, emblema
     static let clave = "disenoBoton"
+    /// Diaz eligió el Emblema (16 nov 2026).
+    static let elegido = DisenoDeBotonDeAhora.emblema
     var nombre: String {
-        switch self { case .siempre: "0 · El de siempre"; case .metal: "A · Metal"; case .capsula: "B · Cápsula con flecha" }
+        switch self {
+        case .siempre: "0 · El de siempre"; case .metal: "A · Metal"; case .capsula: "B · Cápsula con flecha"; case .emblema: "E · Emblema"
+        }
     }
 }
 
@@ -662,11 +666,15 @@ struct BotonDeAhora: View {
     let enMarcha: Bool
     var minutos: Int? = nil
     let accion: () -> Void
-    @AppStorage(DisenoDeBotonDeAhora.clave) private var diseno = 0
+    @AppStorage(DisenoDeBotonDeAhora.clave) private var diseno = DisenoDeBotonDeAhora.elegido.rawValue
     @State private var toques = 0
 
     var body: some View {
-        switch DisenoDeBotonDeAhora(rawValue: diseno) ?? .siempre {
+        switch DisenoDeBotonDeAhora(rawValue: diseno) ?? .elegido {
+        case .emblema:
+            Button { toques += 1; accion() } label: { PlacaEmblema(titulo: enMarcha ? "Terminé" : "Empezar", enMarcha: enMarcha) }
+                .buttonStyle(EstiloHundido())
+                .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: toques)
         case .siempre:
             BotonPrimarioLujo(enMarcha ? "Terminé" : "Empezar", accion: accion)
         case .metal:
@@ -778,6 +786,66 @@ private struct CapsulaConFlecha: View {
         }
         .opacity(activo ? 1 : 0.45)
         .contentShape(Capsule())
+    }
+}
+
+/// E · Emblema (elegido por Diaz): el oro cepillado de siempre con una estrellita de cuatro puntas delante
+/// de la palabra; con la tarea en marcha, la estrellita se vuelve el check (con un giro suave).
+private struct PlacaEmblema: View {
+    let titulo: LocalizedStringKey
+    let enMarcha: Bool
+    @Environment(\.isEnabled) private var activo
+
+    var body: some View {
+        let forma = RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous)
+        HStack(spacing: 10) {
+            ZStack {
+                if enMarcha {
+                    TrazoDeCheck()
+                        .stroke(Lujo.tinta, style: StrokeStyle(lineWidth: 1.6, lineCap: .round, lineJoin: .round))
+                        .frame(width: 13, height: 10)
+                        .transition(.scale(scale: 0.5).combined(with: .opacity))
+                } else {
+                    EstrellitaDeCuatro()
+                        .fill(Lujo.tinta.opacity(0.85))
+                        .frame(width: 13, height: 13)
+                        .transition(.asymmetric(insertion: .scale(scale: 0.5).combined(with: .opacity),
+                                                removal: .scale(scale: 0.4).combined(with: .opacity)))
+                }
+            }
+            .frame(width: 16, height: 16)
+            .animation(.spring(response: 0.38, dampingFraction: 0.82), value: enMarcha)
+            Text(titulo)
+                .font(.lujoEtiqueta(.footnote, .semibold))
+                .versalitas(1.8)
+                .foregroundStyle(Lujo.tinta)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .contentTransition(.opacity)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: Lujo.altoBoton)
+        .background {
+            ZStack {
+                forma.fill(LinearGradient(colors: [Lujo.oroLuz, Lujo.oro, Lujo.oroHondo], startPoint: .top, endPoint: .bottom))
+                // El cepillado del oro de siempre.
+                Canvas { ctx, size in
+                    var y: CGFloat = 1
+                    while y < size.height {
+                        var l = Path(); l.move(to: CGPoint(x: 0, y: y)); l.addLine(to: CGPoint(x: size.width, y: y))
+                        ctx.stroke(l, with: .color(.white.opacity(y.truncatingRemainder(dividingBy: 3) < 1 ? 0.06 : 0.025)), lineWidth: 0.5)
+                        y += 1.5
+                    }
+                }
+                .clipShape(forma)
+            }
+            .shadow(color: Lujo.oroHondo.opacity(0.22), radius: 18, y: 10)
+        }
+        .overlay(alignment: .top) {
+            forma.strokeBorder(LinearGradient(colors: [.white.opacity(0.55), .white.opacity(0.0)], startPoint: .top, endPoint: .center), lineWidth: 0.75)
+        }
+        .opacity(activo ? 1 : 0.4)
+        .contentShape(forma)
     }
 }
 

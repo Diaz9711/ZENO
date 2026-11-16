@@ -317,6 +317,11 @@ struct UniversoView: View {
             } else {
                 withAnimation(.easeOut(duration: 5.0)) { llegada = true }
             }
+            // Diaz eligió el botón Emblema: se pone una vez, aunque antes probara otro en el Modo de prueba.
+            if !UserDefaults.standard.bool(forKey: "botonEmblemaElegido") {
+                UserDefaults.standard.set(DisenoDeBotonDeAhora.elegido.rawValue, forKey: DisenoDeBotonDeAhora.clave)
+                UserDefaults.standard.set(true, forKey: "botonEmblemaElegido")
+            }
             // Fase IA: si la IA del iPhone está, rellena en segundo plano las frases nuevas de Chispa.
             Task(priority: .background) { await ServicioDeIA.compartido.refrescarFrases() }
             #if DEBUG

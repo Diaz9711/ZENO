@@ -21,7 +21,7 @@ struct AjustesView: View {
     @State private var leyendo = false
     @State private var calidadNueva = CalidadVisual.nivel > 0.5
     @AppStorage(TonoDeCielo.clave) private var tonoDeCielo = TonoDeCielo.azulado
-    @AppStorage(DisenoDeBotonDeAhora.clave) private var disenoBoton = 0
+    @AppStorage(DisenoDeBotonDeAhora.clave) private var disenoBoton = DisenoDeBotonDeAhora.elegido.rawValue
     @AppStorage("frasesIA") private var frasesIA = false
 
     var body: some View {
