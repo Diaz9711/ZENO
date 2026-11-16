@@ -90,6 +90,8 @@ Pasos siguientes, uno por uno (Diaz pidió paso a paso, "razona bien", usar a Fa
 - **No tocar** la estrella ni la nebulosa por defecto ni sus colores (Diaz lo repitió).
 
 ## FASE IA (16 nov 2026, pedido de Diaz con un texto largo; plan revisado con Fable) — EN CURSO
+**Parte 1 HECHA (commit 67ce1ac) y probada en el iPhone de Diaz:** `-probarIA YES` dio todo PASS y la IA de Apple dividió tareas en español de verdad (p. ej. «Limpiar la cocina» → Abre el armario / Retira los platos sucios / …). Divídemela: Hoy → tocar a Chispa → "Divídemela" (o en la pregunta del primer paso). Hoja propia: editar, borrar, subir/bajar, añadir, guardar. Con pasos, Hoy dice "Paso 2 de 5" y "Terminé" pasa al siguiente; solo el último da la estrella. Probada la actualización sobre datos existentes (no se pierde nada). En el simulador de este Mac la IA dice "disponible" pero falla al generar → se usa la plantilla (bien). Ajustes → Modo de prueba muestra el motor y lo último generado.
+**Falta:** parte 2 (captura por voz → varias tareas con vista previa) y parte 3 (mensajes de Chispa que no se repiten, banco sin IA).
 Orden: (1) servicio de IA + "Divídemela" → instalar y que Diaz pruebe; (2) captura por voz con vista previa; (3) mensajes de Lumi sin repetir. Una parte a la vez.
 - Motor: Foundation Models de Apple (iOS 26+, dentro del iPhone). El iPhone de Diaz (16 Pro Max, iOS 27.2) puede; el simulador de este Mac (Intel) seguramente no → ahí solo se prueba la versión sin IA.
 - `ServicioDeIA` con un protocolo y tres motores: local (Foundation Models), simple (sin IA, siempre funciona) y nube (solo la "puerta": dice "no disponible", sin red ni claves; la privacidad publicada dice que no hay servidores).

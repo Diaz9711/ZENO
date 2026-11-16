@@ -49,6 +49,11 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 - El widget y el anillo hablan en el idioma elegido en ZENO (`FotoDeZeno.idioma`, `AtributosDelAnillo.idioma`). Siri y los nombres de los atajos siguen el idioma del iPhone (iOS no deja cambiarlo).
 - **Siri y botón de Acción** (`Atajos/AtajosDeZeno.swift`): "Agrega una tarea a ZENO" (Siri pregunta cuál, porque las frases no admiten texto libre) y "Escribe una tarea en ZENO" (abre la escritura saltando la presentación; sirve para Ajustes → Botón de Acción → Atajo). Frases en `AppShortcuts.xcstrings`. Prueba DEBUG: `-probarSiri "texto"`.
 
+## IA (fase IA, 16 nov 2026)
+- `ZENO/IA/ServicioDeIA.swift`: un protocolo `MotorDeIA` y tres motores: `MotorLocal` (Foundation Models de Apple, iOS 26+, dentro del iPhone), `MotorSimple` (sin IA, siempre funciona) y `MotorEnLaNube` (solo la puerta, apagado: ZENO no tiene servidores). Todo resultado se valida en código y, si falla, se usa la versión sin IA. El cerebro de energía NO usa IA.
+- "Divídemela" (`IA/HojaDividir.swift`): pasos de unos 5 min en `Tarea.pasosCrudo`/`pasoActual`; "Terminé" pasa de paso con `AccionesDeTarea.completarPaso`; una estrella por tarea. Crisis: `Cuidado.suenaACrisis` en código antes de cualquier motor, mensaje amable sin teléfonos inventados.
+- Prueba: `-probarIA YES` (PASS/FAIL en consola, también en el iPhone). Nunca código de IA en `Compartido/` (lo enlazaría el widget).
+
 ## Código
 - Nombres en español, sin acentos ni ñ en nombres de archivos y tipos (`EventoDeEnergia`, `TamanoDeTarea`).
 - La carpeta `ZENO/` se sincroniza sola con Xcode: un archivo nuevo ahí ya forma parte de la app.
