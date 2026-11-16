@@ -428,7 +428,8 @@ enum CuandoEsTuHora {
         let hora = Calendar.current.component(.hour, from: ahora)
         if hora == mejor { return Idioma.texto("Es ahora") }
         if mejor > hora { return Idioma.texto("En \(mejor - hora) h") }
-        return Idioma.texto("Mañana otra vez")
+        // Ya pasó: sin "otra vez" (podía leerse como que se perdió). Solo dice que es su hora de cada día.
+        return Idioma.texto("Cada día")
     }
 }
 
@@ -467,20 +468,30 @@ struct EstrellitaDeCuatro: Shape {
     }
 }
 
-/// Tu curva de energía del día, pequeña: la misma de ZENO (curva base), con tu mejor hora en oro
-/// y una marca fina donde está el día ahora. Se dibuja una vez (sin animación por cuadro).
+/// Tu curva de energía del día, pequeña: las mismas 24 horas con las que ZENO elige tu mejor hora
+/// (curva base + lo aprendido), con esa hora en oro y una marca fina donde está el día ahora.
+/// Se dibuja una vez (sin animación por cuadro).
 struct CurvaDelDia: View {
-    let despertar: Double, pico: Double, apagado: Double
+    let valores: [Double]
     let mejorHora: Int
 
     var body: some View {
         Canvas { ctx, size in
-            func punto(_ h: Double) -> CGPoint {
-                let v = MotorDeEnergia.curvaBase(hora: h, despertar: despertar, pico: pico, apagado: apagado)
-                return CGPoint(x: size.width * h / 24, y: size.height - 2 - (size.height - 6) * v / 100)
+            guard valores.count == 24 else { return }
+            let tope = max(valores.max() ?? 100, 1)
+            func punto(_ h: Int) -> CGPoint {
+                CGPoint(x: size.width * (Double(h) + 0.5) / 24,
+                        y: size.height - 2 - (size.height - 6) * max(valores[h], 0) / tope)
             }
             var linea = Path()
-            for i in 0...96 { let p = punto(Double(i) / 4); i == 0 ? linea.move(to: p) : linea.addLine(to: p) }
+            linea.move(to: CGPoint(x: 0, y: punto(0).y))
+            for h in 0..<24 {
+                let p = punto(h)
+                let anterior = h == 0 ? CGPoint(x: 0, y: p.y) : punto(h - 1)
+                let medio = CGPoint(x: (anterior.x + p.x) / 2, y: (anterior.y + p.y) / 2)
+                linea.addQuadCurve(to: medio, control: anterior)
+                if h == 23 { linea.addQuadCurve(to: CGPoint(x: size.width, y: p.y), control: p) }
+            }
             var area = linea
             area.addLine(to: CGPoint(x: size.width, y: size.height)); area.addLine(to: CGPoint(x: 0, y: size.height)); area.closeSubpath()
             ctx.fill(area, with: .linearGradient(Gradient(colors: [Lujo.oro.opacity(0.22), Lujo.oro.opacity(0)]),
@@ -489,7 +500,7 @@ struct CurvaDelDia: View {
             let ahora = CGFloat(Cielo.horaActual()) / 24 * size.width
             var marca = Path(); marca.move(to: CGPoint(x: ahora, y: 0)); marca.addLine(to: CGPoint(x: ahora, y: size.height))
             ctx.stroke(marca, with: .color(Lujo.marfil.opacity(0.35)), style: StrokeStyle(lineWidth: 0.75, dash: [2, 3]))
-            let m = punto(Double(mejorHora) + 0.5)
+            let m = punto(min(max(mejorHora, 0), 23))
             ctx.fill(Path(ellipseIn: CGRect(x: m.x - 3, y: m.y - 3, width: 6, height: 6)), with: .color(Lujo.oro))
         }
     }

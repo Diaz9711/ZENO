@@ -178,6 +178,12 @@ enum MotorDeEnergia {
 
     // MARK: Para las notificaciones (Fase 7)
 
+    /// Las 24 horas del día con su energía (curva base + lo aprendido): la misma cuenta que `mejorHora`,
+    /// para dibujar la curva pequeña de Hoy sin que el punto de oro quede fuera de su cima.
+    static func horasDelDia(persona: Persona, eventos: [Senal], ahora: Date = .now) -> [Double] {
+        (0..<24).map { valor($0, persona, eventos, ahora) }
+    }
+
     /// La hora del día con más energía según la curva base y lo aprendido.
     static func mejorHora(persona: Persona, eventos: [Senal], ahora: Date = .now) -> Int {
         (0..<24).max { a, b in

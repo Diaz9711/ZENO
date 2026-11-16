@@ -20,6 +20,9 @@ struct TareaDelMomentoView: View {
     var mejorHora: Int = 12
     /// Cambia cada vez que se toca el "+" de la barra.
     var pedirAgregar: Int = 0
+    /// iPhone más bajo que el Pro Max: no cabe todo, así que el campo de escribir se queda en el "+"
+    /// de la barra (hace lo mismo) y la barra nunca queda fuera de la pantalla.
+    var compacto = false
     /// Avisa cuando se está escribiendo, para esconder la barra.
     @Binding var editando: Bool
 
@@ -30,8 +33,15 @@ struct TareaDelMomentoView: View {
     private var pendientes: [Tarea]
     @Query private var personas: [Persona]
     /// Qué va en la parte baja de las tarjetas Hoy y Tu mejor hora (Diaz: "que no esté tan vacío").
-    /// 0 = como antes · 1 Estrellas y reloj · 2 Estrellas y curva · 3 Frases. Para comparar: `-disenoMedianas N`.
-    private var disenoMedianas: Int { UserDefaults.standard.integer(forKey: "disenoMedianas") }
+    /// Elegido (Fable, con permiso de Diaz, 15 nov 2026): 2 · Estrellas y curva. Para comparar en pruebas:
+    /// `-disenoMedianas 0|1|3` (0 = como antes, 1 Estrellas y reloj, 3 Frases).
+    private var disenoMedianas: Int {
+        #if DEBUG
+        if let n = UserDefaults.standard.object(forKey: "disenoMedianas") as? Int { return n }
+        if let t = UserDefaults.standard.string(forKey: "disenoMedianas"), let n = Int(t) { return n }
+        #endif
+        return 2
+    }
 
     @State private var modo = Modo.ver
     @State private var frase = ""
@@ -119,7 +129,7 @@ struct TareaDelMomentoView: View {
             tarjetaDeAhora
                 .aparece(2)
 
-            if mostrarCampoRapido {
+            if mostrarCampoRapido && !compacto {
                 CampoRapido { abrirAgregar() }
                     .aparece(3)
             }
@@ -140,7 +150,7 @@ struct TareaDelMomentoView: View {
         }
         .padding(.horizontal, 22)
         Spacer()
-            .frame(minHeight: 96)      // deja sitio a la barra
+            .frame(minHeight: 72)      // deja sitio a la barra (alta ~70 pt)
     }
 
     /// Qué ve el cohete ahora mismo, para decir su frase.
@@ -233,7 +243,7 @@ struct TareaDelMomentoView: View {
 
     /// Mediana izquierda: lo hecho hoy. Solo progreso; sin ceros que parezcan deuda.
     private var tarjetaDelDia: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             EtiquetaLujo("Hoy")
             if hechasHoy.isEmpty {
                 Text("Lo pequeño suma.")
@@ -274,7 +284,8 @@ struct TareaDelMomentoView: View {
             }
         }
         .animation(Lujo.curva(), value: hechasHoy.count)
-        .padding(18)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 15)
         .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
         .tarjetaLujo()
         .accessibilityElement(children: .combine)
@@ -282,22 +293,27 @@ struct TareaDelMomentoView: View {
 
     /// Mediana derecha: la mejor hora, aprendida de la persona.
     private var tarjetaDeMejorHora: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             EtiquetaLujo("Tu mejor hora")
-            Text(verbatim: "\(mejorHora):00")
-                .font(.zenoTitulo(.largeTitle, .light))
-                .foregroundStyle(Lujo.marfil)
-                .contentTransition(.numericText())
-            if disenoMedianas != 0 {
-                Text(CuandoEsTuHora.texto(mejorHora))
-                    .font(.zenoTexto(.caption))
-                    .foregroundStyle(Lujo.marfilSecundario)
+            // La hora y, a su lado (misma línea, para no alargar la tarjeta), cuándo llega.
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(verbatim: "\(mejorHora):00")
+                    .font(.zenoTitulo(.largeTitle, .light))
+                    .foregroundStyle(Lujo.marfil)
+                    .contentTransition(.numericText())
+                if disenoMedianas != 0 {
+                    Text(CuandoEsTuHora.texto(mejorHora))
+                        .font(.zenoTexto(.caption))
+                        .foregroundStyle(Lujo.marfilSecundario)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
             }
             Spacer(minLength: 0)
             if disenoMedianas == 2, let persona = personas.first {
-                CurvaDelDia(despertar: persona.horaDespertar, pico: persona.horaPico,
-                            apagado: persona.horaApagado, mejorHora: mejorHora)
-                    .frame(height: 34)
+                let _ = Memoria.compartida.cerebro(persona: persona, senales: eventos, ahora: .now)
+                CurvaDelDia(valores: Memoria.compartida.horasGuardadas, mejorHora: mejorHora)
+                    .frame(height: 22)
                     .accessibilityHidden(true)
             } else {
                 PuntoDelDia(hora: mejorHora, conAhora: disenoMedianas != 0)
@@ -305,7 +321,8 @@ struct TareaDelMomentoView: View {
                     .accessibilityHidden(true)
             }
         }
-        .padding(18)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 15)
         .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
         .tarjetaLujo()
         .accessibilityElement(children: .combine)

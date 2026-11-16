@@ -89,6 +89,11 @@ Pasos siguientes, uno por uno (Diaz pidió paso a paso, "razona bien", usar a Fa
 5. "Más premium, que la app tenga vida": sin efectos nuevos hasta que lo de arriba esté aprobado.
 - **No tocar** la estrella ni la nebulosa por defecto ni sus colores (Diaz lo repitió).
 
+## Tarjetas Hoy y Tu mejor hora (15 nov 2026, Fable eligió por Diaz)
+- Opción 2 · Estrellas y curva (foto `Comparaciones/hoy-tarjetas-opciones.jpg`). Las otras con `-disenoMedianas 0|1|3` (solo en pruebas).
+- Arreglo de paso: en iPhones más bajos que el Pro Max la barra de abajo quedaba fuera de la pantalla en Hoy (ya pasaba antes). Ahora ahí el campo "Escribe una tarea…" no se muestra (el "+" de la barra hace lo mismo), y las tarjetas son un poco más compactas. Medido en 17 Pro y 17 Pro Max.
+- La presentación al abrir tiene también las estrellas nuevas: Fable aconsejó no separarla (si no, aparecerían estrellas de golpe al pasar a Hoy).
+
 ## Web con movimiento y cielo (15 nov 2026, plan de Fable)
 - Web: titular palabra por palabra con brillo de oro, teléfono que llega y se inclina con el cursor, todo aparece al bajar (con respaldo para que nada quede invisible), barra fija con línea de progreso dorada, cielo con estrellas que titilan y una fugaz cada 14–22 s, gráfica que se dibuja sola, reflejo en botones y luz en el canto de las tarjetas. Sin desenfoque en las tarjetas (era lo que más frenaba). Con Reducir movimiento todo se ve quieto y completo.
 - App: +20 % de estrellas pequeñas en los dos cielos (pedido de Diaz) y el cielo negro negro de verdad: humo carbón y luz plateada (uniforme `negro` también quita los tintes violeta). Foto: `Comparaciones/estrellas-y-negro-real.jpg`.

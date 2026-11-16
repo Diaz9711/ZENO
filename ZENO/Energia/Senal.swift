@@ -98,6 +98,9 @@ final class Memoria {
         return resumenGuardado
     }
 
+    /// La energía de cada hora (para la curva de Hoy), calculada junto con el cerebro.
+    private(set) var horasGuardadas: [Double] = []
+
     func cerebro(persona: Persona, senales: [Senal], ahora: Date) -> (puntaje: Double, mejorHora: Int) {
         let c = Clave(cuantos: senales.count, ultima: senales.last?.fecha,
                       minuto: Int(ahora.timeIntervalSinceReferenceDate / 60),
@@ -105,6 +108,7 @@ final class Memoria {
         if c != clave {
             puntajeGuardado = MotorDeEnergia.puntaje(persona: persona, eventos: senales, ahora: ahora)
             mejorHoraGuardada = MotorDeEnergia.mejorHora(persona: persona, eventos: senales, ahora: ahora)
+            horasGuardadas = MotorDeEnergia.horasDelDia(persona: persona, eventos: senales, ahora: ahora)
             clave = c
         }
         return (puntajeGuardado, mejorHoraGuardada)

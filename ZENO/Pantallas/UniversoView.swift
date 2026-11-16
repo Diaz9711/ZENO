@@ -372,23 +372,27 @@ struct UniversoView: View {
                 // Lumi se dibuja a pantalla completa; aquí se descuenta el margen de arriba.
                 let arriba = geo.safeAreaInsets.top
                 let altoTotal = geo.size.height + arriba + geo.safeAreaInsets.bottom
+                // En iPhones más bajos que el Pro Max el contenido de Hoy no cabía y empujaba la barra
+                // fuera de la pantalla: ahí empieza un poco más arriba (en el Pro Max, igual que siempre).
+                let inicioHoy = altoTotal * 0.405
                 ZStack(alignment: .bottom) {
                     switch pagina {
                     case .hoy:
                         ZStack(alignment: .top) {
                             HojaDeFondo()
-                                .padding(.top, altoTotal * 0.405 - arriba - 18)
+                                .padding(.top, inicioHoy - arriba - 18)
                                 .aparece(1)
                             VStack(spacing: 0) {
                                 TareaDelMomentoView(
                                     centroDeLumi: CGPoint(x: geo.size.width / 2, y: altoTotal * 0.245 - arriba),
-                                    inicioDelContenido: altoTotal * 0.405 - arriba,
+                                    inicioDelContenido: inicioHoy - arriba,
                                     escuchando: $escuchando,
                                     puntaje: puntaje,
                                     eventos: eventos,
                                     alTerminar: celebrar,
                                     mejorHora: Memoria.compartida.cerebro(persona: persona, senales: eventos, ahora: ahora).mejorHora,
                                     pedirAgregar: pedirAgregar,
+                                    compacto: altoTotal < 900,
                                     editando: $editando)
                             }
                             EncabezadoDeHoy(nombre: persona.nombre, puntaje: puntaje)

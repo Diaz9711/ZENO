@@ -54,12 +54,12 @@
         }
       }
     },
-    "Mañana otra vez" : {
+    "Cada día" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Again tomorrow"
+            "value" : "Every day"
           }
         }
       }
