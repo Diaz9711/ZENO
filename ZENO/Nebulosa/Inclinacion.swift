@@ -30,6 +30,10 @@ final class Inclinacion {
         sensor.stopDeviceMotionUpdates()
     }
 
+    /// La última inclinación ya suavizada, sin recalcular nada (para quien solo mira, como el brillo
+    /// del botón Empezar). No enciende ni apaga el sensor: eso lo hace el cielo.
+    var ultima: CGPoint { suave }
+
     /// Se llama una vez por cuadro. Devuelve el valor ya suavizado.
     func leer() -> CGPoint {
         guard let postura = sensor.deviceMotion?.attitude else { return suave }

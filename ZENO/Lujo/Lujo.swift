@@ -668,11 +668,18 @@ struct BotonDeAhora: View {
     let accion: () -> Void
     @AppStorage(DisenoDeBotonDeAhora.clave) private var diseno = DisenoDeBotonDeAhora.elegido.rawValue
     @State private var toques = 0
+    /// Mientras la placa gira no se aceptan toques (un doble toque terminaría la tarea sin querer).
+    @State private var ultimoToque = Date.distantPast
 
     var body: some View {
         switch DisenoDeBotonDeAhora(rawValue: diseno) ?? .elegido {
         case .emblema:
-            Button { toques += 1; accion() } label: { PlacaEmblema(titulo: enMarcha ? "Terminé" : "Empezar", enMarcha: enMarcha) }
+            Button {
+                guard Date.now.timeIntervalSince(ultimoToque) > 0.9 else { return }
+                ultimoToque = .now
+                toques += 1
+                accion()
+            } label: { EmblemaAnimado(enMarcha: enMarcha) }
                 .buttonStyle(EstiloHundido())
                 .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: toques)
         case .siempre:
@@ -695,6 +702,8 @@ private struct EstiloHundido: ButtonStyle {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.975 : 1)
             .offset(y: configuration.isPressed ? 1.5 : 0)
+            // Al presionar, la placa se inclina un poco hacia adentro, como una tecla física.
+            .rotation3DEffect(.degrees(configuration.isPressed ? 7 : 0), axis: (x: 1, y: 0, z: 0), perspective: 0.5)
             .brightness(configuration.isPressed ? -0.03 : 0)
             .animation(.spring(response: 0.28, dampingFraction: 0.86), value: configuration.isPressed)
     }
@@ -846,6 +855,155 @@ private struct PlacaEmblema: View {
         }
         .opacity(activo ? 1 : 0.4)
         .contentShape(forma)
+    }
+}
+
+/// La placa Emblema con su animación 3D (Diaz: "algo único, increíble"; plan de Fable):
+/// - Al empezar, la placa da media vuelta sobre su eje y en el reverso aparecen el check y "Terminé";
+///   al asentarse, una sola banda de luz cruza el metal.
+/// - El brillo del metal se mueve cuando se inclina el iPhone, como el oro de verdad (nunca en bucle).
+/// - Con Reducir Movimiento: sin giro, solo el cambio.
+private struct EmblemaAnimado: View {
+    let enMarcha: Bool
+    @State private var giro: Double = 0
+    @State private var destello = 0
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+
+    var body: some View {
+        let fijo = ProcessInfo.processInfo.arguments.contains("-giroEmblema")
+            ? UserDefaults.standard.double(forKey: "giroEmblema") * 180 : nil
+        PlacaGiratoria(giro: fijo ?? giro, destello: destello, quieto: reducirMovimiento)
+            .onAppear { giro = enMarcha ? 180 : 0 }
+            .onChange(of: enMarcha) { _, nuevo in
+                if reducirMovimiento { giro = nuevo ? 180 : 0; return }
+                if nuevo {
+                    withAnimation(.spring(response: 0.78, dampingFraction: 0.74)) { giro = 180 }
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .seconds(0.42))
+                        destello += 1
+                    }
+                } else {
+                    // De vuelta (paso siguiente u "Ahora no"): un giro corto y callado.
+                    withAnimation(.easeInOut(duration: 0.42)) { giro = 0 }
+                }
+            }
+    }
+}
+
+private struct PlacaGiratoria: View, Animatable {
+    var giro: Double
+    let destello: Int
+    let quieto: Bool
+    var animatableData: Double { get { giro } set { giro = newValue } }
+
+    var body: some View {
+        let reverso = giro > 90
+        let forma = RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous)
+        ZStack {
+            FondoDeOroCepillado(forma: forma)
+            BrilloSegunInclinacion(forma: forma, apagado: quieto)
+            BandaDeLuz(forma: forma, disparo: destello)
+            CaraDeEmblema(reverso: reverso)
+                // El reverso se da vuelta otra vez para que no se lea al revés.
+                .rotation3DEffect(.degrees(reverso ? 180 : 0), axis: (x: 1, y: 0, z: 0))
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: Lujo.altoBoton)
+        .overlay(alignment: .top) {
+            forma.strokeBorder(LinearGradient(colors: [.white.opacity(0.55), .white.opacity(0.0)], startPoint: .top, endPoint: .center), lineWidth: 0.75)
+        }
+        // La placa entera gira sobre su eje horizontal, con perspectiva.
+        .rotation3DEffect(.degrees(giro), axis: (x: 1, y: 0, z: 0), perspective: 0.55)
+        .shadow(color: Lujo.oroHondo.opacity(0.22), radius: 18, y: 10)
+        .contentShape(forma)
+    }
+}
+
+private struct CaraDeEmblema: View {
+    let reverso: Bool
+    var body: some View {
+        HStack(spacing: 10) {
+            Group {
+                if reverso {
+                    TrazoDeCheck()
+                        .stroke(Lujo.tinta, style: StrokeStyle(lineWidth: 1.6, lineCap: .round, lineJoin: .round))
+                        .frame(width: 13, height: 10)
+                } else {
+                    EstrellitaDeCuatro().fill(Lujo.tinta.opacity(0.85)).frame(width: 13, height: 13)
+                }
+            }
+            .frame(width: 16, height: 16)
+            Text(reverso ? "Terminé" : "Empezar")
+                .font(.lujoEtiqueta(.footnote, .semibold))
+                .versalitas(1.8)
+                .foregroundStyle(Lujo.tinta)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+    }
+}
+
+/// El oro cepillado de siempre (el mismo del botón primario).
+private struct FondoDeOroCepillado: View {
+    let forma: RoundedRectangle
+    var body: some View {
+        ZStack {
+            forma.fill(LinearGradient(colors: [Lujo.oroLuz, Lujo.oro, Lujo.oroHondo], startPoint: .top, endPoint: .bottom))
+            Canvas { ctx, size in
+                var y: CGFloat = 1
+                while y < size.height {
+                    var l = Path(); l.move(to: CGPoint(x: 0, y: y)); l.addLine(to: CGPoint(x: size.width, y: y))
+                    ctx.stroke(l, with: .color(.white.opacity(y.truncatingRemainder(dividingBy: 3) < 1 ? 0.06 : 0.025)), lineWidth: 0.5)
+                    y += 1.5
+                }
+            }
+            .clipShape(forma)
+        }
+    }
+}
+
+/// El brillo del metal sigue la inclinación del iPhone (lee el sensor del cielo, sin encenderlo).
+/// Vista aparte: solo ella se redibuja (30 veces por segundo), no la pantalla de Hoy.
+private struct BrilloSegunInclinacion: View {
+    let forma: RoundedRectangle
+    let apagado: Bool
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: apagado || ModoAhorro.compartido.activo)) { _ in
+            let t = Inclinacion.compartida.ultima
+            GeometryReader { geo in
+                RadialGradient(colors: [.white.opacity(0.30), .white.opacity(0)],
+                               center: UnitPoint(x: 0.5 + t.x * 0.45, y: 0.2 + t.y * 0.35),
+                               startRadius: 0, endRadius: geo.size.width * 0.38)
+                    .blendMode(.softLight)
+            }
+            .clipShape(forma)
+        }
+        .allowsHitTesting(false)
+    }
+}
+
+/// Una sola banda de luz que cruza el metal cuando la placa se asienta.
+private struct BandaDeLuz: View {
+    let forma: RoundedRectangle
+    let disparo: Int
+    var body: some View {
+        GeometryReader { geo in
+            LinearGradient(colors: [.white.opacity(0), .white.opacity(0.55), .white.opacity(0)], startPoint: .leading, endPoint: .trailing)
+                .frame(width: geo.size.width * 0.28)
+                .rotationEffect(.degrees(18))
+                .keyframeAnimator(initialValue: -0.4, trigger: disparo) { vista, x in
+                    vista.offset(x: geo.size.width * x)
+                } keyframes: { _ in
+                    KeyframeTrack {
+                        LinearKeyframe(-0.4, duration: 0.01)
+                        CubicKeyframe(1.3, duration: 0.85)
+                    }
+                }
+                .frame(maxHeight: .infinity)
+        }
+        .clipShape(forma)
+        .opacity(disparo == 0 ? 0 : 1)
+        .allowsHitTesting(false)
     }
 }
 
