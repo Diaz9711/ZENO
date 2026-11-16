@@ -129,16 +129,20 @@ struct TareaDelMomentoView: View {
             tarjetaDeAhora
                 .aparece(2)
 
-            if mostrarCampoRapido && !compacto {
+            if mostrarCampoRapido && !(compacto && hayTareaPropuesta) {
                 CampoRapido { abrirAgregar() }
                     .aparece(3)
             }
 
+            // Las dos tarjetas se estiran con el espacio que sobra (sin tareas, en marcha, en descanso),
+            // así abajo no queda un hueco vacío; con una tarea propuesta quedan en su mínimo (Fable).
             HStack(alignment: .top, spacing: 12) {
                 tarjetaDelDia.aparece(4)
                 tarjetaDeMejorHora.aparece(5)
             }
-            .fixedSize(horizontal: false, vertical: true)
+            .frame(minHeight: 128, maxHeight: hayTareaPropuesta ? nil : 184)
+            // Con una tarea propuesta no sobra espacio: tamaño justo, como antes.
+            .fixedSize(horizontal: false, vertical: hayTareaPropuesta)
 
             if let aviso = dictado.aviso {
                 Text(aviso)
@@ -149,8 +153,8 @@ struct TareaDelMomentoView: View {
             }
         }
         .padding(.horizontal, 22)
-        Spacer()
-            .frame(minHeight: 72)      // deja sitio a la barra (alta ~70 pt)
+        Color.clear
+            .frame(height: 72)         // deja sitio a la barra (alta ~70 pt); lo que sobra lo toman las tarjetas
     }
 
     /// Qué ve el cohete ahora mismo, para decir su frase.
@@ -286,7 +290,7 @@ struct TareaDelMomentoView: View {
         .animation(Lujo.curva(), value: hechasHoy.count)
         .padding(.horizontal, 18)
         .padding(.vertical, 15)
-        .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
+        .frame(maxWidth: .infinity, minHeight: 128, maxHeight: .infinity, alignment: .topLeading)
         .tarjetaLujo()
         .accessibilityElement(children: .combine)
     }
@@ -313,7 +317,7 @@ struct TareaDelMomentoView: View {
             if disenoMedianas == 2, let persona = personas.first {
                 let _ = Memoria.compartida.cerebro(persona: persona, senales: eventos, ahora: .now)
                 CurvaDelDia(valores: Memoria.compartida.horasGuardadas, mejorHora: mejorHora)
-                    .frame(height: 22)
+                    .frame(minHeight: 22, maxHeight: 70)
                     .accessibilityHidden(true)
             } else {
                 PuntoDelDia(hora: mejorHora, conAhora: disenoMedianas != 0)
@@ -323,13 +327,19 @@ struct TareaDelMomentoView: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 15)
-        .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
+        .frame(maxWidth: .infinity, minHeight: 128, maxHeight: .infinity, alignment: .topLeading)
         .tarjetaLujo()
         .accessibilityElement(children: .combine)
     }
 
     /// El campo para escribir aparece cuando no hay una tarea en marcha ni descanso:
     /// así la pantalla sigue teniendo una sola acción principal.
+    /// Con una tarea propuesta la tarjeta Ahora es alta: en iPhones bajos el campo no cabe (queda el "+").
+    private var hayTareaPropuesta: Bool {
+        if case .tarea = eleccion { return true }
+        return false
+    }
+
     private var mostrarCampoRapido: Bool {
         guard enCurso == nil else { return false }
         if case .descanso = eleccion { return false }
