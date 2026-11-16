@@ -644,3 +644,106 @@ struct IconoMicrofono: View {
             }
     }
 }
+
+// MARK: - El botón de Hoy (Empezar / Terminé)
+
+/// El botón principal de la tarjeta Ahora. Diaz (16 nov 2026): "se ve súper genérico".
+/// Diseños para comparar con `-disenoBoton N` (0 = el de siempre). Solo en Hoy: el resto de la app no cambia.
+enum DisenoDeBotonDeAhora: Int {
+    case siempre, grabado, lineaFina, emblema, emblemaConMinutos
+    static var elegido: DisenoDeBotonDeAhora {
+        DisenoDeBotonDeAhora(rawValue: UserDefaults.standard.integer(forKey: "disenoBoton")) ?? .siempre
+    }
+}
+
+struct BotonDeAhora: View {
+    let enMarcha: Bool
+    var minutos: Int? = nil
+    var diseno: DisenoDeBotonDeAhora = .elegido
+    let accion: () -> Void
+    @State private var toques = 0
+
+    var body: some View {
+        if diseno == .siempre {
+            BotonPrimarioLujo(enMarcha ? "Terminé" : "Empezar", accion: accion)
+        } else {
+            Button {
+                toques += 1
+                accion()
+            } label: { etiqueta }
+                .buttonStyle(EstiloLujo(conReflejo: diseno != .lineaFina))
+                .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: toques)
+        }
+    }
+
+    private var titulo: LocalizedStringKey { enMarcha ? "Terminé" : "Empezar" }
+    private var forma: RoundedRectangle { RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous) }
+
+    @ViewBuilder
+    private var etiqueta: some View {
+        switch diseno {
+        case .grabado:
+            // Placa grabada: la palabra en Fraunces (no en mayúsculas espaciadas) y una línea fina por dentro.
+            Text(titulo)
+                .font(.zenoTitulo(.title3, .regular))
+                .foregroundStyle(Lujo.tinta)
+                .frame(maxWidth: .infinity)
+                .frame(height: Lujo.altoBoton)
+                .background { fondoOro }
+                .overlay { forma.inset(by: 4).strokeBorder(Lujo.tinta.opacity(0.22), lineWidth: 0.6) }
+                .contentShape(forma)
+        case .lineaFina:
+            // Línea fina: cristal oscuro con un hilo de oro y la palabra en oro (como la pantalla bloqueada).
+            HStack(spacing: 8) {
+                Text(titulo)
+                    .font(.lujoEtiqueta(.footnote, .semibold))
+                    .versalitas(2.2)
+                    .foregroundStyle(Lujo.oro)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: Lujo.altoBoton)
+            .background { forma.fill(Lujo.oro.opacity(0.08)) }
+            .overlay { forma.strokeBorder(LinearGradient(colors: [Lujo.oroLuz, Lujo.oro.opacity(0.55)], startPoint: .top, endPoint: .bottom), lineWidth: 1) }
+            .contentShape(forma)
+        case .emblema, .emblemaConMinutos:
+            // Emblema: una estrellita de cuatro puntas delante, que se vuelve el check al estar en marcha.
+            HStack(spacing: 10) {
+                ZStack {
+                    if enMarcha {
+                        TrazoDeCheck()
+                            .stroke(Lujo.tinta, style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
+                            .frame(width: 13, height: 10)
+                    } else {
+                        EstrellitaDeCuatro().fill(Lujo.tinta.opacity(0.85)).frame(width: 13, height: 13)
+                    }
+                }
+                .frame(width: 18)
+                Text(titulo)
+                    .font(.lujoEtiqueta(.footnote, .semibold))
+                    .versalitas(1.8)
+                    .foregroundStyle(Lujo.tinta)
+                if diseno == .emblemaConMinutos, let minutos, !enMarcha {
+                    Text(verbatim: "· \(minutos) min")
+                        .font(.zenoTexto(.footnote, .medium))
+                        .foregroundStyle(Lujo.tinta.opacity(0.62))
+                }
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .frame(maxWidth: .infinity)
+            .frame(height: Lujo.altoBoton)
+            .background { fondoOro }
+            .contentShape(forma)
+        case .siempre:
+            EmptyView()
+        }
+    }
+
+    private var fondoOro: some View {
+        forma.fill(LinearGradient(colors: [Lujo.oroLuz, Lujo.oro, Lujo.oroHondo], startPoint: .top, endPoint: .bottom))
+            .overlay(alignment: .top) {
+                forma.strokeBorder(LinearGradient(colors: [.white.opacity(0.55), .white.opacity(0.0)], startPoint: .top, endPoint: .center), lineWidth: 0.75)
+            }
+            .shadow(color: Lujo.oroHondo.opacity(0.22), radius: 18, y: 10)
+    }
+}

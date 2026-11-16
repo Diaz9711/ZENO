@@ -319,7 +319,7 @@ struct CheckDibujado: View {
     }
 }
 
-private struct TrazoDeCheck: Shape {
+struct TrazoDeCheck: Shape {
     func path(in r: CGRect) -> Path {
         var p = Path()
         p.move(to: CGPoint(x: r.minX, y: r.midY + r.height * 0.05))

@@ -8,7 +8,9 @@ enum AccionesDeTarea {
     /// Guarda el evento (con cuánto tardó) y marca la tarea como terminada.
     /// Las vistas lo envuelven en su propia animación.
     static func terminar(_ tarea: Tarea, en contexto: ModelContext) {
-        let segundos = tarea.empezadaEn.map { Date.now.timeIntervalSince($0) }
+        // Con pasos (Divídemela) solo se sabe cuánto duró el último paso: no se guarda duración,
+        // para no enseñarle a ZENO que una tarea grande toma 5 minutos.
+        let segundos = tarea.pasos.isEmpty ? tarea.empezadaEn.map { Date.now.timeIntervalSince($0) } : nil
         let evento = EventoDeEnergia(tipo: .tareaTerminada, valor: segundos)
         contexto.insert(evento)
         evento.tarea = tarea
@@ -35,13 +37,15 @@ enum AccionesDeTarea {
     static func terminarLaEnCurso() async {
         let contexto = Almacen.contenedor.mainContext
         let pendientes = (try? contexto.fetch(FetchDescriptor<Tarea>(predicate: #Predicate { $0.terminadaEn == nil }))) ?? []
+        var terminoLaTarea = true
         if let tarea = pendientes.first(where: \.estaEnCurso) {
-            completarPaso(tarea, en: contexto)
+            terminoLaTarea = completarPaso(tarea, en: contexto)
             try? contexto.save()
             // Fuera de la app iOS puede dormirla pronto: se espera a que los avisos queden al día.
             await AvisosDeTareas.sincronizar(contexto)
         }
         await AnilloEnVivo.terminarTodo()
-        Widgets.tareaTerminadaFuera()
+        // Si solo terminó un paso, la tarea sigue: el widget no la borra.
+        if terminoLaTarea { Widgets.tareaTerminadaFuera() }
     }
 }

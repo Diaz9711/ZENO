@@ -230,7 +230,8 @@ struct TareaDelMomentoView: View {
                                             removal: .opacity.combined(with: .offset(y: -8))))
                 // Un botón visible y claro (pedido de Diaz): Empezar y, en marcha, Terminé. Solo tocar.
                 HStack(alignment: .center, spacing: 10) {
-                    BotonPrimarioLujo(enMarcha ? "Terminé" : "Empezar") {
+                    BotonDeAhora(enMarcha: enMarcha,
+                                 minutos: Int(Aprendizaje.minutosPrevistos(tarea, eventos: eventos).rounded())) {
                         if enMarcha { terminar(tarea) } else { empezar(tarea) }
                     }
                     BotonTerciarioLujo(titulo: enMarcha ? "Dejarla para después" : "Ahora no") { ahoraNo(tarea) }
