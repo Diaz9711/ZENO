@@ -18,12 +18,26 @@ struct PedidoDeDivision: Equatable {
     var idioma: Idioma
 }
 
+/// Una tarea encontrada en lo que la persona dijo.
+struct TareaCapturada: Equatable, Identifiable {
+    var id = UUID()
+    var titulo: String
+    var tamano: TamanoDeTarea
+    /// Solo si la persona dijo cuándo (se calcula en código, nunca la inventa la IA).
+    var fecha: Date?
+    var incluida = true
+}
+
 /// Un motor de IA. Para cambiar de motor no hace falta tocar el resto de la app.
 protocol MotorDeIA {
     var nombre: String { get }
     /// Si se puede usar ahora mismo, y si no, por qué (para el modo de prueba).
     var estado: (disponible: Bool, motivo: String) { get }
     func dividir(_ pedido: PedidoDeDivision) async throws -> [String]
+    /// De lo dicho a una lista de tareas: (título, tamaño, "cuándo" tal como lo dijo).
+    func capturar(_ texto: String, idioma: Idioma) async throws -> [(titulo: String, tamano: TamanoDeTarea, cuando: String)]
+    /// Frases nuevas para Chispa de una categoría (cortas, cálidas, sin culpa).
+    func frases(_ categoria: CategoriaDeFrase, cuantas: Int, evitar: [String], idioma: Idioma) async throws -> [String]
 }
 
 enum ErrorDeIA: Error { case noDisponible, respuestaInvalida }
@@ -35,6 +49,19 @@ struct MotorSimple: MotorDeIA {
     var estado: (disponible: Bool, motivo: String) { (true, "Siempre disponible") }
 
     func dividir(_ p: PedidoDeDivision) async throws -> [String] { Self.plantilla(p) }
+
+    /// Sin IA: cada frase (separada por la puntuación del dictado) es una tarea de esfuerzo medio.
+    func capturar(_ texto: String, idioma: Idioma) async throws -> [(titulo: String, tamano: TamanoDeTarea, cuando: String)] {
+        texto.components(separatedBy: CharacterSet(charactersIn: ".!?;\n"))
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines.union(CharacterSet(charactersIn: ","))) }
+            .filter { !$0.isEmpty }
+            .map { (titulo: $0, tamano: .mediana, cuando: $0) }
+    }
+
+    /// Sin IA: las frases escritas a mano (el banco).
+    func frases(_ categoria: CategoriaDeFrase, cuantas: Int, evitar: [String], idioma: Idioma) async throws -> [String] {
+        Array(BancoDeFrases.frases(categoria, idioma).filter { !evitar.contains($0) }.prefix(cuantas))
+    }
 
     /// Pasos genéricos de unos 5 minutos; el primero, ridículamente fácil.
     static func plantilla(_ p: PedidoDeDivision) -> [String] {
@@ -66,6 +93,8 @@ struct MotorEnLaNube: MotorDeIA {
     let nombre = "Nube (apagado)"
     var estado: (disponible: Bool, motivo: String) { (false, "Apagado: ZENO no envía nada fuera del iPhone") }
     func dividir(_ pedido: PedidoDeDivision) async throws -> [String] { throw ErrorDeIA.noDisponible }
+    func capturar(_ texto: String, idioma: Idioma) async throws -> [(titulo: String, tamano: TamanoDeTarea, cuando: String)] { throw ErrorDeIA.noDisponible }
+    func frases(_ categoria: CategoriaDeFrase, cuantas: Int, evitar: [String], idioma: Idioma) async throws -> [String] { throw ErrorDeIA.noDisponible }
 }
 
 // MARK: - Motor local: Foundation Models de Apple (dentro del iPhone, sin internet)
@@ -76,6 +105,31 @@ struct MotorEnLaNube: MotorDeIA {
 struct PasosGenerados {
     @Guide(description: "Entre 3 y 7 pasos de unos 5 minutos cada uno. El primero es ridículamente fácil, como abrir algo. Cada paso es una frase corta que empieza con un verbo.", .count(3...7))
     var pasos: [String]
+}
+
+@available(iOS 26.0, *)
+@Generable(description: "Una tarea que la persona dijo")
+struct TareaDicha {
+    @Guide(description: "La tarea en pocas palabras, usando las mismas palabras de la persona. Sin fecha ni hora.")
+    var titulo: String
+    @Guide(description: "Esfuerzo que pide la tarea", .anyOf(["small", "medium", "large"]))
+    var esfuerzo: String
+    @Guide(description: "Cuándo, solo si la persona lo dijo, con el día y la hora juntos tal como los dijo (por ejemplo «mañana a las 5 de la tarde»). Vacío si no lo dijo.")
+    var cuando: String
+}
+
+@available(iOS 26.0, *)
+@Generable(description: "Las tareas que la persona dijo en voz alta")
+struct TareasDichas {
+    @Guide(description: "Cada tarea distinta que la persona mencionó, en el orden en que la dijo", .count(1...10))
+    var tareas: [TareaDicha]
+}
+
+@available(iOS 26.0, *)
+@Generable(description: "Frases cortas de un compañero amable")
+struct FrasesNuevas {
+    @Guide(description: "Frases distintas entre sí, de 4 a 15 palabras cada una", .count(1...8))
+    var frases: [String]
 }
 
 @available(iOS 26.0, *)
@@ -117,6 +171,34 @@ struct MotorLocal: MotorDeIA {
         let respuesta = try await sesion.respond(to: pedido, generating: PasosGenerados.self,
                                                  options: GenerationOptions(temperature: 0.4))
         return respuesta.content.pasos
+    }
+
+    func capturar(_ texto: String, idioma: Idioma) async throws -> [(titulo: String, tamano: TamanoDeTarea, cuando: String)] {
+        guard estado.disponible else { throw ErrorDeIA.noDisponible }
+        let es = idioma == .espanol
+        let instrucciones = es
+            ? "Conviertes lo que una persona dijo en voz alta en una lista de tareas. Solo tareas que dijo de verdad, con sus palabras. No inventes tareas, fechas ni detalles. Responde en español."
+            : "You turn what a person said out loud into a list of tasks. Only tasks they really said, in their words. Don't invent tasks, dates or details. Answer in English."
+        let sesion = LanguageModelSession(instructions: instrucciones)
+        let r = try await sesion.respond(to: (es ? "Lo que dijo: " : "What they said: ") + texto,
+                                         generating: TareasDichas.self, options: GenerationOptions(temperature: 0.2))
+        return r.content.tareas.map { t in
+            let tamano: TamanoDeTarea = t.esfuerzo == "small" ? .chica : (t.esfuerzo == "large" ? .grande : .mediana)
+            return (titulo: t.titulo, tamano: tamano, cuando: t.cuando)
+        }
+    }
+
+    func frases(_ categoria: CategoriaDeFrase, cuantas: Int, evitar: [String], idioma: Idioma) async throws -> [String] {
+        guard estado.disponible else { throw ErrorDeIA.noDisponible }
+        let es = idioma == .espanol
+        let instrucciones = es
+            ? "Escribes frases de Chispa, un pequeño cohete que acompaña a personas con TDAH. Tono cálido, tranquilo y breve (máximo 15 palabras). Nunca culpa, prisa, presión, reproches ni consejos médicos. Sin números ni horas. Responde en español."
+            : "You write lines for Chispa, a small rocket that keeps people with ADHD company. Warm, calm and brief (15 words max). Never guilt, hurry, pressure, blame or medical advice. No numbers or times. Answer in English."
+        let pedido = (es ? "Momento: " : "Moment: ") + categoria.descripcion(es: es)
+            + (evitar.isEmpty ? "" : (es ? "\nNo repitas estas: " : "\nDon't repeat these: ") + evitar.prefix(12).joined(separator: " | "))
+        let sesion = LanguageModelSession(instructions: instrucciones)
+        let r = try await sesion.respond(to: pedido, generating: FrasesNuevas.self, options: GenerationOptions(temperature: 0.7))
+        return Array(r.content.frases.prefix(cuantas))
     }
 }
 #endif
@@ -182,9 +264,14 @@ final class ServicioDeIA {
             #endif
         }
         ultimoMotor = division.motor
-        historial.insert("Divídemela «\(pedido.titulo)» → \(division.pasos.count) pasos (\(division.motor))", at: 0)
-        if historial.count > 30 { historial.removeLast(historial.count - 30) }
+        anotar("Divídemela «\(pedido.titulo)» → \(division.pasos.count) pasos (\(division.motor))")
         return division
+    }
+
+    /// Guarda una línea para el modo de prueba (las últimas 30).
+    func anotar(_ linea: String) {
+        historial.insert(linea, at: 0)
+        if historial.count > 30 { historial.removeLast(historial.count - 30) }
     }
 
     /// El formato lo garantiza el motor; el contenido se revisa aquí: 3 a 7 pasos, no vacíos,
@@ -238,6 +325,20 @@ enum PruebaDeIA {
             let p = PedidoDeDivision(titulo: titulo, tamano: tamano, energia: energia, idioma: .espanol)
             ok(ServicioDeIA.validarPasos(MotorSimple.plantilla(p)) != nil, "plantilla válida: \(titulo)")
         }
+        // Captura (sin IA): una tarea por frase; con IA, nada que no se haya dicho
+        let dicho = "Llamar al dentista mañana a las 5. Comprar pan. Terminar el informe del trabajo."
+        let sinIA = ServicioDeIA.validarCaptura((try? await MotorSimple().capturar(dicho, idioma: .espanol)) ?? [], dicho: dicho, exigirPalabras: false) ?? []
+        ok(sinIA.count == 3, "captura sin IA: 3 frases → 3 tareas")
+        ok(ServicioDeIA.validarCaptura([(titulo: "Pasear al perro", tamano: .chica, cuando: "")], dicho: dicho) == nil, "captura rechaza una tarea inventada")
+        ok(ServicioDeIA.fechaEn("mañana a las 5") != nil, "fecha en español: «mañana a las 5»")
+        ok(ServicioDeIA.fechaEn("tomorrow at 5pm") != nil, "fecha en inglés: «tomorrow at 5pm»")
+        // Frases
+        ok(MemoriaDeFrases.validar(["Vas muy bien, sigue así con calma"], evitar: []).count == 1, "frase válida")
+        ok(MemoriaDeFrases.validar(["Deberías terminar esto ya"], evitar: []).isEmpty, "frase con culpa se rechaza")
+        ok(MemoriaDeFrases.validar(["Te faltan 3 tareas hoy"], evitar: []).isEmpty, "frase con números se rechaza")
+        ok(MemoriaDeFrases.validar(["Rest es una pausa especial"], evitar: [], idioma: .espanol).isEmpty, "frase con idiomas mezclados se rechaza")
+        ok(MemoriaDeFrases.validar(["Tiny sparks support your steady steps"], evitar: [], idioma: .espanol).isEmpty, "frase en inglés no entra en español")
+        for c in CategoriaDeFrase.allCases { ok(BancoDeFrases.frases(c, .espanol).count == 15 && BancoDeFrases.frases(c, .ingles).count == 15, "banco de 15 + 15 frases: \(c.rawValue)") }
         // Motor real (en el iPhone con Apple Intelligence; en el simulador suele no estar)
         let servicio = await ServicioDeIA.compartido
         for m in await servicio.motores { print("PRUEBA-IA motor · \(m.nombre): \(m.estado.motivo)") }
@@ -245,6 +346,17 @@ enum PruebaDeIA {
             let d = await servicio.dividir(PedidoDeDivision(titulo: titulo, tamano: .grande, energia: .media, idioma: .espanol))
             ok((3...7).contains(d.pasos.count), "dividir «\(titulo)» con \(d.motor)")
             d.pasos.enumerated().forEach { print("PRUEBA-IA   \($0.offset + 1). \($0.element)") }
+        }
+        for dicho in ["Mañana tengo que llamar al dentista a las cinco, comprar pan y terminar el informe del trabajo",
+                      "I need to email my boss, pick up the kids at four and clean the kitchen tonight"] {
+            let c = await servicio.capturar(dicho)
+            ok(!c.tareas.isEmpty, "capturar con \(c.motor)")
+            c.tareas.forEach { print("PRUEBA-IA   · \($0.titulo) [\($0.tamano.rawValue)]\($0.fecha.map { " · \($0.formatted())" } ?? "")") }
+        }
+        await servicio.refrescarFrases()
+        for c in CategoriaDeFrase.allCases {
+            let d = MemoriaDeFrases.compartida.deposito(c, Idioma.actual)
+            print("PRUEBA-IA frases \(c.rawValue): \(d.count) en el depósito · \(d.prefix(3).joined(separator: " | "))")
         }
     }
 }

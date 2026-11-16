@@ -52,6 +52,8 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 ## IA (fase IA, 16 nov 2026)
 - `ZENO/IA/ServicioDeIA.swift`: un protocolo `MotorDeIA` y tres motores: `MotorLocal` (Foundation Models de Apple, iOS 26+, dentro del iPhone), `MotorSimple` (sin IA, siempre funciona) y `MotorEnLaNube` (solo la puerta, apagado: ZENO no tiene servidores). Todo resultado se valida en código y, si falla, se usa la versión sin IA. El cerebro de energía NO usa IA.
 - "Divídemela" (`IA/HojaDividir.swift`): pasos de unos 5 min en `Tarea.pasosCrudo`/`pasoActual`; "Terminé" pasa de paso con `AccionesDeTarea.completarPaso`; una estrella por tarea. Crisis: `Cuidado.suenaACrisis` en código antes de cualquier motor, mensaje amable sin teléfonos inventados.
+- Captura por voz (`IA/Captura.swift`, `IA/HojaCaptura.swift`): varias tareas dichas → vista previa → guardar con un toque. La IA no inventa (se exige que las palabras estén en lo dicho) y las fechas las calcula el sistema.
+- Frases de Chispa (`IA/Frases.swift`): banco a mano + depósito de la IA en segundo plano, validado e idioma de ZENO; `Cohete.consejo(_:turno:)` elige una por momento. Frases con números, siempre a mano.
 - Prueba: `-probarIA YES` (PASS/FAIL en consola, también en el iPhone). Nunca código de IA en `Compartido/` (lo enlazaría el widget).
 
 ## Código

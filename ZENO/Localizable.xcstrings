@@ -114,12 +114,52 @@
         }
       }
     },
+    "Esto es lo que te oí" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Here's what I heard"
+          }
+        }
+      }
+    },
     "Esto suena muy pesado." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "This sounds really heavy."
+          }
+        }
+      }
+    },
+    "Grande" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Large"
+          }
+        }
+      }
+    },
+    "Guardar %lld tareas" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save %lld tasks"
+          }
+        }
+      }
+    },
+    "Guardar 1 tarea" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save 1 task"
           }
         }
       }
@@ -144,6 +184,16 @@
         }
       }
     },
+    "Incluir esta tarea" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Include this task"
+          }
+        }
+      }
+    },
     "Lo último: %@" : {
       "localizations" : {
         "en" : {
@@ -160,6 +210,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Every day"
+          }
+        }
+      }
+    },
+    "Media" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medium"
           }
         }
       }
@@ -204,6 +264,46 @@
         }
       }
     },
+    "Pequeña" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Small"
+          }
+        }
+      }
+    },
+    "Quitar esta tarea" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove this task"
+          }
+        }
+      }
+    },
+    "Quitar la hora" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove the time"
+          }
+        }
+      }
+    },
+    "Separadas por la IA de tu iPhone. Nada sale del teléfono." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Split by your iPhone's AI. Nothing leaves the phone."
+          }
+        }
+      }
+    },
     "Sin cuenta" : {
       "localizations" : {
         "en" : {
@@ -220,6 +320,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Move this step up"
+          }
+        }
+      }
+    },
+    "Una tarea por frase, sin IA. Cámbialas como quieras." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One task per sentence, no AI. Change them as you like."
           }
         }
       }

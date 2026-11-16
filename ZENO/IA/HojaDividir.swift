@@ -144,19 +144,7 @@ struct HojaDividir: View {
         }
     }
 
-    private var cuidado: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Esto suena muy pesado.")
-                .font(.zenoTitulo(.title3, .regular))
-                .foregroundStyle(Lujo.marfil)
-            Text("No hace falta dividir nada ahora. Si estás pasando por un momento muy difícil, habla con alguien de confianza o con un profesional. Si estás en peligro, llama a los servicios de emergencia de tu país.")
-                .font(.zenoTexto(.callout))
-                .foregroundStyle(Lujo.marfilSecundario)
-                .fixedSize(horizontal: false, vertical: true)
-            BotonPrimarioLujo("Entendido") { Hojas.compartidas.cerrar() }
-                .padding(.top, 6)
-        }
-    }
+    private var cuidado: some View { VistaDeCuidado(conCabecera: false) }
 
     private var pasosLimpios: [String] {
         pasos.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
@@ -183,5 +171,32 @@ struct HojaDividir: View {
         tarea.pasoActual = 0
         Hojas.compartidas.cerrar()
         alGuardar()
+    }
+}
+
+/// Si algo suena a crisis emocional: ZENO no responde como terapeuta. Un mensaje amable y general
+/// (sin números de teléfono inventados).
+struct VistaDeCuidado: View {
+    var conCabecera = true
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if conCabecera {
+                HStack(spacing: 12) {
+                    DibujoDeCohete(diseno: .clasico).frame(width: 30, height: 36)
+                    Text(verbatim: Cohete.nombre.uppercased())
+                        .font(.zenoTexto(.caption2, .semibold)).kerning(1.6).foregroundStyle(Lujo.oro)
+                }
+            }
+            Text("Esto suena muy pesado.")
+                .font(.zenoTitulo(.title3, .regular))
+                .foregroundStyle(Lujo.marfil)
+            Text("No hace falta dividir nada ahora. Si estás pasando por un momento muy difícil, habla con alguien de confianza o con un profesional. Si estás en peligro, llama a los servicios de emergencia de tu país.")
+                .font(.zenoTexto(.callout))
+                .foregroundStyle(Lujo.marfilSecundario)
+                .fixedSize(horizontal: false, vertical: true)
+            BotonPrimarioLujo("Entendido") { Hojas.compartidas.cerrar() }
+                .padding(.top, 6)
+        }
     }
 }

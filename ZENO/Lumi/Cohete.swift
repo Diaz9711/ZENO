@@ -20,19 +20,26 @@ enum Cohete {
         case descanso
         case masTarde(vuelveA: Date?)
         case nada(hechasHoy: Int)
+        /// Justo después de terminar una tarea (unos segundos).
+        case celebrando
     }
 
     /// Una sola frase, amable y útil. Sale del estado y de lo que el cerebro aprendió.
-    static func consejo(_ momento: Momento) -> String {
+    /// `turno`: cuándo debe cambiar la frase (otra tarea, otra media hora). Las frases con números u horas
+    /// siguen escritas a mano; las demás salen del depósito de la IA o del banco, sin repetir (fase IA).
+    static func consejo(_ momento: Momento, turno: String = "") -> String {
+        let variada = { (c: CategoriaDeFrase) in MemoriaDeFrases.compartida.frase(c, turno: turno, idioma: Idioma.actual) }
         switch momento {
+        case .celebrando:
+            return variada(.celebracion)
         case .tarea(let enMarcha, let primerPaso, let minutos, let enRacha):
-            if enMarcha { return Idioma.texto("Vas bien. Cuando acabes, toca Terminé.") }
+            if enMarcha { return variada(.enMarcha) }
             if enRacha { return Idioma.texto("¡Qué buen ritmo! Una más si te apetece, sin prisa.") }
             if primerPaso { return Idioma.texto("Solo dos minutos. Yo te acompaño.") }
             if let minutos { return Idioma.texto("Algo así suele tomarte unos \(minutos) min. ¿Despegamos?") }
-            return Idioma.texto("Cuando quieras, toca Empezar. Yo te acompaño.")
+            return variada(.ahora)
         case .descanso:
-            return Idioma.texto("Tu energía está baja, y está bien. Descansar también cuenta.")
+            return variada(.descanso)
         case .masTarde(let vuelveA):
             if let vuelveA {
                 return Idioma.texto("Te propongo algo otra vez a las \(vuelveA.formatted(date: .omitted, time: .shortened)).")
@@ -40,7 +47,7 @@ enum Cohete {
             return Idioma.texto("Lo intentamos más tarde. Aquí sigo.")
         case .nada(let hechas):
             if hechas > 0 { return Idioma.texto("Hoy ya encendiste \(hechas) estrellas. Tu cielo las guarda.") }
-            return Idioma.texto("Escribe una sola cosa y despegamos juntos.")
+            return variada(.nada)
         }
     }
 }
@@ -66,6 +73,8 @@ struct CoheteAmigo: View {
                     .frame(width: 34, height: 40)
                     .offset(y: flota ? -2.5 : 2.5)
                 Text(verbatim: frase)
+                    .contentTransition(.opacity)
+                    .animation(Lujo.curva(0.5), value: frase)
                     .font(.zenoTexto(.footnote))
                     .foregroundStyle(Lujo.marfil.opacity(0.85))
                     .multilineTextAlignment(.leading)

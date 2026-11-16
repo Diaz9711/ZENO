@@ -317,6 +317,8 @@ struct UniversoView: View {
             } else {
                 withAnimation(.easeOut(duration: 5.0)) { llegada = true }
             }
+            // Fase IA: si la IA del iPhone está, rellena en segundo plano las frases nuevas de Chispa.
+            Task(priority: .background) { await ServicioDeIA.compartido.refrescarFrases() }
             #if DEBUG
             DatosDeEjemplo.cargarSiHaceFalta(en: contexto, hayPersona: !personas.isEmpty)
             DatosDeEjemplo.cargarCielo(en: contexto)

@@ -96,6 +96,8 @@ final class Dictado {
             let peticion = SFSpeechAudioBufferRecognitionRequest()
             peticion.shouldReportPartialResults = true
             peticion.requiresOnDeviceRecognition = true
+            // Con puntuación, una frase larga con varias tareas se puede separar (fase IA, captura por voz).
+            peticion.addsPunctuation = true
             self.peticion = peticion
 
             entrada.removeTap(onBus: 0)

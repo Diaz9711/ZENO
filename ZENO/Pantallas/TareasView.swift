@@ -52,6 +52,8 @@ struct TareaDelMomentoView: View {
     @State private var toques = 0
     /// Cada paso terminado de una tarea dividida (un toque suave).
     @State private var pasosHechos = 0
+    /// Unos segundos después de terminar una tarea, Chispa lo celebra con una frase.
+    @State private var celebrando = false
     /// Recuerda la tarea elegida: la pantalla la pide muchas veces por dibujo y calcularla recorre el historial.
     @State private var memoria = MemoriaDeEleccion()
     @FocusState private var escribiendo: Bool
@@ -89,8 +91,10 @@ struct TareaDelMomentoView: View {
                 registrar(.tareaPropuesta, valor: puntaje, tarea: tarea)
             }
         }
-        .onChange(of: dictado.activo) { _, activo in
+        .onChange(of: dictado.activo) { antes, activo in
             withAnimation(Lujo.curva(0.4)) { escuchando = activo }
+            // Al dejar de dictar: si dijo varias cosas, Chispa las separa y las muestra antes de guardar.
+            if antes && !activo && modo == .agregar { procesarDictado() }
         }
         .onChange(of: pedirAgregar) { _, _ in abrirAgregar() }
         // El widget de inicio muestra la misma tarea de ahora.
@@ -127,7 +131,7 @@ struct TareaDelMomentoView: View {
         VStack(alignment: .leading, spacing: 14) {
             // El amigo: una sola frase según el momento; al tocarlo, ofrece ayuda.
             // Cada pieza llega en su turno (Fable): Chispa, Ahora, el campo y las dos medianas.
-            CoheteAmigo(frase: Cohete.consejo(momentoDelCohete)) { pedirAyuda() }
+            CoheteAmigo(frase: Cohete.consejo(momentoDelCohete, turno: turnoDeFrase)) { pedirAyuda() }
                 .aparece(1)
             tarjetaDeAhora
                 .aparece(2)
@@ -161,7 +165,13 @@ struct TareaDelMomentoView: View {
     }
 
     /// Qué ve el cohete ahora mismo, para decir su frase.
+    /// Cuándo cambia la frase de Chispa: con otra tarea, otra cosa hecha o cada media hora (nunca en cada redibujado).
+    private var turnoDeFrase: String {
+        "\(idPropuesta.map { "\($0.hashValue)" } ?? "-")|\(enCurso != nil)|\(hechasHoy.count)|\(Int(Date.now.timeIntervalSince1970 / 1800))"
+    }
+
     private var momentoDelCohete: Cohete.Momento {
+        if celebrando { return .celebrando }
         switch eleccion {
         case .tarea(let tarea):
             let minutos = tarea.primerPaso == nil
@@ -542,6 +552,27 @@ struct TareaDelMomentoView: View {
         dictado.empezar()
     }
 
+    /// Captura por voz (fase IA): de lo dicho a tareas, con vista previa. Si es una sola, queda en el campo.
+    private func procesarDictado() {
+        let dicho = limpio(frase)
+        guard !dicho.isEmpty else { return }
+        if Cuidado.suenaACrisis(dicho) {
+            Hojas.compartidas.mostrar { VistaDeCuidado() }
+            return
+        }
+        Task { @MainActor in
+            let captura = await ServicioDeIA.compartido.capturar(dicho)
+            guard captura.tareas.count > 1, modo == .agregar else { return }
+            escribiendo = false
+            Hojas.compartidas.mostrar {
+                HojaCaptura(tareas: captura.tareas, conIA: !captura.deRespaldo) {
+                    frase = ""
+                    cerrarAgregar()
+                }
+            }
+        }
+    }
+
     // MARK: Acciones
 
     private func limpio(_ texto: String) -> String {
@@ -628,6 +659,11 @@ struct TareaDelMomentoView: View {
             withAnimation(Ritmo.contenido) { AccionesDeTarea.completarPaso(tarea, en: contexto) }
             pasosHechos += 1
             return
+        }
+        celebrando = true
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(6))
+            withAnimation(Lujo.curva()) { celebrando = false }
         }
         let celebracion = Celebracion.para(tarea, eventos: eventos, puntaje: puntaje)
         alTerminar(celebracion)
