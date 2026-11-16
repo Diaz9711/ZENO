@@ -89,6 +89,15 @@ Pasos siguientes, uno por uno (Diaz pidió paso a paso, "razona bien", usar a Fa
 5. "Más premium, que la app tenga vida": sin efectos nuevos hasta que lo de arriba esté aprobado.
 - **No tocar** la estrella ni la nebulosa por defecto ni sus colores (Diaz lo repitió).
 
+## Web 3D (15 nov 2026, plan aprobado por Diaz, revisado con Fable) — `Web/zeno-3d.html`, aparte de la web actual
+- Lumi y la nebulosa son los shaders de la app (`Sombras.metal`) pasados a GLSL, con la misma semilla (comprobado: mismos números que la app). Three.js 0.160.0 desde jsDelivr, cargado solo si hay WebGL. Sin WebGL (o `?sin3d`): estrella 2D de la web. Con Reducir movimiento: imagen quieta.
+- Partes: Lumi, Tu cielo (velos de gas + estrellas con profundidad), Energía (aro de 24 horas con la curva base), Ahora (tarjeta), Tus estrellas, Tiempo visible (anillo: solo se ve al elegirlo o al ver por dentro; Diaz no lo quiere en la vista normal).
+- Pestañas (la cámara viaja y separa la parte), "Ver por dentro" (3 s, frena al final, etiquetas con línea fina que no se pisan), giro lento constante, arrastrar y pellizcar.
+- `?play` = grabación de 25 s en bucle (sin botones ni cursor); `?play&vertical` = escenario 9:16 para Reels (Diaz lo graba con la grabación de pantalla). `?fps` muestra cuadros por segundo. `?nombre=Diaz&fecha=1999-06-15` = estrella de esa persona.
+- Revisión contra la app (misma semilla, mismo tamaño en el iPhone 17 Pro Max): corregidos rayos casi invisibles en pantallas pequeñas (mínimo 1,1 px), mezcla de luz como en la app (rayos largos y núcleo cálido), anillo quitado de la vista, tarjeta que se cortaba en vertical. Sigue distinto: el ángulo de los rayos (Lumi gira), la nebulosa es de la hora actual, y la estrella del respaldo 2D es más simple.
+- Calidad automática: baja primero la resolución del cielo y luego hasta 1 píxel por punto, nunca menos (la estrella no se ve borrosa). En el simulador va lento porque no tiene gráficos reales: medir en el iPhone con `?fps`.
+- Decisiones tomadas por defecto (Diaz no contestó): las anclas semanales se cambiaron por "Tus estrellas" (las anclas no existen aún); el botón dice "Próximamente en iPhone" y lleva a la web actual; la nebulosa sigue azul; es una página aparte.
+
 ## Tarjetas Hoy y Tu mejor hora (15 nov 2026, Fable eligió por Diaz)
 - Opción 2 · Estrellas y curva (foto `Comparaciones/hoy-tarjetas-opciones.jpg`). Las otras con `-disenoMedianas 0|1|3` (solo en pruebas).
 - Arreglo de paso: en iPhones más bajos que el Pro Max la barra de abajo quedaba fuera de la pantalla en Hoy (ya pasaba antes). Ahora ahí el campo "Escribe una tarea…" no se muestra (el "+" de la barra hace lo mismo), y las tarjetas son un poco más compactas. Medido en 17 Pro y 17 Pro Max.

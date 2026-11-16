@@ -1,0 +1,979 @@
+<meta charset="utf-8">
+<title>ZENO en 3D</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="ZENO por dentro: Lumi, tu cielo, el cerebro de energía, la tarea de ahora, tus estrellas y el tiempo visible.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Manrope:wght@400;500;600&display=swap">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<style>
+/* ZENO en 3D (Diaz, 15 nov 2026; plan revisado con Fable). La estrella y la nebulosa son los mismos
+   shaders de la app (Sombras.metal) pasados a GLSL, con la misma semilla y los mismos colores. */
+:root {
+  --cielo: #0b1024;
+  --marfil: #f2ecdd;
+  --marfil-2: rgba(242, 236, 221, .66);
+  --oro: #d9c08a;
+  --oro-luz: #ecdeb8;
+  --oro-hondo: #b8975a;
+  --tinta: #1f1a14;
+  --titulo: "Fraunces", Georgia, serif;
+  --texto: "Manrope", system-ui, sans-serif;
+  --marca: "Bebas Neue", "Arial Narrow", sans-serif;
+  --curva: cubic-bezier(.22, 1, .36, 1);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--cielo); color: var(--marfil); font-family: var(--texto); -webkit-font-smoothing: antialiased; overflow: hidden; }
+#escena { position: fixed; inset: 0; overflow: hidden; background: var(--cielo); }
+#escena canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+#respaldo { position: absolute; inset: 0; width: 100%; height: 100%; display: none; }
+
+/* — Arriba — */
+.arriba { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: max(18px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); pointer-events: none; }
+.logo { display: flex; align-items: center; gap: 7px; pointer-events: auto; text-decoration: none; }
+.logo span { font-family: var(--marca); font-size: 28px; letter-spacing: .2em;
+  background: linear-gradient(180deg, var(--marfil), var(--oro)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.logo svg { width: 36px; height: 24px; overflow: visible; }
+.lema { font-size: 11px; font-weight: 600; letter-spacing: .32em; color: var(--oro); white-space: nowrap; }
+
+/* — Abajo — */
+.abajo { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: grid; gap: 14px; justify-items: center;
+  padding: 0 max(16px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  background: linear-gradient(180deg, transparent, rgba(8, 11, 26, .55) 40%, rgba(8, 11, 26, .78)); padding-top: 60px; }
+.panel { max-width: 34em; text-align: center; min-height: 66px; display: grid; gap: 4px; }
+.panel h2 { margin: 0; font: 300 clamp(24px, 3.4vw, 34px)/1.1 var(--titulo); letter-spacing: -.01em; }
+.panel h2 em { font-style: italic; color: var(--oro); }
+.panel p { margin: 0; color: var(--marfil-2); font-size: 15px; line-height: 1.5; }
+.panel > * { transition: opacity .5s var(--curva), transform .6s var(--curva); }
+.panel.cambia > * { opacity: 0; transform: translateY(8px); }
+.pestanas { display: flex; gap: 8px; overflow-x: auto; max-width: 100%; padding: 2px; scrollbar-width: none; scroll-snap-type: x proximity; }
+.pestanas::-webkit-scrollbar { display: none; }
+.pestanas button { flex: none; scroll-snap-align: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 0; cursor: pointer;
+  font: 500 12px/1 var(--texto); letter-spacing: .14em; text-transform: uppercase; color: var(--marfil-2);
+  background: rgba(242, 236, 221, .04); box-shadow: inset 0 0 0 .75px rgba(242, 236, 221, .14);
+  transition: color .4s var(--curva), box-shadow .4s var(--curva), background .4s var(--curva); }
+.pestanas button[aria-pressed="true"] { color: var(--oro); box-shadow: inset 0 0 0 .9px rgba(217, 192, 138, .9); background: rgba(217, 192, 138, .08); }
+.acciones { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.boton { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 24px; border-radius: 16px; border: 0;
+  font: 600 12.5px/1 var(--texto); letter-spacing: .16em; text-transform: uppercase; text-decoration: none; cursor: pointer;
+  transition: transform .35s var(--curva), filter .35s var(--curva); }
+.boton:active { transform: scale(.97); }
+.boton.primario { color: var(--tinta); background: linear-gradient(180deg, var(--oro-luz), var(--oro) 55%, var(--oro-hondo));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 14px 30px -12px rgba(184,151,90,.5); }
+.boton.secundario { color: var(--marfil); background: rgba(242,236,221,.04); box-shadow: inset 0 0 0 .75px rgba(242,236,221,.18); }
+.boton.secundario[aria-pressed="true"] { color: var(--oro); box-shadow: inset 0 0 0 .9px rgba(217,192,138,.9); }
+:focus-visible { outline: 1px solid var(--oro); outline-offset: 3px; }
+[hidden] { display: none !important; }
+
+/* — Etiquetas del despiece — */
+#etiquetas { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+#etiquetas svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.etiqueta { position: absolute; transform: translate(-50%, -50%); font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--oro-luz); white-space: nowrap; padding: 6px 10px; border-radius: 999px; background: rgba(11, 16, 36, .62);
+  box-shadow: inset 0 0 0 .75px rgba(217, 192, 138, .45); opacity: 0; transition: opacity .6s var(--curva); }
+.etiqueta.ve { opacity: 1; }
+
+.cargando { position: absolute; inset: 0; display: grid; place-items: center; z-index: 1; color: var(--marfil-2); font-size: 13px; letter-spacing: .2em; text-transform: uppercase; transition: opacity .8s var(--curva); }
+.cargando.fuera { opacity: 0; pointer-events: none; }
+
+/* — Modo grabación: sin botones ni cursor; en vertical, un escenario 9:16 — */
+body.play { cursor: none; }
+body.play .abajo .pestanas, body.play .abajo .acciones { display: none; }
+body.vertical #escena { inset: auto; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(100vw, calc(100vh * 9 / 16)); height: min(100vh, calc(100vw * 16 / 9)); }
+body.vertical { background: #000; }
+@media (max-width: 560px) { .lema { font-size: 9.5px; letter-spacing: .26em; } .panel p { font-size: 14px; } }
+</style>
+
+<div id="escena" aria-label="Lumi y su cielo en 3D. Arrastra para girar, pellizca o usa la rueda para acercar." role="img">
+  <canvas id="respaldo" aria-hidden="true"></canvas>
+  <div class="cargando" id="cargando">Encendiendo tu cielo…</div>
+  <div id="etiquetas"><svg aria-hidden="true"></svg></div>
+
+  <header class="arriba">
+    <a class="logo" href="https://claude.ai/artifact/DFKXykKGoKgHZkJdeuxxSo" aria-label="ZENO">
+      <span>ZEN</span>
+      <svg viewBox="0 0 40 24" aria-hidden="true">
+        <defs><linearGradient id="metalO" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2ecdd"/><stop offset=".5" stop-color="#ecdeb8"/><stop offset="1" stop-color="#d9c08a"/></linearGradient></defs>
+        <g transform="rotate(-18 18 12)" fill="none" stroke="url(#metalO)" stroke-linecap="round" stroke-width=".9"><path d="M2.4 12 A15.6 4 0 0 1 33.6 12" stroke-opacity=".75"/></g>
+        <circle cx="18" cy="12" r="7.05" fill="none" stroke="url(#metalO)" stroke-width="1.9"/>
+        <g transform="rotate(-18 18 12)" fill="none" stroke="url(#metalO)" stroke-linecap="round" stroke-width=".9"><path d="M33.6 12 A15.6 4 0 0 1 2.4 12"/></g>
+        <circle cx="31.7" cy="6.2" r="1.4" fill="#f2ecdd"/>
+      </svg>
+    </a>
+    <p class="lema">FOCUS · FLOW · FORWARD</p>
+  </header>
+
+  <section class="abajo">
+    <div class="panel" id="panel" aria-live="polite">
+      <h2 id="panel-titulo">Una sola cosa. <em>Ahora.</em></h2>
+      <p id="panel-l1">ZENO te acompaña con una estrella que nace contigo.</p>
+      <p id="panel-l2">Toca una parte para verla de cerca.</p>
+    </div>
+    <nav class="pestanas" id="pestanas" aria-label="Partes de ZENO"></nav>
+    <div class="acciones">
+      <button class="boton secundario" id="despiece" aria-pressed="false">Ver por dentro</button>
+      <a class="boton primario" href="https://claude.ai/artifact/DFKXykKGoKgHZkJdeuxxSo">Próximamente en iPhone</a>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ═════ Datos de cada parte (lo que hace por la persona; nada inventado) ═════ */
+window.PARTES = [
+  { id: 'lumi', nombre: 'Lumi', titulo: 'Lumi', l1: 'Tu estrella nace de tu nombre y tu fecha. Nadie tiene una igual.', l2: 'Te acompaña y celebra cada cosa que terminas.' },
+  { id: 'nebulosa', nombre: 'Tu cielo', titulo: 'Tu <em>cielo</em>', l1: 'La nebulosa cambia con la hora y con tu energía.', l2: 'Es el fondo vivo de ZENO, dibujado en el teléfono.' },
+  { id: 'cerebro', nombre: 'Energía', titulo: 'El <em>cerebro</em>', l1: 'Calcula tu energía con tu ritmo y con lo que haces.', l2: 'Aprende cuál es tu mejor hora del día.' },
+  { id: 'ahora', nombre: 'Ahora', titulo: 'La tarea <em>de ahora</em>', l1: 'Una sola tarea: la que encaja con tu energía.', l2: 'Empezar, Terminé o «Ahora no», sin culpa.' },
+  { id: 'estrellas', nombre: 'Tus estrellas', titulo: 'Tus <em>estrellas</em>', l1: 'Cada tarea terminada es una estrella nueva en tu cielo.', l2: 'Se quedan ahí para siempre.' },
+  { id: 'tiempo', nombre: 'Tiempo visible', titulo: 'Tiempo <em>visible</em>', l1: 'Un anillo de luz alrededor de Lumi muestra cuánto llevas.', l2: 'También en la pantalla bloqueada, sin alarmas.' }
+];
+
+/* ═════ La semilla y la apariencia: copia exacta de Semilla.swift y AparienciaLumi.swift (cielo azul) ═════ */
+window.ZENO_APARIENCIA = (() => {
+  const M = (1n << 64n) - 1n;
+  function semilla(nombre, a, m, d) {
+    const limpio = nombre.trim().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const bytes = new TextEncoder().encode(`${limpio}|${a}-${m}-${d}`);
+    let h = 0xcbf29ce484222325n;
+    for (const b of bytes) { h ^= BigInt(b); h = (h * 0x100000001b3n) & M; }
+    return h;
+  }
+  function generador(s) {
+    let e = s;
+    const sig = () => {
+      e = (e + 0x9e3779b97f4a7c15n) & M;
+      let z = e;
+      z = ((z ^ (z >> 30n)) * 0xbf58476d1ce4e5b9n) & M;
+      z = ((z ^ (z >> 27n)) * 0x94d049bb133111ebn) & M;
+      return z ^ (z >> 31n);
+    };
+    const unidad = () => Number(sig() >> 11n) / 2 ** 53;
+    return { unidad, entre: (x, y) => x + (y - x) * unidad(), entero: (lo, hi) => lo + Number(sig() % BigInt(hi - lo + 1)) };
+  }
+  const hsb = (h, s, b) => {
+    const t6 = (h - Math.floor(h)) * 6, i = Math.floor(t6), f = t6 - i;
+    const p = b * (1 - s), q = b * (1 - s * f), t = b * (1 - s * (1 - f));
+    return [[b, t, p], [q, b, p], [p, b, t], [p, q, b], [t, p, b], [b, p, q]][i % 6];
+  };
+  function apariencia(sem) {
+    const g = generador(sem);
+    const hN = g.entre(.115, .135), sN = g.entre(.26, .36);
+    const hC = g.entre(.112, .132), sC = g.entre(.50, .62);
+    let tonoHalo = g.unidad();
+    if (tonoHalo > .10 && tonoHalo < .64) tonoHalo = tonoHalo < .30 ? .10 : .64;
+    const sH = g.entre(.42, .68);
+    const lobulos = g.entero(3, 7);
+    const profundidad = g.entre(.09, .22);
+    const sentido = g.unidad() < .5 ? -1 : 1;
+    const respira = g.entre(4.2, 6.4);
+    const u = g.unidad();
+    const tono = .585 + .085 * u;
+    const sF = g.entre(.66, .80), bF = g.entre(.175, .215);
+    const vecino = tono + g.entre(-.07, .07);
+    const sNu = g.entre(.52, .70), bNu = g.entre(.40, .50);
+    const ub = g.unidad(), sb = g.entre(.62, .78);
+    const hO = g.entre(.100, .130), sO = g.entre(.45, .60);
+    const dx = g.entre(0, 60), dy = g.entre(0, 60);
+    const ola = g.entero(0, 3);
+    const incl = g.entre(.36, 1.0), giroOrb = g.entre(0, Math.PI), flote = g.entre(.55, 1.45);
+    return {
+      nucleo: hsb(hN, sN, 1), corona: hsb(hC, sC, 1), halo: hsb(tonoHalo, sH, 1),
+      coronaVecino: hsb(.108, .62, 1), nucleoVecino: hsb(.112, .34, 1),
+      fondo: hsb(tono, sF, bF * 1.12), nube: hsb(vecino, sNu, bNu), brasa: hsb(.585 + .075 * ub, sb * .62, .95), oro: hsb(hO, sO, 1),
+      lobulos, profundidad, sentido, respira, ola, orbita: [incl, giroOrb], flote, despl: [dx, dy], periodoLuz: 70 + 40 * dx / 60
+    };
+  }
+  // ?nombre=Diaz&fecha=1999-06-15 dibuja la estrella de esa persona (la de ejemplo de la app, para comparar).
+  const q = new URLSearchParams(location.search);
+  const nombre = q.get('nombre') || 'Lumi';
+  const [a, m, d] = (q.get('fecha') || '1999-06-15').split('-').map(Number);
+  return { ap: apariencia(semilla(nombre, a || 1999, m || 6, d || 15)), hsb };
+})();
+
+/* ═════ Respaldo sin 3D: la estrella de la web actual, dibujada en 2D (quieta) ═════ */
+window.dibujarRespaldo = function () {
+  const lienzo = document.getElementById('respaldo');
+  lienzo.style.display = 'block';
+  document.getElementById('cargando').classList.add('fuera');
+  const { ap } = window.ZENO_APARIENCIA;
+  const r = Math.min(devicePixelRatio || 1, 2), w = lienzo.clientWidth, h = lienzo.clientHeight;
+  lienzo.width = w * r; lienzo.height = h * r;
+  const c = lienzo.getContext('2d'); c.scale(r, r);
+  const rgb = (v, a) => `rgba(${v.map(x => Math.round(x * 255)).join(',')},${a})`;
+  const fondo = c.createRadialGradient(w / 2, h * .42, 0, w / 2, h * .42, Math.max(w, h) * .7);
+  fondo.addColorStop(0, rgb(ap.nube, 1)); fondo.addColorStop(.45, rgb(ap.fondo, 1)); fondo.addColorStop(1, '#0a0e22');
+  c.fillStyle = fondo; c.fillRect(0, 0, w, h);
+  c.globalCompositeOperation = 'lighter';
+  const cx = w / 2, cy = h * .42, base = Math.min(w, h) * .32;
+  let g = c.createRadialGradient(cx, cy, 0, cx, cy, base);
+  g.addColorStop(0, rgb(ap.halo, .3)); g.addColorStop(1, rgb(ap.halo, 0)); c.fillStyle = g; c.fillRect(0, 0, w, h);
+  const n = ap.lobulos + 1;
+  for (let i = 0; i < n * 2; i++) {
+    const corto = i % 2, ang = Math.PI * 2 * Math.floor(i / 2) / n + (corto ? Math.PI / n : 0) + ap.despl[1];
+    const L = base * (corto ? .35 : .8), ex = cx + Math.cos(ang) * L, ey = cy + Math.sin(ang) * L;
+    const lg = c.createLinearGradient(cx, cy, ex, ey);
+    lg.addColorStop(0, 'rgba(255,247,230,.85)'); lg.addColorStop(1, rgb(ap.corona, 0));
+    c.strokeStyle = lg; c.lineWidth = corto ? .8 : 1.2; c.beginPath(); c.moveTo(cx, cy); c.lineTo(ex, ey); c.stroke();
+  }
+  g = c.createRadialGradient(cx, cy, 0, cx, cy, base * .2);
+  g.addColorStop(0, 'rgba(255,250,238,1)'); g.addColorStop(.3, rgb(ap.nucleo, .9)); g.addColorStop(1, rgb(ap.nucleo, 0));
+  c.fillStyle = g; c.beginPath(); c.arc(cx, cy, base * .2, 0, 6.283); c.fill();
+};
+</script>
+
+<script type="module">
+/* ═════ ZENO en 3D ═════ */
+const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const params = new URLSearchParams(location.search);
+const modoPlay = params.has('play');
+const vertical = params.has('vertical');
+if (modoPlay) document.body.classList.add('play');
+if (vertical) document.body.classList.add('vertical');
+
+function hayWebGL() {
+  try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }
+}
+
+const PARTES = window.PARTES;
+const { ap, hsb } = window.ZENO_APARIENCIA;
+const panel = document.getElementById('panel');
+const pestanas = document.getElementById('pestanas');
+const botonDespiece = document.getElementById('despiece');
+
+function mostrarPanel(parte) {
+  panel.classList.add('cambia');
+  setTimeout(() => {
+    document.getElementById('panel-titulo').innerHTML = parte ? parte.titulo : 'Una sola cosa. <em>Ahora.</em>';
+    document.getElementById('panel-l1').textContent = parte ? parte.l1 : 'ZENO te acompaña con una estrella que nace contigo.';
+    document.getElementById('panel-l2').textContent = parte ? parte.l2 : 'Toca una parte para verla de cerca.';
+    panel.classList.remove('cambia');
+  }, quieto ? 0 : 220);
+}
+
+PARTES.forEach(p => {
+  const b = document.createElement('button');
+  b.textContent = p.nombre; b.dataset.id = p.id; b.setAttribute('aria-pressed', 'false');
+  pestanas.appendChild(b);
+});
+
+if (!hayWebGL() || params.has('sin3d')) {
+  window.dibujarRespaldo();
+  // Sin 3D las pestañas siguen contando cada parte.
+  pestanas.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    [...pestanas.children].forEach(x => x.setAttribute('aria-pressed', x === b));
+    mostrarPanel(PARTES.find(p => p.id === b.dataset.id));
+  });
+  botonDespiece.hidden = true;
+} else {
+  // Three.js se carga solo aquí, cuando el navegador puede dibujar en 3D.
+  import('three').then(async (THREE) => {
+    const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
+    await document.fonts.ready.catch(() => {});
+    iniciar(THREE, OrbitControls);
+  }).catch(() => window.dibujarRespaldo());
+}
+
+function iniciar(THREE, OrbitControls) {
+  const escena = document.getElementById('escena');
+  const v3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
+
+  /* — Render — */
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+  renderer.setClearColor(0x0b1024, 1);
+  renderer.autoClear = false;
+  escena.insertBefore(renderer.domElement, escena.firstChild);
+  renderer.domElement.setAttribute('aria-hidden', 'true');
+  let dprMax = Math.min(devicePixelRatio || 1, 2), dpr = dprMax;
+  renderer.setPixelRatio(dpr);
+  // Un solo bucle de dibujo; se pide un cuadro cuando algo cambia (y siempre, si hay movimiento).
+  let pendiente = false, anterior = performance.now(), cuadro = 0, inicioPlay = performance.now();
+  function pedir() { if (!pendiente) { pendiente = true; requestAnimationFrame(dibujar); } }
+
+  const camara = new THREE.PerspectiveCamera(38, 1, .05, 100);
+  const INICIO = new THREE.Vector3(0, .55, 6.4);
+  camara.position.copy(INICIO);
+  const controles = new OrbitControls(camara, renderer.domElement);
+  controles.enableDamping = true; controles.dampingFactor = .06;
+  controles.enablePan = false; controles.minDistance = 2.4; controles.maxDistance = 11;
+  controles.autoRotate = !quieto && !modoPlay; controles.autoRotateSpeed = .45;
+  controles.rotateSpeed = .6; controles.zoomSpeed = .7;
+  if (modoPlay) controles.enabled = false;
+
+  const mundo = new THREE.Scene();
+
+  /* ═════ La nebulosa: el shader de la app, a pantalla completa (a media resolución, 30 cuadros: como en la app) ═════ */
+  const GLSL_RUIDO = `
+  float azar(vec2 p){ p = fract(p*vec2(123.34,456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
+  float ruido(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*f*(f*(f*6.0-15.0)+10.0);
+    float a=azar(i), b=azar(i+vec2(1.,0.)), c=azar(i+vec2(0.,1.)), d=azar(i+vec2(1.,1.));
+    return mix(mix(a,b,u.x), mix(c,d,u.x), u.y); }
+  float nube(vec2 p){ float v=0.0, amp=0.5; for(int i=0;i<4;i++){ v+=amp*ruido(p); p=vec2(p.x*1.6-p.y*1.2, p.x*1.2+p.y*1.6)+7.3; amp*=0.5; } return v/0.9375; }
+  vec2 gradiente(vec2 p){ float h=azar(p)*6.2831853; return vec2(cos(h), sin(h)); }
+  float perlin(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*f*(f*(f*6.0-15.0)+10.0);
+    float a=dot(gradiente(i), f), b=dot(gradiente(i+vec2(1.,0.)), f-vec2(1.,0.));
+    float c=dot(gradiente(i+vec2(0.,1.)), f-vec2(0.,1.)), d=dot(gradiente(i+vec2(1.,1.)), f-vec2(1.,1.));
+    return clamp(0.5+0.72*mix(mix(a,b,u.x), mix(c,d,u.x), u.y), 0.0, 1.0); }
+  float gasN(vec2 p, int capas){ float v=0.0, amp=0.5, total=0.0;
+    for(int i=0;i<6;i++){ if(i>=capas) break; v+=amp*perlin(p); total+=amp; p=vec2(p.x*1.62-p.y*1.18, p.x*1.18+p.y*1.62)+11.7; amp*=0.52; }
+    return v/total; }
+  `;
+  const nebulosaFrag = `
+  precision highp float;
+  uniform vec2 tam; uniform vec2 centro; uniform float t; uniform vec2 inclina; uniform vec2 desplazamiento;
+  uniform float energia; uniform float calidez; uniform vec3 cFondo; uniform vec3 cNube; uniform vec3 cBrasa; uniform vec3 cOro;
+  uniform float escalaPx;
+  ${GLSL_RUIDO}
+  float crestas(vec2 p){ float v=0.0, amp=0.5, total=0.0;
+    for(int i=0;i<4;i++){ float c=1.0-abs(2.0*perlin(p)-1.0); v+=amp*c*c; total+=amp; p=vec2(p.x*1.7-p.y*1.1, p.x*1.1+p.y*1.7)+5.3; amp*=0.5; }
+    return v/total; }
+  float estrellas(vec2 pos, float celda, float densidad, float radio, float t, vec2 semilla){
+    vec2 g=pos/celda; vec2 id=floor(g); float h=azar(id+semilla);
+    vec2 cc=0.5+0.34*(vec2(azar(id+semilla+3.1), azar(id+semilla+7.9))-0.5);
+    float dist=length(fract(g)-cc)*celda; float brilla=step(1.0-densidad, h);
+    float titila=0.65+0.35*sin(t*(0.5+2.2*fract(h*57.0))+h*90.0);
+    float nucleo=exp(-dist*dist/(radio*radio)); float aura=0.22*exp(-dist*dist/(radio*radio*9.0));
+    return (nucleo+aura)*brilla*titila*(0.45+0.55*fract(h*131.0)); }
+  float estrellasBrillantes(vec2 pos, float celda, float t, vec2 semilla, float umbral){
+    vec2 g=pos/celda; vec2 id=floor(g); float h=azar(id+semilla); if(h<umbral) return 0.0;
+    vec2 c=0.5+0.30*(vec2(azar(id+semilla+2.3), azar(id+semilla+5.7))-0.5);
+    vec2 rel=(fract(g)-c)*celda; float r2=dot(rel,rel);
+    float nucleo=exp(-r2/0.8); float halo=0.16*exp(-r2/20.0);
+    float puntas=exp(-abs(rel.y)*1.6)*exp(-abs(rel.x)/9.0) + exp(-abs(rel.x)*1.6)*exp(-abs(rel.y)/9.0);
+    float titila=0.82+0.18*sin(t*(0.4+fract(h*37.0))+h*50.0);
+    return (nucleo+halo+0.55*puntas)*titila*(0.55+0.45*fract(h*91.0)); }
+  float lucecitas(vec2 pos, float celda, float radio, float t, vec2 semilla){
+    vec2 g=pos/celda; vec2 id=floor(g); float h=azar(id+semilla); float h2=fract(h*113.0);
+    vec2 paseo=vec2(sin(t*(0.10+0.14*h2)+h*40.0), cos(t*(0.08+0.12*h)+h2*70.0));
+    float dist=length(fract(g)-(0.5+0.27*paseo))*celda; float presente=step(0.62, h);
+    float pulso=smoothstep(0.15, 0.85, 0.5+0.5*sin(t*(0.22+0.35*h2)+h*30.0));
+    float nucleo=exp(-dist*dist/(radio*radio)); float aura=0.30*exp(-dist*dist/(radio*radio*10.0));
+    return (nucleo+aura)*presente*pulso; }
+  float cometa(vec2 pos, vec2 tam, float t, vec2 semilla){
+    if(t<1.0) return 0.0; float periodo=19.0; float ciclo=floor(t/periodo); float local=t-ciclo*periodo; float dur=2.2;
+    float pasa=step(0.48, azar(vec2(ciclo,4.3)+semilla)); if(pasa<0.5 || local>dur) return 0.0;
+    float izquierda=step(0.5, azar(vec2(ciclo,1.9)+semilla));
+    vec2 inicio=vec2(mix(-0.05,0.40,azar(vec2(ciclo,3.1)+semilla))*tam.x, mix(0.04,0.22,azar(vec2(ciclo,8.7)+semilla))*tam.y);
+    float ang=mix(0.18,0.42,azar(vec2(ciclo,5.5)+semilla)); vec2 dir=vec2(cos(ang), sin(ang));
+    if(izquierda>0.5){ inicio.x=tam.x-inicio.x; dir.x=-dir.x; }
+    float p=local/dur; vec2 cabeza=inicio+dir*(0.85*tam.x)*p; vec2 rel=pos-cabeza;
+    float atras=dot(rel,-dir); float lado=abs(rel.x*dir.y-rel.y*dir.x); float ancho=0.7+atras*0.012;
+    float cola=step(0.0,atras)*exp(-atras/48.0)*exp(-lado*lado/(ancho*ancho));
+    float punto=exp(-dot(rel,rel)/2.2)+0.25*exp(-dot(rel,rel)/18.0); float vida=sin(p*3.14159265);
+    return (punto*1.1+cola*0.42)*vida*vida; }
+  void main(){
+    // Mismo sistema que la app: puntos, con el origen arriba a la izquierda.
+    vec2 pos = vec2(gl_FragCoord.x, tam.y*escalaPx - gl_FragCoord.y) / escalaPx;
+    const float calidad = 1.0;
+    float escala=min(tam.x,tam.y); vec2 uv=(pos-centro)/escala; float d=length(uv);
+    float giro=0.50*exp(-d*1.5)+t*0.0035; float cg=cos(giro), sg=sin(giro);
+    vec2 ru=vec2(uv.x*cg-uv.y*sg, uv.x*sg+uv.y*cg);
+    vec2 p=ru*1.30+desplazamiento+inclina*mix(0.035,0.070,calidad);
+    vec2 q=vec2(gasN(p+vec2(0.0,t*0.020),3), gasN(p+vec2(5.2,1.3)-vec2(t*0.016,0.0),3));
+    vec2 r=vec2(gasN(p+1.9*q+vec2(1.7,9.2)+t*0.011,3), gasN(p+1.9*q+vec2(8.3,2.8)-t*0.009,3));
+    float n=gasN(p+1.8*r,5); float fila=crestas(p*1.55+1.3*r+4.0); float polvo=gasN(p*2.2-1.5*q+11.0,4);
+    float luzE=mix(0.84,1.0,energia);
+    float fino=gasN(p*3.6+2.4*r+23.0,2);
+    float dens=smoothstep(0.30,0.74,n+(fino-0.5)*0.18);
+    float pliegue=smoothstep(0.58,0.92,length(r)*1.15);
+    vec3 cAcento=mix(cNube,cBrasa,0.55);
+    vec3 col=cFondo*mix(0.80,1.06,calidez);
+    col=mix(col,cNube,dens*0.74);
+    col=mix(col,cAcento,pliegue*dens*0.38);
+    col*=mix(vec3(1.0), vec3(0.82,0.96,1.12), 0.45*smoothstep(0.42,0.72,q.x));
+    col*=mix(vec3(1.0), vec3(1.10,0.94,1.04), 0.40*smoothstep(0.45,0.75,q.y));
+    float borde=dens*(1.0-dens)*4.0;
+    col+=mix(cNube,cBrasa,0.30)*borde*fino*(0.10+0.22*exp(-d*1.6))*luzE;
+    {
+      vec2 haciaLumi=-ru/max(length(ru),0.0001); vec2 base=p+1.8*r; float aqui=n;
+      float hacia=gasN(base+haciaLumi*0.09,2)*0.82+n*0.18;
+      float iluminado=clamp((aqui-hacia)*9.0,0.0,1.0); float sombra=clamp((hacia-aqui)*8.0,0.0,1.0);
+      float alcance=exp(-d*0.85);
+      col+=mix(cBrasa,cOro,0.35)*iluminado*(0.35+dens)*alcance*0.80*luzE*calidad;
+      col*=1.0-0.42*sombra*(0.3+dens)*(0.5+0.5*alcance)*calidad;
+      float angulo=atan(ru.y,ru.x);
+      float haces=ruido(vec2(angulo*7.0+desplazamiento.x, t*0.030))*ruido(vec2(angulo*19.0-desplazamiento.y, t*0.018+3.0));
+      col+=mix(cBrasa,cNube,0.30)*pow(haces,2.0)*exp(-d*1.6)*(0.30+0.70*dens)*0.50*luzE*calidad;
+    }
+    float hilo=pow(fila,3.0);
+    col+=mix(cBrasa,cNube,0.35)*hilo*(0.12+0.42*dens)*luzE;
+    float apertura=3.4-0.8*energia-1.0*calidez; float calor=exp(-d*d*apertura);
+    float velo=0.74+0.44*n+0.30*hilo;
+    col=mix(col,cBrasa,clamp(calor*velo*mix(0.30,0.58,calidez)*luzE,0.0,1.0));
+    col+=cOro*pow(calor,2.4)*velo*mix(0.10,0.24,energia)*mix(0.70,1.0,calidez);
+    col+=cBrasa*0.05*calidez*dens;
+    float veta=smoothstep(0.52,0.78,polvo); col*=1.0-0.40*veta*(1.0-0.8*calor);
+    float tapa=1.0-0.60*dens; vec3 cEstrella=vec3(1.0,0.95,0.88);
+    vec2 posCerca=pos+inclina*mix(14.0,28.0,calidad);
+    float lejos=estrellas(pos+inclina*mix(3.0,4.0,calidad),7.0,0.060,mix(0.55,0.48,calidad),t,desplazamiento);
+    float medias=estrellas(pos+inclina*mix(7.0,13.0,calidad),19.0,0.072,0.85,t,desplazamiento+17.0);
+    float cerca=estrellas(posCerca,53.0,0.090,1.35,t,desplazamiento+41.0);
+    vec3 tinte=mix(vec3(0.78,0.86,1.0), vec3(1.0,0.88,0.72), azar(floor(posCerca/53.0)+2.0));
+    col+=cEstrella*(lejos*0.42+medias*0.70)*tapa*(1.0-calor);
+    col+=tinte*cerca*1.12*tapa*(1.0-calor);
+    {
+      vec2 posBrillo=pos+inclina*40.0; float brillantes=estrellasBrillantes(posBrillo,115.0,t,desplazamiento+63.0,0.68);
+      vec3 tinteB=mix(vec3(0.80,0.88,1.0), vec3(1.0,0.92,0.80), azar(floor(posBrillo/115.0)+9.0));
+      col+=tinteB*brillantes*1.35*(1.0-0.45*dens)*(1.0-calor)*calidad;
+    }
+    col*=1.0-0.24*smoothstep(0.45,1.25,d); col*=luzE;
+    { vec3 s=col*col*(3.0-2.0*col); col=mix(col,s,0.38*calidad); float l=dot(col,vec3(0.299,0.587,0.114)); col=mix(vec3(l),col,1.0+0.16*calidad); }
+    col=max(col,cFondo*0.74);
+    vec2 sube=vec2(0.0,-t*2.2);
+    float luzLejos=lucecitas(pos+inclina*mix(22.0,36.0,calidad)+sube,104.0,1.5,t,desplazamiento+5.0);
+    float luzCerca=lucecitas(pos+inclina*mix(38.0,64.0,calidad)+sube*1.7,171.0,2.5,t*0.8,desplazamiento+29.0);
+    col+=mix(cOro,vec3(1.0,0.93,0.80),0.35)*(luzLejos*0.55+luzCerca*0.42)*(1.0-0.7*calor);
+    col+=cometa(pos,tam,t,desplazamiento)*mix(cOro,vec3(1.0,0.97,0.92),0.6);
+    col+=(azar(pos+fract(t))-0.5)/160.0;
+    vec3 sobra=max(col-0.8,0.0); vec3 suave=min(col,0.8)+0.2*(1.0-exp(-sobra*5.0)); col=mix(col,suave,calidad);
+    gl_FragColor=vec4(clamp(col,0.0,1.0),1.0);
+  }`;
+  const vertPantalla = `void main(){ gl_Position = vec4(position.xy, 0.0, 1.0); }`;
+  const uNeb = {
+    tam: { value: new THREE.Vector2(1, 1) }, centro: { value: new THREE.Vector2() }, t: { value: 0 },
+    inclina: { value: new THREE.Vector2() }, desplazamiento: { value: new THREE.Vector2(ap.despl[0], ap.despl[1]) },
+    energia: { value: .72 }, calidez: { value: .5 }, escalaPx: { value: 1 },
+    cFondo: { value: v3(ap.fondo) }, cNube: { value: v3(ap.nube) }, cBrasa: { value: v3(ap.brasa) }, cOro: { value: v3(ap.oro) }
+  };
+  const hora = new Date().getHours() + new Date().getMinutes() / 60;
+  uNeb.calidez.value = .5 + .5 * Math.cos((hora - 10) / 24 * 2 * Math.PI);   // Cielo.calidez de la app
+  const escenaNeb = new THREE.Scene();
+  const camOrto = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  escenaNeb.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2),
+    new THREE.ShaderMaterial({ uniforms: uNeb, vertexShader: vertPantalla, fragmentShader: nebulosaFrag, depthTest: false, depthWrite: false })));
+  let escalaNeb = .6;
+  let rtNeb = new THREE.WebGLRenderTarget(4, 4, { depthBuffer: false });
+  const escenaCopia = new THREE.Scene();
+  const matCopia = new THREE.ShaderMaterial({
+    uniforms: { mapa: { value: rtNeb.texture } },
+    vertexShader: `varying vec2 v; void main(){ v = position.xy*0.5+0.5; gl_Position = vec4(position.xy,0.0,1.0); }`,
+    fragmentShader: `uniform sampler2D mapa; varying vec2 v; void main(){ gl_FragColor = texture2D(mapa, v); }`,
+    depthTest: false, depthWrite: false
+  });
+  escenaCopia.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), matCopia));
+
+  /* ═════ Lumi: el shader de la app sobre un plano que siempre mira a la cámara ═════ */
+  const lumiFrag = `
+  precision highp float;
+  varying vec2 vUv;
+  uniform vec2 tam; uniform float t; uniform vec2 desplazamiento; uniform float energia; uniform float respiro; uniform float giro;
+  uniform float lobulos; uniform float profundidad; uniform float destello; uniform float ola; uniform vec2 orbita;
+  uniform vec3 cNucleo; uniform vec3 cCorona; uniform vec3 cHalo; uniform float apagar;
+  ${GLSL_RUIDO}
+  void main(){
+    const float calidad = 1.0;
+    vec2 pos = vec2(vUv.x, 1.0 - vUv.y) * tam;
+    vec2 uv = (pos - tam*0.5) / (min(tam.x,tam.y)*0.5);
+    float d=length(uv); float a=atan(uv.y,uv.x); vec2 dir=uv/max(d,0.0001);
+    float brillo=mix(0.82,1.0,energia)+0.06*destello;
+    float ondaH=0.62*sin(a*lobulos+giro)+0.38*sin(a*(lobulos-1.0)-giro*0.6+desplazamiento.x);
+    float gas=ruido(dir*1.7+desplazamiento+vec2(t*0.05,-t*0.04))-0.5;
+    float forma=1.0+profundidad*ondaH*(0.6+0.4*energia)+0.20*gas;
+    float rHalo=mix(0.58,0.80,energia)*(1.0+mix(0.04,0.10,energia)*respiro)*forma;
+    float halo=exp(-pow(d/rHalo,1.45)*2.0);
+    float co=cos(orbita.y), so=sin(orbita.y); float motas=0.0;
+    for(int i=0;i<9;i++){ float fi=float(i);
+      float h1=azar(vec2(fi*1.31,7.7)+desplazamiento); float h2=azar(vec2(fi*2.17,3.1)+desplazamiento);
+      float vel=0.07+0.09*h1; float ang=h2*6.2832+giro*0.4+t*vel;
+      float rad=mix(0.40,0.72,h1)*mix(0.80,1.0,energia)+0.02*sin(t*(0.3+h2)+fi);
+      vec2 po=rad*vec2(cos(ang), sin(ang)*orbita.x); vec2 pm=vec2(po.x*co-po.y*so, po.x*so+po.y*co);
+      float dm=length(uv-pm); float pulso=0.55+0.45*sin(t*(0.7+1.3*h1)+fi*2.4); float cerca=0.75+0.25*sin(ang);
+      motas+=(0.8*exp(-dm*dm/0.00014)+0.22*exp(-dm*dm/0.0020))*pulso*cerca; }
+    vec3 col=cHalo*halo*mix(0.40,0.60,energia);
+    vec3 cClaro=mix(cNucleo,vec3(1.0,0.97,0.90),0.28);
+    float rN=mix(0.092,0.112,energia)*(1.0+0.055*respiro); float x=d/rN;
+    float corazon=exp(-x*x*0.85);
+    float vivo=nube(uv/rN*0.8+desplazamiento+vec2(t*0.04,-t*0.03));
+    float pegado=1.0/(1.0+pow(x/mix(1.0,0.72,calidad),2.0));
+    float fil=nube(dir*1.25+desplazamiento+(x*0.12-t*0.035));
+    float medio=1.0/(1.0+pow(x/(mix(1.9,2.6,energia)*mix(1.0,0.78,calidad)),2.0));
+    medio*=(0.74+0.52*fil)*mix(1.0,0.70,calidad);
+    float velo=exp(-pow((d-rHalo*0.84)/0.075,2.0))*(0.4+0.6*fil);
+    float centelleo=1.0+0.055*sin(t*2.1+desplazamiento.x)+0.035*sin(t*3.7+desplazamiento.y*1.7)+0.025*(ruido(vec2(t*1.3,desplazamiento.x))-0.5)*2.0;
+    float nR=lobulos+1.0;
+    float largo=mix(0.60,0.82,energia)*(1.0+0.09*respiro)*(1.0+0.22*destello);
+    float rayos=0.0, rayosCortos=0.0;
+    // En la app la estrella ocupa ~1.100 píxeles (pantalla 3x) y sus rayos miden ~1,4 px. En una ventana
+    // pequeña quedarían por debajo de 1 px y desaparecerían: aquí nunca bajan de 1,1 px.
+    float minW=1.1*2.0/min(tam.x,tam.y);
+    for(int i=0;i<8;i++){ float fi=float(i); float activo=step(fi+0.5,nR);
+      float ang=giro*0.35+desplazamiento.y+6.2831853*fi/nR; float danza=sin(t*0.75-fi*ola*6.2831853/nR);
+      vec2 e=vec2(cos(ang),sin(ang)); float al=dot(uv,e); float pe=abs(uv.x*e.y-uv.y*e.x);
+      float chispa=1.0+0.10*sin(t*(1.6+0.35*fi)+fi*2.7+desplazamiento.x);
+      float L=largo*(0.82+0.18*danza)*chispa;
+      float w=max((0.0024+0.0068*clamp(1.0-al/L,0.0,1.0))*mix(1.0,0.78,calidad), minW);
+      float linea=exp(-pe*pe/(w*w))+mix(0.10,0.03,calidad)*exp(-pe*pe/(w*w*14.0));
+      rayos+=activo*smoothstep(-0.01,0.03,al)*linea*exp(-al/L*2.5)*chispa;
+      float ang2=ang+3.14159265/nR; vec2 e2=vec2(cos(ang2),sin(ang2)); float al2=dot(uv,e2); float pe2=abs(uv.x*e2.y-uv.y*e2.x);
+      float L2=L*0.46; float w2=max((0.0020+0.0050*clamp(1.0-al2/L2,0.0,1.0))*mix(1.0,0.78,calidad), minW*0.85);
+      float linea2=exp(-pe2*pe2/(w2*w2))+mix(0.10,0.03,calidad)*exp(-pe2*pe2/(w2*w2*14.0));
+      rayosCortos+=activo*smoothstep(-0.01,0.03,al2)*linea2*exp(-al2/L2*2.5); }
+    float brasa=pow(nube(dir*5.5+desplazamiento+vec2(t*0.05,giro)),3.0)*exp(-x*0.55)*2.2;
+    col+=mix(cHalo,cCorona,0.35)*velo*mix(0.02,0.10,energia);
+    col+=cCorona*medio*0.80*brillo;
+    col+=mix(cNucleo,cCorona,0.40)*pegado*0.90*brillo*(1.0+0.30*destello)*centelleo;
+    col+=cCorona*brasa*0.14*brillo;
+    col+=mix(mix(cClaro,cCorona,0.48),cHalo,0.12)*rayos*1.25*brillo;
+    col+=mix(mix(cClaro,cCorona,0.55),cHalo,0.15)*rayosCortos*0.80*brillo;
+    col+=cClaro*corazon*(1.9+0.5*(vivo-0.5))*brillo*centelleo;
+    float px=2.0/min(tam.x,tam.y); float rPunto=rN*0.50;
+    float punto=smoothstep(rPunto+px,rPunto-px,d);
+    col+=cClaro*punto*1.1*centelleo;
+    float grano=nube(uv/rN*2.4+desplazamiento*1.3+vec2(t*0.06,-t*0.05));
+    col+=cClaro*corazon*(grano-0.5)*0.40*brillo*calidad;
+    float chispaC=exp(-x*x*14.0);
+    col+=vec3(1.0,0.98,0.94)*chispaC*0.50*centelleo*calidad;
+    col=1.0-exp(-col*1.20);
+    col+=mix(cNucleo,cHalo,0.35)*motas*mix(0.10,0.50,energia);
+    float margen=smoothstep(1.0,0.74,d); col*=margen;
+    col+=(azar(pos+fract(t)*13.0)-0.5)/150.0;
+    col=clamp(col,0.0,1.0);
+    float alfa=max(col.r,max(col.g,col.b));
+    gl_FragColor=vec4(col*apagar, alfa*apagar);
+  }`;
+  const vertPlano = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
+  const uLumi = {
+    tam: { value: new THREE.Vector2(400, 400) }, t: { value: 0 }, desplazamiento: { value: new THREE.Vector2(ap.despl[0], ap.despl[1]) },
+    energia: { value: .72 }, respiro: { value: 0 }, giro: { value: 0 }, lobulos: { value: ap.lobulos }, profundidad: { value: ap.profundidad },
+    destello: { value: 0 }, ola: { value: ap.ola }, orbita: { value: new THREE.Vector2(ap.orbita[0], ap.orbita[1]) },
+    cNucleo: { value: new THREE.Vector3() }, cCorona: { value: new THREE.Vector3() }, cHalo: { value: v3(ap.halo) }, apagar: { value: 1 }
+  };
+  const TAM_LUMI = 2.7;
+  const lumi = new THREE.Mesh(new THREE.PlaneGeometry(TAM_LUMI, TAM_LUMI), new THREE.ShaderMaterial({
+    uniforms: uLumi, vertexShader: vertPlano, fragmentShader: lumiFrag, transparent: true, depthWrite: false,
+    blending: THREE.CustomBlending,
+    // Como en la app: el color de Lumi ya viene multiplicado por su transparencia.
+    blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor
+  }));
+  lumi.renderOrder = 10;
+  const grupoLumi = new THREE.Group(); grupoLumi.add(lumi); mundo.add(grupoLumi);
+
+  // Los colores de Lumi según la energía, igual que LumiView.
+  const coronaBaja = hsb(.108, .72, 1), coronaAlta = hsb(.138, .55, 1), nucleoBajo = hsb(.112, .46, 1), nucleoAlto = hsb(.142, .30, 1);
+  const mezclar = (a, b, k) => a.map((x, i) => x + (b[i] - x) * k);
+  function coloresDeLumi(tiempo, e) {
+    const m = (.5 - .5 * Math.cos(tiempo * 2 * Math.PI / ap.periodoLuz)) * .35;
+    const corona = mezclar(mezclar(ap.corona, ap.coronaVecino, m), mezclar(coronaBaja, coronaAlta, e), .65);
+    const nucleo = mezclar(mezclar(ap.nucleo, ap.nucleoVecino, m), mezclar(nucleoBajo, nucleoAlto, e), .65);
+    uLumi.cCorona.value.set(...corona); uLumi.cNucleo.value.set(...nucleo);
+  }
+  // El ritmo de Lumi (RelojDeLumi): respira, gira y late con su propio periodo.
+  const reloj = { tiempo: 0, faseR: 0, faseF: 0, giro: 0 };
+  function avanzarReloj(dt, e) {
+    reloj.tiempo += dt;
+    const ritmo = .62 + .38 * e;
+    reloj.faseR += dt * 2 * Math.PI / ap.respira * ritmo;
+    reloj.faseF += dt * (.22 + .36 * e);
+    reloj.giro += dt * ap.sentido * (.05 + .10 * e);
+    const s = Math.sin(reloj.faseR);
+    uLumi.respiro.value = s - .18 * Math.sin(2 * reloj.faseR);
+    uLumi.giro.value = reloj.giro; uLumi.t.value = reloj.tiempo;
+    const amp = .012 + .010 * e;
+    lumi.position.set(Math.sin(reloj.faseF * ap.flote + 1.3) * amp * .7 * TAM_LUMI, -(Math.sin(reloj.faseF) * amp + Math.sin(reloj.faseF * .47 * ap.flote) * amp * .5) * TAM_LUMI, 0);
+    coloresDeLumi(reloj.tiempo, e);
+  }
+
+  avanzarReloj(0, .72);   // colores y forma desde el primer cuadro
+
+  /* ═════ Las otras partes, en 3D alrededor de Lumi ═════ */
+  const ORO = new THREE.Color(0xd9c08a), ORO_LUZ = new THREE.Color(0xecdeb8), MARFIL = new THREE.Color(0xf2ecdd);
+  const partes = {};   // id → { grupo, base, dir, k, objetivo, ancla }
+  function parte(id, grupo, dir, ancla) {
+    partes[id] = { grupo, base: grupo.position.clone(), dir: new THREE.Vector3(...dir), k: 0, objetivo: 0, ancla: new THREE.Vector3(...ancla) };
+    mundo.add(grupo);
+  }
+  parte('lumi', grupoLumi, [0, 0, 0], [0, .15, 0]);
+
+  // Tu cielo: velos de gas con los colores de la nebulosa, en capas alrededor (dan profundidad al girar).
+  const gasFrag = `
+  precision highp float; varying vec2 vUv; uniform float t; uniform vec3 cNube; uniform vec3 cBrasa; uniform float semilla; uniform float fuerza;
+  ${GLSL_RUIDO}
+  void main(){ vec2 p=vUv*2.0-1.0; float d=length(p);
+    float n=nube(p*1.6+semilla+vec2(t*0.012,-t*0.009)); float f=nube(p*3.2-semilla*0.7+n*1.4);
+    float forma=smoothstep(1.0,0.15,d)*smoothstep(0.35,0.85,n*0.75+f*0.45);
+    vec3 col=mix(cNube,cBrasa,0.35+0.4*f)*1.15; float a=forma*fuerza;
+    gl_FragColor=vec4(col*a, a); }`;
+  const grupoGas = new THREE.Group();
+  const velos = [];
+  for (let i = 0; i < 7; i++) {
+    const ang = i / 7 * Math.PI * 2 + .4, rad = 2.6 + (i % 3) * .5, alto = ((i * 37) % 7 - 3) * .32;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(3.4 + (i % 2), 3.0 + (i % 3) * .4), new THREE.ShaderMaterial({
+      uniforms: { t: { value: 0 }, cNube: { value: v3(ap.nube) }, cBrasa: { value: v3(ap.brasa) }, semilla: { value: i * 7.3 + ap.despl[0] }, fuerza: { value: .30 } },
+      vertexShader: vertPlano, fragmentShader: gasFrag, transparent: true, depthWrite: false,
+      blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor
+    }));
+    m.position.set(Math.cos(ang) * rad, alto, Math.sin(ang) * rad - .6);
+    m.userData.base = m.position.clone();
+    m.renderOrder = 1;
+    grupoGas.add(m); velos.push(m);
+  }
+  // Estrellas de fondo con profundidad real.
+  {
+    const n = 420, pos = new Float32Array(n * 3);
+    let s = 9; const azar = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    for (let i = 0; i < n; i++) {
+      const u = azar() * 2 - 1, th = azar() * Math.PI * 2, r = 9 + azar() * 7, q = Math.sqrt(1 - u * u);
+      pos.set([Math.cos(th) * q * r, u * r, Math.sin(th) * q * r], i * 3);
+    }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: MARFIL, size: 1.6, sizeAttenuation: false, transparent: true, opacity: .55, depthWrite: false }));
+    grupoGas.add(pts);
+  }
+  parte('nebulosa', grupoGas, [0, 0, 0], [2.6, 1.2, -.6]);
+
+  // El cerebro: tu día como un aro de 24 horas; la altura es la energía (la misma curva base de la app).
+  function curvaBase(hora, despertar = 7, pico = 10, apagado = 22) {
+    const desde = (x, y) => { let d = (y - x) % 24; return d < 0 ? d + 24 : d; };
+    let despierto = desde(despertar, apagado); if (despierto < 1) despierto = 16;
+    const t = desde(despertar, hora); if (t > despierto) return 10;
+    const aPico = Math.min(desde(hora, pico), desde(pico, hora));
+    let e = 32 + 58 * Math.exp(-(aPico * aPico) / (2 * 9));
+    e *= Math.min(1, .55 + .45 * t);
+    const resta = despierto - t; if (resta < 2) e *= .6 + .2 * resta;
+    return Math.min(Math.max(e, 8), 95);
+  }
+  const grupoCerebro = new THREE.Group();
+  {
+    const R = 1.75, puntos = [], barras = [];
+    let mejor = 0, maxV = 0;
+    for (let h = 0; h < 24; h++) { const v = curvaBase(h + .5); if (v > maxV) { maxV = v; mejor = h; } }
+    for (let i = 0; i <= 96; i++) {
+      const h = i / 4, a = h / 24 * Math.PI * 2 - Math.PI / 2, alto = .04 + .62 * curvaBase(h) / 100;
+      puntos.push(new THREE.Vector3(Math.cos(a) * R, alto, Math.sin(a) * R));
+    }
+    const linea = new THREE.Line(new THREE.BufferGeometry().setFromPoints(puntos), new THREE.LineBasicMaterial({ color: ORO, transparent: true, opacity: .9 }));
+    grupoCerebro.add(linea);
+    const aro = [];
+    for (let i = 0; i <= 96; i++) { const a = i / 96 * Math.PI * 2; aro.push(new THREE.Vector3(Math.cos(a) * R, 0, Math.sin(a) * R)); }
+    grupoCerebro.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(aro), new THREE.LineBasicMaterial({ color: MARFIL, transparent: true, opacity: .18 })));
+    for (let h = 0; h < 24; h++) {
+      const a = (h + .5) / 24 * Math.PI * 2 - Math.PI / 2, alto = .04 + .62 * curvaBase(h + .5) / 100;
+      barras.push(new THREE.Vector3(Math.cos(a) * R, 0, Math.sin(a) * R), new THREE.Vector3(Math.cos(a) * R, alto, Math.sin(a) * R));
+    }
+    grupoCerebro.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(barras), new THREE.LineBasicMaterial({ color: ORO, transparent: true, opacity: .28 })));
+    const a = (mejor + .5) / 24 * Math.PI * 2 - Math.PI / 2;
+    const punto = new THREE.Mesh(new THREE.SphereGeometry(.035, 20, 20), new THREE.MeshBasicMaterial({ color: ORO_LUZ }));
+    punto.position.set(Math.cos(a) * R, .04 + .62 * maxV / 100, Math.sin(a) * R);
+    grupoCerebro.add(punto);
+  }
+  grupoCerebro.position.set(0, -.55, 0);
+  grupoCerebro.rotation.x = .06;
+  parte('cerebro', grupoCerebro, [0, -1.25, .2], [0, -.3, 1.75]);
+
+  // La tarea de ahora: una tarjeta de cristal con su botón dorado (texto de ejemplo, sin datos).
+  function texturaDeTarjeta() {
+    const c = document.createElement('canvas'); c.width = 640; c.height = 380;
+    const x = c.getContext('2d');
+    const r = 44;
+    x.beginPath(); x.roundRect(6, 6, 628, 368, r);
+    x.fillStyle = 'rgba(20,26,56,.86)'; x.fill();
+    const borde = x.createLinearGradient(0, 0, 0, 380); borde.addColorStop(0, 'rgba(242,236,221,.38)'); borde.addColorStop(1, 'rgba(242,236,221,.06)');
+    x.strokeStyle = borde; x.lineWidth = 2.5; x.stroke();
+    x.fillStyle = 'rgba(242,236,221,.62)'; x.font = '600 22px Manrope'; x.letterSpacing = '6px'; x.fillText('AHORA', 48, 76);
+    x.letterSpacing = '0px'; x.fillStyle = '#f2ecdd'; x.font = '400 52px Fraunces'; x.fillText('Una sola', 48, 152);
+    x.font = 'italic 400 52px Fraunces'; x.fillStyle = '#d9c08a'; x.fillText('cosa.', 270, 152);
+    const b = x.createLinearGradient(0, 220, 0, 320); b.addColorStop(0, '#ecdeb8'); b.addColorStop(.55, '#d9c08a'); b.addColorStop(1, '#b8975a');
+    x.beginPath(); x.roundRect(48, 222, 330, 96, 30); x.fillStyle = b; x.fill();
+    x.fillStyle = '#1f1a14'; x.font = '700 24px Manrope'; x.letterSpacing = '6px'; x.textAlign = 'center'; x.fillText('EMPEZAR', 213, 280);
+    x.fillStyle = 'rgba(242,236,221,.6)'; x.font = '600 21px Manrope'; x.fillText('AHORA NO', 498, 280);
+    const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 4;
+    return tx;
+  }
+  const tarjeta = new THREE.Mesh(new THREE.PlaneGeometry(1.15, .68), new THREE.MeshBasicMaterial({ map: texturaDeTarjeta(), transparent: true, depthWrite: false }));
+  tarjeta.renderOrder = 12;
+  const grupoAhora = new THREE.Group(); grupoAhora.add(tarjeta);
+  grupoAhora.position.set(1.3, -.55, .9);
+  parte('ahora', grupoAhora, [.75, -.2, .3], [1.3, -.3, .9]);
+
+  // Tus estrellas: una por cada tarea terminada (aquí, de ejemplo), con su punta dorada.
+  function texturaEstrellita() {
+    const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d');
+    const g = x.createRadialGradient(32, 32, 0, 32, 32, 30); g.addColorStop(0, 'rgba(236,222,184,.55)'); g.addColorStop(1, 'rgba(236,222,184,0)');
+    x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+    x.fillStyle = '#f6eed8'; x.beginPath();
+    x.moveTo(32, 6); x.quadraticCurveTo(35, 29, 58, 32); x.quadraticCurveTo(35, 35, 32, 58); x.quadraticCurveTo(29, 35, 6, 32); x.quadraticCurveTo(29, 29, 32, 6); x.fill();
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  }
+  const grupoEstrellas = new THREE.Group();
+  {
+    const tx = texturaEstrellita();
+    let s = 21; const azar = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    for (let i = 0; i < 14; i++) {
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tx, color: ORO_LUZ, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+      const a = azar() * Math.PI * 2, r = 1.6 + azar() * 1.3;
+      sp.position.set(Math.cos(a) * r, .9 + azar() * 1.1, Math.sin(a) * r * .6);
+      const t = .045 + azar() * .045; sp.scale.set(t, t, 1); sp.userData.fase = azar() * 6.28;
+      grupoEstrellas.add(sp);
+    }
+  }
+  parte('estrellas', grupoEstrellas, [-.9, 1.0, 0], [-1.2, 1.6, 0]);
+
+  // Tiempo visible: el anillo de luz alrededor de Lumi, que se va llenando.
+  const grupoTiempo = new THREE.Group();
+  const RADIO_ANILLO = TAM_LUMI * .25;
+  const aroBase = new THREE.Mesh(new THREE.TorusGeometry(RADIO_ANILLO, .006, 8, 160), new THREE.MeshBasicMaterial({ color: ORO, transparent: true, opacity: .22 }));
+  let arcoGeo = new THREE.TorusGeometry(RADIO_ANILLO, .012, 10, 160, Math.PI * 1.2);
+  const arco = new THREE.Mesh(arcoGeo, new THREE.MeshBasicMaterial({ color: ORO, transparent: true, opacity: .62 }));
+  arco.rotation.z = Math.PI / 2;
+  grupoTiempo.add(aroBase, arco);
+  parte('tiempo', grupoTiempo, [0, -.55, 1.1], [0, -RADIO_ANILLO, 0]);
+  let llenadoActual = -1;
+  function llenarAnillo(f) {
+    const q = Math.round(f * 120) / 120;
+    if (q === llenadoActual) return; llenadoActual = q;
+    arco.geometry.dispose();
+    arco.geometry = new THREE.TorusGeometry(RADIO_ANILLO, .012, 10, 160, Math.max(.02, q) * Math.PI * 2);
+  }
+
+  /* ═════ Etiquetas con línea fina (despiece) ═════ */
+  const capaEtiquetas = document.getElementById('etiquetas');
+  const svg = capaEtiquetas.querySelector('svg');
+  const NS = 'http://www.w3.org/2000/svg';
+  const etiquetas = {};
+  PARTES.forEach(p => {
+    const div = document.createElement('div'); div.className = 'etiqueta'; div.textContent = p.nombre; capaEtiquetas.appendChild(div);
+    const linea = document.createElementNS(NS, 'line'); linea.setAttribute('stroke', 'rgba(217,192,138,.65)'); linea.setAttribute('stroke-width', '.75'); linea.style.opacity = 0; linea.style.transition = 'opacity .6s';
+    const punto = document.createElementNS(NS, 'circle'); punto.setAttribute('r', '2.2'); punto.setAttribute('fill', '#ecdeb8'); punto.style.opacity = 0; punto.style.transition = 'opacity .6s';
+    svg.append(linea, punto);
+    etiquetas[p.id] = { div, linea, punto };
+  });
+  const tmp = new THREE.Vector3();
+  function aPantalla(v, ancho, alto) {
+    tmp.copy(v).project(camara);
+    return [(tmp.x * .5 + .5) * ancho, (-tmp.y * .5 + .5) * alto, tmp.z < 1];
+  }
+
+  /* ═════ Estado: despiece y parte elegida ═════ */
+  let abierto = false, elegida = null;
+  const suave = k => 1 - Math.pow(1 - k, 3);   // frena al final
+  function actualizarObjetivos() {
+    for (const id in partes) partes[id].objetivo = abierto ? 1 : (elegida === id ? 1 : 0);
+  }
+  botonDespiece.addEventListener('click', () => {
+    abierto = !abierto; botonDespiece.setAttribute('aria-pressed', abierto);
+    botonDespiece.textContent = abierto ? 'Volver a unir' : 'Ver por dentro';
+    actualizarObjetivos(); pedir();
+  });
+
+  // Cámara: viaja hacia cada parte (posición relativa a la parte, del lado desde donde se mira ahora).
+  const VISTAS = {
+    lumi: { dist: 3.4, alto: .15 }, nebulosa: { dist: 8.6, alto: 1.6 }, cerebro: { dist: 4.6, alto: 2.4 },
+    ahora: { dist: 2.7, alto: .1 }, estrellas: { dist: 4.4, alto: .6 }, tiempo: { dist: 3.0, alto: 0 }
+  };
+  let viaje = null;
+  function centroDeParte(id) {
+    const p = partes[id];
+    return p.ancla.clone().add(p.dir.clone().multiply(escalaDespiece).multiplyScalar(id === 'nebulosa' ? 0 : 1));
+  }
+  function viajarA(id, duracion = 1.6) {
+    const destinoT = id ? centroDeParte(id) : new THREE.Vector3(0, 0, 0);
+    const v = id ? VISTAS[id] : { dist: INICIO.length(), alto: INICIO.y };
+    const desde = camara.position.clone().sub(controles.target);
+    desde.y = 0; if (desde.lengthSq() < 1e-4) desde.set(0, 0, 1); desde.normalize();
+    const destinoP = destinoT.clone().add(desde.multiplyScalar(v.dist)).add(new THREE.Vector3(0, v.alto, 0));
+    if (quieto) { controles.target.copy(destinoT); camara.position.copy(destinoP); controles.update(); pedir(); return; }
+    viaje = { t0: performance.now(), dur: duracion * 1000, pA: camara.position.clone(), tA: controles.target.clone(), pB: destinoP, tB: destinoT };
+  }
+  function elegir(id) {
+    elegida = elegida === id ? null : id;
+    [...pestanas.children].forEach(b => b.setAttribute('aria-pressed', b.dataset.id === elegida));
+    mostrarPanel(elegida ? PARTES.find(p => p.id === elegida) : null);
+    actualizarObjetivos(); viajarA(elegida); pedir();
+  }
+  pestanas.addEventListener('click', e => { const b = e.target.closest('button'); if (b) elegir(b.dataset.id); });
+
+  const escalaDespiece = new THREE.Vector3(1, 1, 1);
+  const dirEscalada = new THREE.Vector3();
+  /* ═════ Tamaño, calidad automática ═════ */
+  let ancho = 1, alto = 1;
+  function medir() {
+    const r = escena.getBoundingClientRect(); ancho = Math.max(1, r.width); alto = Math.max(1, r.height);
+    renderer.setPixelRatio(dpr); renderer.setSize(ancho, alto, false);
+    camara.aspect = ancho / alto;
+    // En vertical, un poco más de campo para que todo quepa.
+    camara.fov = ancho / alto < .8 ? 52 : 38;
+    // La escena se ve un poco más arriba: abajo están el texto y los botones.
+    camara.setViewOffset(ancho, alto, 0, alto * .11, ancho, alto);
+    // En pantallas en vertical la tarjeta se acerca al centro para que no se corte.
+    const xTarjeta = ancho / alto < .8 ? .32 : 1.3;
+    // En vertical, el despiece se abre menos hacia los lados y hacia abajo (si no, se sale o tapa el texto).
+    escalaDespiece.set(ancho / alto < .8 ? .55 : 1, ancho / alto < .8 ? .6 : 1, 1);
+    partes.ahora.base.x = xTarjeta; partes.ahora.ancla.x = xTarjeta;
+    camara.updateProjectionMatrix();
+    const s = dpr * escalaNeb;
+    rtNeb.setSize(Math.max(2, Math.round(ancho * s)), Math.max(2, Math.round(alto * s)));
+    uNeb.tam.value.set(ancho, alto); uNeb.escalaPx.value = s;
+    pedir();
+  }
+  new ResizeObserver(medir).observe(escena);
+  medir();
+  // Si el teléfono no llega a ~55 cuadros, se baja la resolución (primero la del cielo, luego la general).
+  const muestras = [];
+  let ultimoAjuste = 0;
+  function ajustarCalidad(ms, ahora) {
+    muestras.push(ms); if (muestras.length > 90) muestras.shift();
+    if (ahora - ultimoAjuste < 1500 || muestras.length < 60) return;
+    const media = muestras.reduce((a, b) => a + b, 0) / muestras.length;
+    if (media > 18.5) {
+      if (escalaNeb > .42) escalaNeb = Math.max(.42, escalaNeb - .1);
+      // Nunca por debajo de 1 píxel real por punto: la estrella no se puede ver borrosa (Diaz).
+      else if (dpr > 1) dpr = Math.max(1, dpr - .25);
+      else return;
+      ultimoAjuste = ahora; muestras.length = 0; medir();
+    } else if (media < 11 && (dpr < dprMax || escalaNeb < .6)) {
+      if (dpr < dprMax) dpr = Math.min(dprMax, dpr + .25); else escalaNeb = Math.min(.6, escalaNeb + .1);
+      ultimoAjuste = ahora; muestras.length = 0; medir();
+    }
+  }
+
+  /* ═════ Modo grabación: 25 s en bucle, todo sale de un solo reloj ═════ */
+  const ORDEN = PARTES.map(p => p.id);
+  function estadoPlay(s) {
+    // 0–4 s rodea · 4–16 s una parte cada 2 s · 16–19 s se abre · 19–22 s abierto · 22–25 s se une y vuelve.
+    const giro = s / 25 * Math.PI * 2;
+    const base = new THREE.Vector3(Math.sin(giro) * 6.2, .55 + Math.sin(giro * 2) * .35, Math.cos(giro) * 6.2);
+    let objetivo = new THREE.Vector3(), peso = 0, parteId = null, k = 0;
+    if (s >= 4 && s < 16) {
+      const i = Math.floor((s - 4) / 2), local = (s - 4) % 2;
+      parteId = ORDEN[i];
+      const entrada = Math.min(local / .7, 1), salida = Math.min((2 - local) / .5, 1);
+      peso = suave(Math.min(entrada, salida)); k = peso;
+    }
+    if (s >= 16 && s < 22) k = suave(Math.min((s - 16) / 3, 1));
+    if (s >= 22) k = 1 - suave(Math.min((s - 22) / 3, 1));
+    let pos = base;
+    if (parteId) {
+      const v = VISTAS[parteId], t = centroDeParte(parteId);
+      const dir = base.clone().setY(0).normalize();
+      const p = t.clone().add(dir.multiplyScalar(v.dist)).add(new THREE.Vector3(0, v.alto, 0));
+      pos = base.clone().lerp(p, peso); objetivo = new THREE.Vector3().lerp(t, peso);
+    }
+    return { pos, objetivo, parteId, kTodas: s >= 16 ? k : 0, kParte: parteId ? k : 0 };
+  }
+  let ultimaPartePlay = undefined;
+
+  let medidor = null;
+  if (params.has('fps')) { medidor = document.createElement('div'); medidor.style.cssText = 'position:absolute;top:60px;left:16px;z-index:9;font:12px Manrope;color:#ecdeb8;background:rgba(0,0,0,.4);padding:4px 8px;border-radius:8px'; escena.appendChild(medidor); }
+  /* ═════ Bucle ═════ */
+  controles.addEventListener('change', pedir);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { anterior = performance.now(); pedir(); } });
+
+  function dibujar(ahora) {
+    pendiente = false;
+    const dt = Math.min((ahora - anterior) / 1000, .1);
+    if (cuadro > 2) ajustarCalidad(ahora - anterior, ahora);
+    anterior = ahora; cuadro++;
+
+    if (!quieto) avanzarReloj(dt, .72); else if (cuadro < 3) avanzarReloj(0, .72);
+
+    // Viaje de cámara.
+    if (modoPlay) {
+      const s = ((ahora - inicioPlay) / 1000) % 25;
+      const e = estadoPlay(s);
+      camara.position.copy(e.pos); camara.lookAt(e.objetivo); controles.target.copy(e.objetivo);
+      for (const id in partes) partes[id].k = Math.max(e.kTodas, e.parteId === id ? e.kParte : 0);
+      if (e.parteId !== ultimaPartePlay) {
+        ultimaPartePlay = e.parteId;
+        mostrarPanel(e.parteId ? PARTES.find(p => p.id === e.parteId) : null);
+      }
+    } else {
+      if (viaje) {
+        const k = Math.min((ahora - viaje.t0) / viaje.dur, 1), e = suave(k);
+        camara.position.lerpVectors(viaje.pA, viaje.pB, e); controles.target.lerpVectors(viaje.tA, viaje.tB, e);
+        if (k >= 1) viaje = null;
+      }
+      controles.update();
+      // Despiece: 3 s, frena al final.
+      for (const id in partes) {
+        const p = partes[id];
+        const paso = quieto ? 1 : dt / 3;
+        p.k += Math.sign(p.objetivo - p.k) * Math.min(Math.abs(p.objetivo - p.k), paso);
+      }
+    }
+
+    // Colocar cada parte según su separación.
+    for (const id in partes) {
+      const p = partes[id], e = suave(p.k);
+      if (id === 'nebulosa') {
+        velos.forEach(v => v.position.copy(v.userData.base).multiplyScalar(1 + .55 * e));
+      } else p.grupo.position.copy(p.base).addScaledVector(dirEscalada.copy(p.dir).multiply(escalaDespiece), e);
+    }
+    // Lo que debe mirar siempre a la cámara: Lumi, sus velos, la tarjeta y el anillo.
+    lumi.quaternion.copy(camara.quaternion);
+    velos.forEach(v => v.quaternion.copy(camara.quaternion));
+    tarjeta.quaternion.copy(camara.quaternion);
+    grupoTiempo.quaternion.copy(camara.quaternion);
+    const tt = quieto ? 0 : reloj.tiempo;
+    velos.forEach(v => { v.material.uniforms.t.value = tt; });
+    grupoEstrellas.children.forEach(sp => { sp.material.opacity = .45 + .3 * Math.sin(tt * .8 + sp.userData.fase); });
+    llenarAnillo(quieto ? .62 : ((tt % 25) / 25));
+    // El anillo no se ve en la vista normal (Diaz): solo aparece al elegir "Tiempo visible" o al ver por dentro.
+    const kT = suave(partes.tiempo.k);
+    grupoTiempo.visible = kT > .01;
+    aroBase.material.opacity = .22 * kT; arco.material.opacity = .62 * kT;
+    grupoCerebro.rotation.y = tt * .05;
+
+    // La nebulosa sigue a Lumi en la pantalla y se mueve un poco al girar (como al inclinar el iPhone).
+    const [lx, ly] = aPantalla(grupoLumi.getWorldPosition(new THREE.Vector3()), ancho, alto);
+    uNeb.centro.value.set(lx, ly);
+    const esf = new THREE.Spherical().setFromVector3(camara.position.clone().sub(controles.target));
+    uNeb.inclina.value.set(Math.sin(esf.theta) * .9, (esf.phi - Math.PI / 2) * .9);
+    uNeb.t.value = tt;
+    // Lumi se dibuja al tamaño en píxeles con que se ve (para que su centro quede nítido).
+    const d = camara.position.distanceTo(grupoLumi.position);
+    const pxPorUnidad = alto / (2 * Math.tan(camara.fov * Math.PI / 360) * d);
+    uLumi.tam.value.set(TAM_LUMI * pxPorUnidad, TAM_LUMI * pxPorUnidad);
+
+    renderer.clear();
+    if (cuadro % 2 === 1 || quieto || cuadro < 3) { renderer.setRenderTarget(rtNeb); renderer.render(escenaNeb, camOrto); renderer.setRenderTarget(null); }
+    renderer.render(escenaCopia, camOrto);
+    renderer.clearDepth();
+    renderer.render(mundo, camara);
+
+    // Etiquetas: con despiece, cada parte con su línea fina. Si dos chocan, se separan en vertical.
+    const colocadas = [];
+    PARTES.forEach(p => {
+      const et = etiquetas[p.id], pa = partes[p.id];
+      const ve = pa.k > .55 && (abierto || modoPlay ? pa.k > .55 : elegida === p.id);
+      const ancla = pa.ancla.clone().addScaledVector(dirEscalada.copy(pa.dir).multiply(escalaDespiece), p.id === 'nebulosa' ? 0 : suave(pa.k));
+      const [x, y, delante] = aPantalla(ancla, ancho, alto);
+      const cx = ancho / 2, cy = alto / 2;
+      let dx = x - cx, dy = y - cy; const l = Math.hypot(dx, dy) || 1; dx /= l; dy /= l;
+      // Las etiquetas nunca tapan el texto de abajo.
+      const limiteAbajo = document.getElementById('panel').getBoundingClientRect().top - escena.getBoundingClientRect().top - 24;
+      const ex = Math.min(Math.max(x + dx * 70, 70), ancho - 70);
+      let ey = Math.min(Math.max(y + dy * 46, 90), limiteAbajo);
+      if (ve && delante) {
+        for (let vuelta = 0; vuelta < 6; vuelta++) {
+          const choca = colocadas.find(c => Math.abs(c[0] - ex) < 130 && Math.abs(c[1] - ey) < 32);
+          if (!choca) break;
+          ey = ey > choca[1] || ey + 34 > limiteAbajo ? choca[1] - 34 : choca[1] + 34;
+          if (ey > limiteAbajo) ey = choca[1] - 34;
+        }
+        colocadas.push([ex, ey]);
+      }
+      const mostrar = ve && delante;
+      et.div.classList.toggle('ve', mostrar);
+      et.div.style.left = ex + 'px'; et.div.style.top = ey + 'px';
+      et.linea.setAttribute('x1', x); et.linea.setAttribute('y1', y); et.linea.setAttribute('x2', ex); et.linea.setAttribute('y2', ey);
+      et.linea.style.opacity = mostrar ? 1 : 0; et.punto.setAttribute('cx', x); et.punto.setAttribute('cy', y); et.punto.style.opacity = mostrar ? 1 : 0;
+    });
+
+    if (cuadro >= 2) document.getElementById('cargando').classList.add('fuera');
+    // ?fps muestra los cuadros por segundo y la calidad (para medir en un teléfono).
+    if (medidor && cuadro % 30 === 0) medidor.textContent = `${Math.round(1000 / Math.max(1, muestras.slice(-30).reduce((a, b) => a + b, 0) / Math.max(1, muestras.slice(-30).length)))} fps · píxeles ${dpr.toFixed(2)} · cielo ${escalaNeb.toFixed(2)}`;
+    if (!quieto) pedir();
+    else if (viaje || cuadro < 3) pedir();
+  }
+  pedir();
+}
+</script>
