@@ -28,6 +28,10 @@ struct TareaDelMomentoView: View {
     @Environment(\.locale) private var idiomaElegido
     @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
     private var pendientes: [Tarea]
+    @Query private var personas: [Persona]
+    /// Qué va en la parte baja de las tarjetas Hoy y Tu mejor hora (Diaz: "que no esté tan vacío").
+    /// 0 = como antes · 1 Estrellas y reloj · 2 Estrellas y curva · 3 Frases. Para comparar: `-disenoMedianas N`.
+    private var disenoMedianas: Int { UserDefaults.standard.integer(forKey: "disenoMedianas") }
 
     @State private var modo = Modo.ver
     @State private var frase = ""
@@ -247,9 +251,27 @@ struct TareaDelMomentoView: View {
                     .contentTransition(.numericText())
             }
             Spacer(minLength: 0)
-            LineaDeLuz(cantidad: Double(hechasHoy.count) / 4)
-                .frame(width: 58, height: 6)
-                .accessibilityHidden(true)
+            switch disenoMedianas {
+            case 1, 2:
+                // Una estrellita por cada tarea de hoy (sin huecos vacíos: nunca parece una racha rota).
+                if hechasHoy.isEmpty {
+                    LineaDeLuz(cantidad: 0).frame(width: 58, height: 6).accessibilityHidden(true)
+                } else {
+                    EstrellasDeHoy(cantidad: hechasHoy.count).accessibilityHidden(true)
+                }
+            case 3:
+                if let ultima = hechasHoy.last?.tareaID, let texto = tituloDe(ultima) {
+                    Text("Lo último: \(texto)")
+                        .font(.zenoTexto(.caption))
+                        .foregroundStyle(Lujo.marfilSecundario)
+                        .lineLimit(2)
+                }
+                LineaDeLuz(cantidad: Double(hechasHoy.count) / 4).frame(width: 58, height: 6).accessibilityHidden(true)
+            default:
+                LineaDeLuz(cantidad: Double(hechasHoy.count) / 4)
+                    .frame(width: 58, height: 6)
+                    .accessibilityHidden(true)
+            }
         }
         .animation(Lujo.curva(), value: hechasHoy.count)
         .padding(18)
@@ -266,10 +288,22 @@ struct TareaDelMomentoView: View {
                 .font(.zenoTitulo(.largeTitle, .light))
                 .foregroundStyle(Lujo.marfil)
                 .contentTransition(.numericText())
+            if disenoMedianas != 0 {
+                Text(CuandoEsTuHora.texto(mejorHora))
+                    .font(.zenoTexto(.caption))
+                    .foregroundStyle(Lujo.marfilSecundario)
+            }
             Spacer(minLength: 0)
-            PuntoDelDia(hora: mejorHora)
-                .frame(height: 6)
-                .accessibilityHidden(true)
+            if disenoMedianas == 2, let persona = personas.first {
+                CurvaDelDia(despertar: persona.horaDespertar, pico: persona.horaPico,
+                            apagado: persona.horaApagado, mejorHora: mejorHora)
+                    .frame(height: 34)
+                    .accessibilityHidden(true)
+            } else {
+                PuntoDelDia(hora: mejorHora, conAhora: disenoMedianas != 0)
+                    .frame(height: 6)
+                    .accessibilityHidden(true)
+            }
         }
         .padding(18)
         .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
@@ -290,6 +324,11 @@ struct TareaDelMomentoView: View {
         eventos.filter { $0.tipo == .ahoraNo && Date.now.timeIntervalSince($0.fecha) < 90 * 60 }
             .map { $0.fecha.addingTimeInterval(90 * 60) }
             .min()
+    }
+
+    /// El título de una tarea terminada (para "Lo último").
+    private func tituloDe(_ id: PersistentIdentifier) -> String? {
+        (contexto.model(for: id) as? Tarea)?.textoVisible
     }
 
     private var hechasHoy: [Senal] {

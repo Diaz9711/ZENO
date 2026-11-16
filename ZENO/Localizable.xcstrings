@@ -24,6 +24,46 @@
         }
       }
     },
+    "En %lld h" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In %lld h"
+          }
+        }
+      }
+    },
+    "Es ahora" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It's now"
+          }
+        }
+      }
+    },
+    "Lo último: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last one: %@"
+          }
+        }
+      }
+    },
+    "Mañana otra vez" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Again tomorrow"
+          }
+        }
+      }
+    },
     "Sin cuenta" : {
       "localizations" : {
         "en" : {

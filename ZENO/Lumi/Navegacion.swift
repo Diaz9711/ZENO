@@ -399,11 +399,17 @@ struct LineaDeLuz: View {
 /// La mejor hora como un punto de luz sobre la línea del día (0 a 24 h), no como un relleno.
 struct PuntoDelDia: View {
     let hora: Int
+    /// Una marca fina de marfil donde está el día ahora mismo.
+    var conAhora = false
 
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
                 Capsule().fill(Color.marfil.opacity(0.10)).frame(height: 1)
+                if conAhora {
+                    Capsule().fill(Color.marfil.opacity(0.55)).frame(width: 1, height: 7)
+                        .offset(x: geo.size.width * CGFloat(Cielo.horaActual()) / 24)
+                }
                 Circle()
                     .fill(Lujo.oro)
                     .frame(width: 6, height: 6)
@@ -411,6 +417,80 @@ struct PuntoDelDia: View {
                     .offset(x: geo.size.width * CGFloat(min(max(hora, 0), 23)) / 23 - 3)
             }
             .frame(maxHeight: .infinity)
+        }
+    }
+}
+
+
+/// Cuándo llega tu mejor hora, en una frase corta y sin presión.
+enum CuandoEsTuHora {
+    static func texto(_ mejor: Int, ahora: Date = .now) -> String {
+        let hora = Calendar.current.component(.hour, from: ahora)
+        if hora == mejor { return Idioma.texto("Es ahora") }
+        if mejor > hora { return Idioma.texto("En \(mejor - hora) h") }
+        return Idioma.texto("Mañana otra vez")
+    }
+}
+
+/// Una estrellita de cuatro puntas por cada tarea terminada hoy (hasta 8; luego "+N").
+struct EstrellasDeHoy: View {
+    let cantidad: Int
+    var body: some View {
+        HStack(spacing: 7) {
+            ForEach(0..<min(cantidad, 8), id: \.self) { i in
+                EstrellitaDeCuatro()
+                    .fill(Lujo.oro)
+                    .frame(width: 9, height: 9)
+                    .shadow(color: Lujo.oro.opacity(0.8), radius: 3)
+                    .aparece(i)
+            }
+            if cantidad > 8 {
+                Text(verbatim: "+\(cantidad - 8)")
+                    .font(.zenoTexto(.caption2, .medium))
+                    .foregroundStyle(Lujo.oro)
+            }
+        }
+        .frame(height: 10)
+    }
+}
+
+struct EstrellitaDeCuatro: Shape {
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        let c = CGPoint(x: r.midX, y: r.midY), a = r.width / 2, b = r.width * 0.12
+        p.move(to: CGPoint(x: c.x, y: c.y - a))
+        p.addQuadCurve(to: CGPoint(x: c.x + a, y: c.y), control: CGPoint(x: c.x + b, y: c.y - b))
+        p.addQuadCurve(to: CGPoint(x: c.x, y: c.y + a), control: CGPoint(x: c.x + b, y: c.y + b))
+        p.addQuadCurve(to: CGPoint(x: c.x - a, y: c.y), control: CGPoint(x: c.x - b, y: c.y + b))
+        p.addQuadCurve(to: CGPoint(x: c.x, y: c.y - a), control: CGPoint(x: c.x - b, y: c.y - b))
+        return p
+    }
+}
+
+/// Tu curva de energía del día, pequeña: la misma de ZENO (curva base), con tu mejor hora en oro
+/// y una marca fina donde está el día ahora. Se dibuja una vez (sin animación por cuadro).
+struct CurvaDelDia: View {
+    let despertar: Double, pico: Double, apagado: Double
+    let mejorHora: Int
+
+    var body: some View {
+        Canvas { ctx, size in
+            func punto(_ h: Double) -> CGPoint {
+                let v = MotorDeEnergia.curvaBase(hora: h, despertar: despertar, pico: pico, apagado: apagado)
+                return CGPoint(x: size.width * h / 24, y: size.height - 2 - (size.height - 6) * v / 100)
+            }
+            var linea = Path()
+            for i in 0...96 { let p = punto(Double(i) / 4); i == 0 ? linea.move(to: p) : linea.addLine(to: p) }
+            var area = linea
+            area.addLine(to: CGPoint(x: size.width, y: size.height)); area.addLine(to: CGPoint(x: 0, y: size.height)); area.closeSubpath()
+            ctx.fill(area, with: .linearGradient(Gradient(colors: [Lujo.oro.opacity(0.22), Lujo.oro.opacity(0)]),
+                                                 startPoint: .zero, endPoint: CGPoint(x: 0, y: size.height)))
+            ctx.stroke(linea, with: .color(Lujo.oro.opacity(0.85)), lineWidth: 1)
+            let ahora = CGFloat(Cielo.horaActual()) / 24 * size.width
+            var marca = Path(); marca.move(to: CGPoint(x: ahora, y: 0)); marca.addLine(to: CGPoint(x: ahora, y: size.height))
+            ctx.stroke(marca, with: .color(Lujo.marfil.opacity(0.35)), style: StrokeStyle(lineWidth: 0.75, dash: [2, 3]))
+            let m = punto(Double(mejorHora) + 0.5)
+            ctx.fill(Path(ellipseIn: CGRect(x: m.x - 3, y: m.y - 3, width: 6, height: 6)), with: .color(Lujo.oro))
         }
     }
 }
