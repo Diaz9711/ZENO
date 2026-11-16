@@ -29,6 +29,7 @@ enum Aprendizaje {
     /// Los minutos del anillo: lo aprendido si ya hay datos; si no, lo previsto (5, 15, 25).
     /// Un primer paso siempre es de dos minutos: es la promesa de ZENO.
     static func minutosPrevistos(_ tarea: Tarea, eventos: [Senal]) -> Double {
+        if tarea.pasoDeAhora != nil { return 5 }       // Divídemela: pasos de unos 5 minutos
         if tarea.primerPaso != nil { return 2 }
         return (minutosReales(tarea.tamano, eventos: eventos)?.rounded()) ?? tarea.minutosPrevistos
     }

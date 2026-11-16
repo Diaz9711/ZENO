@@ -89,6 +89,16 @@ Pasos siguientes, uno por uno (Diaz pidió paso a paso, "razona bien", usar a Fa
 5. "Más premium, que la app tenga vida": sin efectos nuevos hasta que lo de arriba esté aprobado.
 - **No tocar** la estrella ni la nebulosa por defecto ni sus colores (Diaz lo repitió).
 
+## FASE IA (16 nov 2026, pedido de Diaz con un texto largo; plan revisado con Fable) — EN CURSO
+Orden: (1) servicio de IA + "Divídemela" → instalar y que Diaz pruebe; (2) captura por voz con vista previa; (3) mensajes de Lumi sin repetir. Una parte a la vez.
+- Motor: Foundation Models de Apple (iOS 26+, dentro del iPhone). El iPhone de Diaz (16 Pro Max, iOS 27.2) puede; el simulador de este Mac (Intel) seguramente no → ahí solo se prueba la versión sin IA.
+- `ServicioDeIA` con un protocolo y tres motores: local (Foundation Models), simple (sin IA, siempre funciona) y nube (solo la "puerta": dice "no disponible", sin red ni claves; la privacidad publicada dice que no hay servidores).
+- Todo resultado se valida en código (3–7 pasos, no vacíos, frases ≤15 palabras, idioma de ZENO); si falla, versión simple. Nunca rompe la app.
+- Pasos: `Tarea.pasosCrudo` (opcional) y `pasoActual`. Con pasos, Hoy muestra el paso de ahora; "Terminé" avanza al siguiente y solo el último termina la tarea (una estrella por tarea, no por paso). Probar actualización sobre datos existentes.
+- Mapeo (no existe en ZENO): "porqué" e "interés" no hay → no se piden; "esfuerzo" = tamaño de tarea; "reto/novedad/pasión" → momentos de Chispa; celebración = frase de Chispa tras Terminé; HealthKit no está en la app.
+- Crisis: comprobación en código (sin IA) antes de cualquier motor; mensaje amable sin números de teléfono inventados.
+- Pruebas: no hay target de tests → funciones puras + `-probarIA YES` (PASS/FAIL en consola). Modo de prueba en Ajustes muestra el motor y lo último generado.
+
 ## Web 3D (15 nov 2026, plan aprobado por Diaz, revisado con Fable) — `Web/zeno-3d.html`, aparte de la web actual
 - Lumi y la nebulosa son los shaders de la app (`Sombras.metal`) pasados a GLSL, con la misma semilla (comprobado: mismos números que la app). Three.js 0.160.0 desde jsDelivr, cargado solo si hay WebGL. Sin WebGL (o `?sin3d`): estrella 2D de la web. Con Reducir movimiento: imagen quieta.
 - Partes: Lumi, Tu cielo (velos de gas + estrellas con profundidad), Energía (aro de 24 horas con la curva base), Ahora (tarjeta), Tus estrellas, Tiempo visible (anillo: solo se ve al elegirlo o al ver por dentro; Diaz no lo quiere en la vista normal).

@@ -239,6 +239,17 @@ struct AjustesView: View {
                             Text(verbatim: "Nueva calidad del cielo y Lumi").font(.zenoTexto(.subheadline))
                         }
                         .toggleStyle(InterruptorLujo())
+                        // Fase IA: qué motor se usa ahora, el estado de cada uno y lo último generado.
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(verbatim: "IA · motor: \(ServicioDeIA.compartido.motor.nombre)")
+                                .font(.zenoTexto(.subheadline, .medium))
+                            ForEach(ServicioDeIA.compartido.motores.map { "\($0.nombre): \($0.estado.motivo)" }, id: \.self) { linea in
+                                Text(verbatim: "· " + linea).font(.zenoTexto(.caption)).foregroundStyle(Lujo.marfilSecundario)
+                            }
+                            ForEach(ServicioDeIA.compartido.historial.prefix(5), id: \.self) { linea in
+                                Text(verbatim: "↳ " + linea).font(.zenoTexto(.caption)).foregroundStyle(Lujo.marfilSecundario)
+                            }
+                        }
                         Button("Cargar datos de ejemplo") { DatosDeEjemplo.cargar(en: contexto) }
                             .font(.zenoTexto(.subheadline, .medium))
                         Button("Enviar un aviso de prueba en 10 segundos") {

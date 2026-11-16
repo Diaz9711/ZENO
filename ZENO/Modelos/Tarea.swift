@@ -28,6 +28,11 @@ final class Tarea {
     var avisoPersonalizado: Date? = nil
     /// Identificador del aviso en iOS. Se crea la primera vez que hace falta.
     var idAviso: String? = nil
+    /// "Divídemela" (fase IA, 16 nov 2026): pasos de unos 5 minutos, uno por línea. nil = sin pasos.
+    /// Con valor por defecto: los datos que ya existen migran solos.
+    var pasosCrudo: String? = nil
+    /// El paso en el que va (0 = el primero).
+    var pasoActual: Int = 0
 
     @Relationship(deleteRule: .nullify, inverse: \EventoDeEnergia.tarea)
     var eventos: [EventoDeEnergia] = []
@@ -46,6 +51,22 @@ final class Tarea {
 
     var estaTerminada: Bool { terminadaEn != nil }
 
-    /// Lo que se le muestra a la persona: el primer paso si existe, si no el título.
-    var textoVisible: String { primerPaso ?? titulo }
+    /// Los pasos de "Divídemela" (vacío si no tiene).
+    var pasos: [String] {
+        get { (pasosCrudo ?? "").split(separator: "\n").map(String.init).filter { !$0.isEmpty } }
+        set {
+            let limpios = newValue.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+            pasosCrudo = limpios.isEmpty ? nil : limpios.joined(separator: "\n")
+            pasoActual = min(pasoActual, max(limpios.count - 1, 0))
+        }
+    }
+
+    /// El paso de ahora, si la tarea está dividida.
+    var pasoDeAhora: String? {
+        let p = pasos
+        return p.indices.contains(pasoActual) ? p[pasoActual] : nil
+    }
+
+    /// Lo que se le muestra a la persona: el paso de ahora, el primer paso o el título.
+    var textoVisible: String { pasoDeAhora ?? primerPaso ?? titulo }
 }

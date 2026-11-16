@@ -4,6 +4,56 @@
     "" : {
       "shouldTranslate" : false
     },
+    "Añadir un paso" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a step"
+          }
+        }
+      }
+    },
+    "Bajar este paso" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move this step down"
+          }
+        }
+      }
+    },
+    "Borrar este paso" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this step"
+          }
+        }
+      }
+    },
+    "Cambiar los pasos" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change the steps"
+          }
+        }
+      }
+    },
+    "Chispa la está dividiendo…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chispa is splitting it…"
+          }
+        }
+      }
+    },
     "Cielo azul" : {
       "localizations" : {
         "en" : {
@@ -24,6 +74,16 @@
         }
       }
     },
+    "Divídemela" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Split it for me"
+          }
+        }
+      }
+    },
     "En %lld h" : {
       "localizations" : {
         "en" : {
@@ -34,12 +94,52 @@
         }
       }
     },
+    "Entendido" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got it"
+          }
+        }
+      }
+    },
     "Es ahora" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "It's now"
+          }
+        }
+      }
+    },
+    "Esto suena muy pesado." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This sounds really heavy."
+          }
+        }
+      }
+    },
+    "Guardar pasos" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save steps"
+          }
+        }
+      }
+    },
+    "Hechos con la IA de tu iPhone. Nada sale del teléfono." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Made with your iPhone's AI. Nothing leaves the phone."
           }
         }
       }
@@ -64,12 +164,62 @@
         }
       }
     },
+    "No hace falta dividir nada ahora. Si estás pasando por un momento muy difícil, habla con alguien de confianza o con un profesional. Si estás en peligro, llama a los servicios de emergencia de tu país." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You don't need to split anything right now. If you're going through a very hard time, talk to someone you trust or to a professional. If you're in danger, call your local emergency services."
+          }
+        }
+      }
+    },
+    "Paso %lld de %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Step %lld of %lld"
+          }
+        }
+      }
+    },
+    "Paso de: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Step of: %@"
+          }
+        }
+      }
+    },
+    "Pasos de ejemplo, sin IA. Cámbialos como quieras." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sample steps, no AI. Change them as you like."
+          }
+        }
+      }
+    },
     "Sin cuenta" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "No account"
+          }
+        }
+      }
+    },
+    "Subir este paso" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move this step up"
           }
         }
       }

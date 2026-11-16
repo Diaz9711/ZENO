@@ -50,6 +50,8 @@ struct TareaDelMomentoView: View {
     @State private var plan = BorradorDePlan()
     @State private var dictado = Dictado()
     @State private var toques = 0
+    /// Cada paso terminado de una tarea dividida (un toque suave).
+    @State private var pasosHechos = 0
     /// Recuerda la tarea elegida: la pantalla la pide muchas veces por dibujo y calcularla recorre el historial.
     @State private var memoria = MemoriaDeEleccion()
     @FocusState private var escribiendo: Bool
@@ -70,6 +72,7 @@ struct TareaDelMomentoView: View {
         .ignoresSafeArea(.keyboard)
         .sensoryFeedback(.selection, trigger: toques)
         .sensoryFeedback(.impact(weight: .light), trigger: escuchando)
+        .sensoryFeedback(.impact(weight: .medium, intensity: 0.6), trigger: pasosHechos)
         .onChange(of: dictado.texto) { _, nuevo in
             // Lo que se dicta va apareciendo en el campo activo.
             guard !nuevo.isEmpty else { return }
@@ -178,9 +181,22 @@ struct TareaDelMomentoView: View {
             HojaDeAyuda.Accion(titulo: "Dictar una tarea", icono: .microfono) { alternarVoz() }
         ]
         if case .tarea(let tarea) = eleccion {
+            // Divídemela (fase IA): pasos de unos 5 minutos; si ya está dividida, se editan sus pasos.
+            acciones.insert(HojaDeAyuda.Accion(titulo: tarea.pasos.isEmpty ? "Divídemela" : "Cambiar los pasos", icono: .check) {
+                dividir(tarea)
+            }, at: 0)
             acciones.append(HojaDeAyuda.Accion(titulo: "Dejar esta para después", icono: .reloj) { ahoraNo(tarea) })
         }
         Hojas.compartidas.mostrar { HojaDeAyuda(acciones: acciones) }
+    }
+
+    /// Abre "Divídemela" para una tarea. Espera un instante a que se cierre la hoja de Chispa.
+    private func dividir(_ tarea: Tarea) {
+        let nivel = MotorDeEnergia.nivel(puntaje)
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(0.35))
+            Hojas.compartidas.mostrar { HojaDividir(tarea: tarea, energia: nivel) }
+        }
     }
 
     /// La tarjeta ancha: la tarea del momento (con su botón Empezar / Terminé) o el estado del día.
@@ -191,8 +207,14 @@ struct TareaDelMomentoView: View {
             case .tarea(let tarea):
                 let enMarcha = enCurso == tarea.persistentModelID
                 HStack {
-                    EtiquetaLujo(enRacha && enCurso == nil ? "Vas en racha · ¿una más?"
-                                 : (tarea.primerPaso != nil ? "Primer paso" : (enCurso == nil ? "Ahora" : "En curso")))
+                    Group {
+                        if !tarea.pasos.isEmpty {
+                            EtiquetaLujo("Paso \(tarea.pasoActual + 1) de \(tarea.pasos.count)")
+                        } else {
+                            EtiquetaLujo(enRacha && enCurso == nil ? "Vas en racha · ¿una más?"
+                                         : (tarea.primerPaso != nil ? "Primer paso" : (enCurso == nil ? "Ahora" : "En curso")))
+                        }
+                    }
                         .contentTransition(.opacity)
                     Spacer()
                     if let fecha = tarea.fechaPlaneada, Calendar.current.isDateInToday(fecha) {
@@ -203,7 +225,7 @@ struct TareaDelMomentoView: View {
                 }
                 // La siguiente tarea sube desde abajo mientras la anterior se va hacia arriba (sin desenfoque).
                 TareaTocable(tarea: tarea, enCurso: enMarcha)
-                    .id(tarea.persistentModelID)
+                    .id("\(tarea.persistentModelID.hashValue)-\(tarea.pasoActual)")
                     .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 12)),
                                             removal: .opacity.combined(with: .offset(y: -8))))
                 // Un botón visible y claro (pedido de Diaz): Empezar y, en marcha, Terminé. Solo tocar.
@@ -452,6 +474,10 @@ struct TareaDelMomentoView: View {
                 botonChico("Listo", fuerte: true) { guardarTarea(conPaso: true) }
                     .disabled(limpio(primerPaso).isEmpty)
             }
+            // O que Chispa la divida en pasos de unos 5 minutos (fase IA).
+            BotonTerciarioLujo(titulo: "Divídemela", icono: .check) {
+                if let tarea = guardarTarea(conPaso: false) { dividir(tarea) }
+            }
             Text(verbatim: limpio(frase))
                 .font(.zenoTexto(.caption))
                 .foregroundStyle(Lujo.marfilSecundario)
@@ -559,9 +585,10 @@ struct TareaDelMomentoView: View {
         }
     }
 
-    private func guardarTarea(conPaso: Bool) {
+    @discardableResult
+    private func guardarTarea(conPaso: Bool) -> Tarea? {
         let titulo = limpio(frase)
-        guard !titulo.isEmpty else { return }
+        guard !titulo.isEmpty else { return nil }
         let paso = limpio(primerPaso)
         let tarea = Tarea(titulo: titulo,
                           tamano: ClasificadorDeTamano.tamano(de: titulo),
@@ -575,6 +602,7 @@ struct TareaDelMomentoView: View {
         frase = ""
         primerPaso = ""
         withAnimation(Ritmo.contenido) { modo = .ver }
+        return tarea
     }
 
     /// Guarda un evento en el historial. La tarea se enlaza después de insertar, para que siempre quede guardada.
@@ -593,6 +621,13 @@ struct TareaDelMomentoView: View {
     }
 
     private func terminar(_ tarea: Tarea) {
+        // Con pasos (Divídemela): si quedan, se pasa al siguiente con un toque suave; la estrella y la
+        // celebración llegan con el último.
+        if !tarea.pasos.isEmpty && tarea.pasoActual < tarea.pasos.count - 1 {
+            withAnimation(Ritmo.contenido) { AccionesDeTarea.completarPaso(tarea, en: contexto) }
+            pasosHechos += 1
+            return
+        }
         let celebracion = Celebracion.para(tarea, eventos: eventos, puntaje: puntaje)
         alTerminar(celebracion)
         // La tarea se va despacio, mientras Lumi celebra. Guarda cuánto tardó (para su propio promedio).
@@ -713,8 +748,15 @@ private struct TareaTocable: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Titular(texto: tarea.textoVisible, tamano: .largeTitle, alineacion: .leading)
-            if tarea.primerPaso != nil {
+            // Los pasos de Divídemela son frases más largas: un poco más pequeñas, para que se lean enteras.
+            Titular(texto: tarea.textoVisible, tamano: tarea.pasoDeAhora != nil ? .title : .largeTitle, alineacion: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+            if tarea.pasoDeAhora != nil {
+                Text("Paso de: \(tarea.titulo)")
+                    .font(.zenoTexto(.footnote))
+                    .foregroundStyle(Lujo.marfilSecundario)
+                    .lineLimit(1)
+            } else if tarea.primerPaso != nil {
                 // Se muestra el primer paso; la tarea grande queda como contexto.
                 Text("Primer paso de: \(tarea.titulo)")
                     .font(.zenoTexto(.footnote))
@@ -725,7 +767,7 @@ private struct TareaTocable: View {
         // Sin empezar, la tarea respira una luz dorada: "empieza". Al mantenerla, se enciende.
         // El resplandor es una capa fija; solo cambia su opacidad (barato para la GPU).
         .background {
-            Titular(texto: tarea.textoVisible, tamano: .largeTitle, alineacion: .leading)
+            Titular(texto: tarea.textoVisible, tamano: tarea.pasoDeAhora != nil ? .title : .largeTitle, alineacion: .leading)
                 .colorMultiply(Lujo.oro)
                 .blur(radius: 18)
                 // Se dibuja una sola vez como imagen: el latido solo cambia la opacidad (no recalcula el desenfoque).

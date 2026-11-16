@@ -11,6 +11,8 @@ struct ZENOApp: App {
         UNUserNotificationCenter.current().delegate = CentroDeAvisos.compartido
         #if DEBUG
         if UserDefaults.standard.bool(forKey: "medirFluidez") { MedidorDeTirones.compartido.empezar() }
+        // `-probarIA YES`: comprobación de la fase IA (PASS/FAIL en la consola), también en el iPhone.
+        if UserDefaults.standard.bool(forKey: "probarIA") { Task { await PruebaDeIA.correr() } }
         #endif
     }
 
