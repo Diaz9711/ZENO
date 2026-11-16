@@ -414,12 +414,10 @@ static float cometa(float2 pos, float2 tam, float t, float2 semilla) {
         float punto = smoothstep(rPunto + px, rPunto - px, d);
         col += cClaro * punto * 1.1 * centelleo;
         if (calidad > 0.001) {
-            // Calidad: el corazón tiene textura viva (como la superficie de una estrella) y un
-            // anillo de difracción finísimo, como en las fotos reales de estrellas.
+            // Calidad: el corazón tiene textura viva (como la superficie de una estrella).
             float grano = nube(uv / rN * 2.4 + desplazamiento * 1.3 + float2(t * 0.06, -t * 0.05));
             col += cClaro * corazon * (grano - 0.5) * 0.40 * brillo * calidad;
-            float anillo = exp(-pow((x - 3.2) / 0.10, 2.0)) * (0.55 + 0.45 * fil);
-            col += mix(cClaro, cHalo, 0.30) * anillo * 0.12 * brillo * calidad;
+            // (El anillo de difracción fino que rodeaba la estrella se quitó a pedido de Diaz, 15 nov 2026.)
             // Chispa de luz sobre el centro: un destello pequeño y nítido.
             float chispa = exp(-x * x * 14.0);
             col += float3(1.0, 0.98, 0.94) * chispa * 0.50 * centelleo * calidad;
