@@ -56,6 +56,13 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 - Frases de Chispa (`IA/Frases.swift`): banco a mano + depósito de la IA en segundo plano, validado e idioma de ZENO; `Cohete.consejo(_:turno:)` elige una por momento. Frases con números, siempre a mano.
 - Prueba: `-probarIA YES` (PASS/FAIL en consola, también en el iPhone). Nunca código de IA en `Compartido/` (lo enlazaría el widget).
 
+## Compañero TDAH (20 nov 2026)
+- El TDAH se mueve por interés: `Tarea.porque` ("¿Para qué te importa?", opcional) viste Hoy, Chispa y Divídemela; va primero con energía media/alta.
+- `Eleccion.silencio`: modo compañero (energía < 22 o 3 "Ahora no" seguidos): no propone nada, solo presencia; nunca forzar acción.
+- Avisos: el texto depende de la energía esperada a esa hora (baja: solo Chispa). Nunca texto de tareas.
+- Salud (señal C) preparada y apagada en `Energia/Salud.swift`; nunca a ninguna IA.
+- Tests: objetivo `ZENOTests` (funciones puras). Mantenerlos verdes al cambiar el cerebro.
+
 ## Código
 - Nombres en español, sin acentos ni ñ en nombres de archivos y tipos (`EventoDeEnergia`, `TamanoDeTarea`).
 - La carpeta `ZENO/` se sincroniza sola con Xcode: un archivo nuevo ahí ya forma parte de la app.

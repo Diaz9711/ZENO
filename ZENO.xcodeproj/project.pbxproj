@@ -18,6 +18,13 @@
 			remoteGlobalIDString = 2E0000000000000000000016;
 			remoteInfo = ZENOWidgets;
 		};
+		2E0000000000000000000045 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2E0000000000000000000009 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2E0000000000000000000006;
+			remoteInfo = ZENO;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -37,6 +44,7 @@
 /* Begin PBXFileReference section */
 		2E0000000000000000000001 /* ZENO.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZENO.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E0000000000000000000011 /* ZENOWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ZENOWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		2E0000000000000000000040 /* ZENOTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZENOTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -53,6 +61,11 @@
 		2E0000000000000000000018 /* Compartido */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Compartido;
+			sourceTree = "<group>";
+		};
+		2E0000000000000000000041 /* ZENOTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ZENOTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -72,6 +85,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2E0000000000000000000042 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -81,6 +101,7 @@
 				2E0000000000000000000002 /* ZENO */,
 				2E0000000000000000000018 /* Compartido */,
 				2E0000000000000000000017 /* ZENOWidgets */,
+				2E0000000000000000000041 /* ZENOTests */,
 				2E0000000000000000000005 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +111,7 @@
 			children = (
 				2E0000000000000000000001 /* ZENO.app */,
 				2E0000000000000000000011 /* ZENOWidgets.appex */,
+				2E0000000000000000000040 /* ZENOTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -145,6 +167,29 @@
 			productReference = 2E0000000000000000000011 /* ZENOWidgets.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		2E0000000000000000000047 /* ZENOTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2E000000000000000000004A /* Build configuration list for PBXNativeTarget "ZENOTests" */;
+			buildPhases = (
+				2E0000000000000000000043 /* Sources */,
+				2E0000000000000000000042 /* Frameworks */,
+				2E0000000000000000000044 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2E0000000000000000000046 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				2E0000000000000000000041 /* ZENOTests */,
+			);
+			name = ZENOTests;
+			packageProductDependencies = (
+			);
+			productName = ZENOTests;
+			productReference = 2E0000000000000000000040 /* ZENOTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -160,6 +205,10 @@
 					};
 					2E0000000000000000000016 = {
 						CreatedOnToolsVersion = 26.5;
+					};
+					2E0000000000000000000047 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = 2E0000000000000000000006;
 					};
 				};
 			};
@@ -180,6 +229,7 @@
 			targets = (
 				2E0000000000000000000006 /* ZENO */,
 				2E0000000000000000000016 /* ZENOWidgets */,
+				2E0000000000000000000047 /* ZENOTests */,
 			);
 		};
 /* End PBXProject section */
@@ -193,6 +243,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2E000000000000000000001B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2E0000000000000000000044 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -216,6 +273,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2E0000000000000000000043 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -223,6 +287,11 @@
 			isa = PBXTargetDependency;
 			target = 2E0000000000000000000016 /* ZENOWidgets */;
 			targetProxy = 2E0000000000000000000013 /* PBXContainerItemProxy */;
+		};
+		2E0000000000000000000046 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2E0000000000000000000006 /* ZENO */;
+			targetProxy = 2E0000000000000000000045 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -386,6 +455,42 @@
 			};
 			name = Release;
 		};
+		2E0000000000000000000048 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2D85YUQDQ3;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.zeno.ZENOTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ZENO.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ZENO";
+			};
+			name = Debug;
+		};
+		2E0000000000000000000049 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2D85YUQDQ3;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.zeno.ZENOTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ZENO.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ZENO";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -412,6 +517,15 @@
 			buildConfigurations = (
 				2E000000000000000000001E /* Debug */,
 				2E000000000000000000001F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2E000000000000000000004A /* Build configuration list for PBXNativeTarget "ZENOTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2E0000000000000000000048 /* Debug */,
+				2E0000000000000000000049 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
