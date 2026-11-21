@@ -558,10 +558,8 @@ struct BotonZeno: View {
     static let tinta = Color(red: 0.09, green: 0.08, blue: 0.15)
 
     var body: some View {
-        Button(action: accion) {
-            EtiquetaDeBoton(titulo: titulo, compacto: compacto)
-        }
-        .buttonStyle(EstiloLujo(conReflejo: false))
+        // El estándar de ZENO (Diaz, 21 nov 2026), a su altura completa de 58 pt.
+        ZenoPrimaryButton(titulo, ancho: compacto ? nil : 256, accion: accion)
     }
 }
 

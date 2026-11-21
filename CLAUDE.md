@@ -69,6 +69,10 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 - HealthKit fuera de la 1.0 (condición `SALUD`). Privacidad dentro de Ajustes (`Pantallas/Privacidad.swift`); mantenerla igual que `Web/privacidad.html`.
 - Registro de 4 pasos (Diaz, 21 nov 2026): nombre, fecha, **Curva viva** (las tres horas en una pantalla: su curva de energía real que se transforma al tocar; `Pantallas/RegistroDia.swift`, `DiaDeEnergia` siempre da un día válido) y forma: "01 / 04". Los otros diseños (esfera, frase) y las tres preguntas de antes quedan con `-disenoDia 2|3|0`.
 
+## Sistema de diseño (Diaz, 21 nov 2026)
+- `ZENO/DesignSystem/Components/`: `ZenoPrimaryButton` (archivo de Diaz, con el oro de `Lujo` —`oroLuz`/`oro`/`oroHondo`—, Manrope e `IconoFino`) es el estándar de calidad. `BotonPrimarioLujo` (48 pt, filas) y `BotonZeno` (58 pt) ya lo usan. El Emblema de Empezar no se tocó (opción "F · Estándar" en Modo de prueba para comparar).
+- `ZenoSecondaryButton`, `ZenoIconButton`, `ZenoCard`, `ZenoChip` (`ZenoComponentes.swift`): misma calidad (degradado, brillo, borde de luz, resplandor, presión, háptico). **Aún no se usan** hasta que Diaz los apruebe en la galería (Ajustes → Modo de prueba → Ver componentes, o `-galeriaComponentes YES`).
+
 ## Código
 - Nombres en español, sin acentos ni ñ en nombres de archivos y tipos (`EventoDeEnergia`, `TamanoDeTarea`).
 - La carpeta `ZENO/` se sincroniza sola con Xcode: un archivo nuevo ahí ya forma parte de la app.

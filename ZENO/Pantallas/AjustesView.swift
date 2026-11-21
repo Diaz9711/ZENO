@@ -25,6 +25,7 @@ struct AjustesView: View {
     @AppStorage(TonoDeCielo.clave) private var tonoDeCielo = TonoDeCielo.azulado
     @AppStorage(DisenoDeBotonDeAhora.clave) private var disenoBoton = DisenoDeBotonDeAhora.elegido.rawValue
     @AppStorage("frasesIA") private var frasesIA = false
+    @AppStorage("galeriaComponentes") private var galeriaComponentes = false
 
     var body: some View {
         let apariencia = AparienciaLumi(semilla: persona.semilla, cielo: tonoDeCielo)
@@ -274,6 +275,8 @@ struct AjustesView: View {
                                 }
                             }
                         }
+                        // Los componentes nuevos (ZenoSecondaryButton, ZenoIconButton, ZenoCard, ZenoChip) sobre el cielo.
+                        ZenoSecondaryButton("Ver componentes", alto: 48) { galeriaComponentes = true }
                         Toggle(isOn: $frasesIA) {
                             Text(verbatim: "Frases de Chispa escritas por la IA").font(.zenoTexto(.subheadline))
                         }

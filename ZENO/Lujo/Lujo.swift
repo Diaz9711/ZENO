@@ -237,7 +237,6 @@ struct BotonPrimarioLujo: View {
     let titulo: LocalizedStringKey
     var ancho: CGFloat? = nil
     let accion: () -> Void
-    @State private var toques = 0
 
     init(_ titulo: LocalizedStringKey, ancho: CGFloat? = nil, accion: @escaping () -> Void) {
         self.titulo = titulo
@@ -246,14 +245,8 @@ struct BotonPrimarioLujo: View {
     }
 
     var body: some View {
-        Button {
-            toques += 1
-            accion()
-        } label: {
-            EtiquetaPrimaria(titulo: titulo, ancho: ancho)
-        }
-        .buttonStyle(EstiloLujo(conReflejo: true))
-        .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: toques)
+        // Desde el 21 nov 2026 (Diaz): el estándar `ZenoPrimaryButton`, a 48 pt para convivir en filas.
+        ZenoPrimaryButton(titulo, ancho: ancho, alto: Lujo.altoBoton, accion: accion)
     }
 }
 
@@ -651,13 +644,13 @@ struct IconoMicrofono: View {
 /// calidad y premium". Dos diseños de verdad distintos (consejo de Fable) y el de siempre; se cambian en vivo en
 /// Ajustes → Modo de prueba (`disenoBoton`). Solo en Hoy: el resto de la app no cambia.
 enum DisenoDeBotonDeAhora: Int, CaseIterable {
-    case siempre, metal, capsula, emblema
+    case siempre, metal, capsula, emblema, estandar
     static let clave = "disenoBoton"
     /// Diaz eligió el Emblema (16 nov 2026).
     static let elegido = DisenoDeBotonDeAhora.emblema
     var nombre: String {
         switch self {
-        case .siempre: "0 · El de siempre"; case .metal: "A · Metal"; case .capsula: "B · Cápsula con flecha"; case .emblema: "E · Emblema"
+        case .siempre: "0 · El de siempre"; case .metal: "A · Metal"; case .capsula: "B · Cápsula con flecha"; case .emblema: "E · Emblema"; case .estandar: "F · Estándar (ZenoPrimaryButton)"
         }
     }
 }
@@ -684,6 +677,9 @@ struct BotonDeAhora: View {
                 .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: toques)
         case .siempre:
             BotonPrimarioLujo(enMarcha ? "Terminé" : "Empezar", accion: accion)
+        case .estandar:
+            // Para comparar con el Emblema (Diaz decide): el botón estándar de ZENO.
+            ZenoPrimaryButton(enMarcha ? "Terminé" : "Empezar", icono: enMarcha ? .check : nil, alto: 54, accion: accion)
         case .metal:
             Button { toques += 1; accion() } label: { PlacaDeMetal(titulo: enMarcha ? "Terminé" : "Empezar") }
                 .buttonStyle(EstiloHundido())

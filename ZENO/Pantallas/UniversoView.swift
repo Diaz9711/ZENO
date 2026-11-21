@@ -48,6 +48,8 @@ struct UniversoView: View {
     @AppStorage(Sesion.clave) private var sesionAbierta = true
     /// El cielo que eligió la persona en Ajustes (azul de siempre o negro).
     @AppStorage(TonoDeCielo.clave) private var tonoDeCielo = TonoDeCielo.azulado
+    /// Galería de componentes (Ajustes → Modo de prueba → Componentes, o `-galeriaComponentes YES`).
+    @AppStorage("galeriaComponentes") private var galeriaComponentes = false
 
     /// Solo para elegir el botón (se abre con el argumento -galeriaBotones YES).
     private static var verGaleria: Bool {
@@ -232,7 +234,11 @@ struct UniversoView: View {
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
 
-            if Self.verGaleria {
+            if galeriaComponentes {
+                #if DEBUG
+                GaleriaDeComponentes { galeriaComponentes = false }
+                #endif
+            } else if Self.verGaleria {
                 #if DEBUG
                 GaleriaDeLumi(apariencia: apariencia)
                 #endif
