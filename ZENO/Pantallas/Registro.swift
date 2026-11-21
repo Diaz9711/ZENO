@@ -109,15 +109,16 @@ struct RegistroView: View {
         .padding(.horizontal, 12)
     }
 
-    /// Opción de registro corto (auditoría, solo para comparar; Diaz elige): las tres horas en una pantalla.
-    /// `-registroCorto YES`. El registro de siempre no cambia.
-    private var corto: Bool {
+    /// Diseños a comparar para las tres horas en una sola pantalla (Diaz, 21 nov 2026), solo en pruebas:
+    /// `-disenoDia 1` curva viva, `2` esfera, `3` frase. Sin el argumento, el registro de siempre.
+    private var disenoDia: Int {
         #if DEBUG
-        return UserDefaults.standard.bool(forKey: "registroCorto")
+        return UserDefaults.standard.integer(forKey: "disenoDia")
         #else
-        return false
+        return 0
         #endif
     }
+    private var corto: Bool { disenoDia != 0 }
     private var totalDePasos: Int { corto ? 4 : 6 }
 
     private var numeroDePaso: Int {
@@ -296,43 +297,25 @@ struct RegistroView: View {
         }
     }
 
-    /// Registro corto: despertar, energía y apagado juntos, ya marcados con lo más común. Un toque basta.
+    /// Las tres horas en una sola pantalla, con uno de los tres diseños a comparar (`-disenoDia 1|2|3`).
     private var tuDia: some View {
-        pantalla("Así es tu *día*", razon: "Toca lo que más se parezca. Si no sabes, déjalo así.") {
-            VStack(alignment: .leading, spacing: 22) {
-                filaDeHoras("Despierto", valor: borrador.horaDespertar,
-                            opciones: [("5:30", 5.5), ("7:00", 7), ("9:00", 9), ("11:00", 11)]) { borrador.horaDespertar = $0 }
-                filaDeHoras("Más energía", valor: borrador.horaPico,
-                            opciones: [("Mañana", 10), ("Mediodía", 13), ("Tarde", 17), ("Noche", 21)]) { borrador.horaPico = $0 }
-                filaDeHoras("Me apago", valor: borrador.horaApagado,
-                            opciones: [("20:30", 20.5), ("22:00", 22), ("0:00", 0), ("2:00", 2)]) { borrador.horaApagado = $0 }
-            }
-        } pie: {
-            BotonZeno("Continuar") { ir(a: .nacimiento) }
-        }
-    }
-
-    private func filaDeHoras(_ titulo: LocalizedStringKey, valor: Double, opciones: [(LocalizedStringKey, Double)],
-                             elegir: @escaping (Double) -> Void) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            EtiquetaLujo(titulo)
-            HStack(spacing: 8) {
-                ForEach(Array(opciones.enumerated()), id: \.offset) { _, opcion in
-                    let elegida = valor == opcion.1
-                    Button { withAnimation(Lujo.curva(0.25)) { elegir(opcion.1) } } label: {
-                        Text(opcion.0)
-                            .font(.zenoTexto(.subheadline, elegida ? .semibold : .regular))
-                            .foregroundStyle(elegida ? Lujo.oro : Lujo.marfil)
-                            .lineLimit(1).minimumScaleFactor(0.8)
-                            .frame(maxWidth: .infinity, minHeight: 48)
-                            .background(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(elegida ? Lujo.oro.opacity(0.10) : Lujo.marfil.opacity(0.04)))
-                            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .strokeBorder(elegida ? Lujo.oro.opacity(0.9) : Lujo.marfil.opacity(0.12), lineWidth: 0.75))
-                    }
-                    .buttonStyle(EstiloLujo(conReflejo: false))
-                    .sensoryFeedback(.selection, trigger: elegida)
-                }
+        let dia = Binding<DiaDeEnergia>(
+            get: { DiaDeEnergia(despertar: borrador.horaDespertar, pico: borrador.horaPico, apagado: borrador.horaApagado) },
+            set: { borrador.horaDespertar = $0.despertar; borrador.horaPico = $0.pico; borrador.horaApagado = $0.apagado })
+        return Group {
+            switch disenoDia {
+            case 2:
+                pantalla("Las horas de tu *día*", razon: "Toca el aro o las horas de abajo. Si no sabes, déjalo así.") {
+                    DiaEsfera(dia: dia)
+                } pie: { BotonZeno("Continuar") { ir(a: .nacimiento) } }
+            case 3:
+                pantalla("Tu día, en una *frase*", razon: nil) {
+                    DiaFrase(dia: dia)
+                } pie: { BotonZeno("Continuar") { ir(a: .nacimiento) } }
+            default:
+                pantalla("Tu *energía* en un día", razon: "Toca la curva o las horas de abajo. Si no sabes, déjala así.") {
+                    DiaCurvaViva(dia: dia)
+                } pie: { BotonZeno("Continuar") { ir(a: .nacimiento) } }
             }
         }
     }

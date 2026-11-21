@@ -3972,26 +3972,6 @@
         }
       }
     },
-    "Así es tu *día*" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This is your *day*"
-          }
-        }
-      }
-    },
-    "Toca lo que más se parezca. Si no sabes, déjalo así." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap what fits best. If you’re not sure, leave it as is."
-          }
-        }
-      }
-    },
     "Despierto" : {
       "localizations" : {
         "en" : {
@@ -4032,30 +4012,6 @@
         }
       }
     },
-    "5:30" : {
-      "shouldTranslate" : false
-    },
-    "7:00" : {
-      "shouldTranslate" : false
-    },
-    "9:00" : {
-      "shouldTranslate" : false
-    },
-    "11:00" : {
-      "shouldTranslate" : false
-    },
-    "20:30" : {
-      "shouldTranslate" : false
-    },
-    "22:00" : {
-      "shouldTranslate" : false
-    },
-    "0:00" : {
-      "shouldTranslate" : false
-    },
-    "2:00" : {
-      "shouldTranslate" : false
-    },
     "Lo que te llama de esto. Te lo recordaré cuando cueste empezar. Es opcional." : {
       "localizations" : {
         "en" : {
@@ -4072,6 +4028,156 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "For example: seeing my niece happy"
+          }
+        }
+      }
+    },
+    "Las horas de tu *día*" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The hours of your *day*"
+          }
+        }
+      }
+    },
+    "Toca el aro o las horas de abajo. Si no sabes, déjalo así." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the ring or the hours below. If you’re not sure, leave it as is."
+          }
+        }
+      }
+    },
+    "Tu día, en una *frase*" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your day, in one *sentence*"
+          }
+        }
+      }
+    },
+    "Tu *energía* en un día" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your *energy* in a day"
+          }
+        }
+      }
+    },
+    "Toca la curva o las horas de abajo. Si no sabes, déjala así." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the curve or the hours below. If you’re not sure, leave it as is."
+          }
+        }
+      }
+    },
+    "por la mañana" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "in the morning"
+          }
+        }
+      }
+    },
+    "al mediodía" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "at midday"
+          }
+        }
+      }
+    },
+    "por la tarde" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "in the afternoon"
+          }
+        }
+      }
+    },
+    "por la noche" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "at night"
+          }
+        }
+      }
+    },
+    "de día" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "awake"
+          }
+        }
+      }
+    },
+    "Me despierto a las" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I wake up at"
+          }
+        }
+      }
+    },
+    "tengo más energía" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I have the most energy"
+          }
+        }
+      }
+    },
+    "y me apago a las" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "and I wind down at"
+          }
+        }
+      }
+    },
+    "Toca las palabras doradas para cambiarlas." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the golden words to change them."
+          }
+        }
+      }
+    },
+    "Toca para cambiarlo" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to change it"
           }
         }
       }
