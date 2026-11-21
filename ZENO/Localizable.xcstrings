@@ -3541,6 +3541,56 @@
           }
         }
       }
+    },
+    "Aquí sigo, sin prisa." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still here, no rush."
+          }
+        }
+      }
+    },
+    "Hoy puede ser suave. Te acompaño." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today can be gentle. I’m with you."
+          }
+        }
+      }
+    },
+    "Nada que hacer ahora. Solo pasaba a saludarte." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing to do right now. Just stopping by to say hi."
+          }
+        }
+      }
+    },
+    "Descansar también cuenta. Aquí estoy." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resting counts too. I’m here."
+          }
+        }
+      }
+    },
+    "Tienes un paso pequeño listo. Uno solo, si quieres." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You have a small step ready. Just one, if you like."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
