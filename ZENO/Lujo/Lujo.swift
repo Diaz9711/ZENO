@@ -889,7 +889,8 @@ private struct PlacaGiratoria: View, Animatable {
         let reverso = giro > 90
         let forma = RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous)
         ZStack {
-            FondoDeOroCepillado(forma: forma)
+            // De vidrio con tinte de oro desde el 21 nov 2026 (Diaz: "todo vidrio"); el giro y la luz siguen igual.
+            FondoDeVidrio(forma: forma, liquido: false)
             BrilloSegunInclinacion(forma: forma, apagado: quieto)
             BandaDeLuz(forma: forma, disparo: destello)
             CaraDeEmblema(reverso: reverso)
@@ -898,12 +899,8 @@ private struct PlacaGiratoria: View, Animatable {
         }
         .frame(maxWidth: .infinity)
         .frame(height: Lujo.altoBoton)
-        .overlay(alignment: .top) {
-            forma.strokeBorder(LinearGradient(colors: [.white.opacity(0.55), .white.opacity(0.0)], startPoint: .top, endPoint: .center), lineWidth: 0.75)
-        }
         // La placa entera gira sobre su eje horizontal, con perspectiva.
         .rotation3DEffect(.degrees(giro), axis: (x: 1, y: 0, z: 0), perspective: 0.55)
-        .shadow(color: Lujo.oroHondo.opacity(0.22), radius: 18, y: 10)
         .contentShape(forma)
     }
 }
@@ -915,17 +912,17 @@ private struct CaraDeEmblema: View {
             Group {
                 if reverso {
                     TrazoDeCheck()
-                        .stroke(Lujo.tinta, style: StrokeStyle(lineWidth: 1.6, lineCap: .round, lineJoin: .round))
+                        .stroke(Lujo.oroLuz, style: StrokeStyle(lineWidth: 1.6, lineCap: .round, lineJoin: .round))
                         .frame(width: 13, height: 10)
                 } else {
-                    EstrellitaDeCuatro().fill(Lujo.tinta.opacity(0.85)).frame(width: 13, height: 13)
+                    EstrellitaDeCuatro().fill(Lujo.oroLuz).frame(width: 13, height: 13)
                 }
             }
             .frame(width: 16, height: 16)
             Text(reverso ? "Terminé" : "Empezar")
                 .font(.lujoEtiqueta(.footnote, .semibold))
                 .versalitas(1.8)
-                .foregroundStyle(Lujo.tinta)
+                .foregroundStyle(Lujo.marfil)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }

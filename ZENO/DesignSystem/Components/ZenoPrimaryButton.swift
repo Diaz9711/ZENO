@@ -107,6 +107,9 @@ extension ZenoGlassStyle where Forma == Capsule {
 struct FondoDeVidrio<Forma: InsettableShape>: View {
     let forma: Forma
     var presionado = false
+    /// false: vidrio dibujado (sin Liquid Glass ni desenfoque del fondo). Para lo que gira en 3D (el Emblema),
+    /// porque el Liquid Glass no sigue la rotación y se deforma a mitad del giro.
+    var liquido = true
 
     var body: some View {
         cuerpo
@@ -121,7 +124,18 @@ struct FondoDeVidrio<Forma: InsettableShape>: View {
 
     @ViewBuilder
     private var cuerpo: some View {
-        if #available(iOS 26.0, *) {
+        if !liquido {
+            ZStack {
+                forma.fill(LinearGradient(colors: [Color(red: 0.36, green: 0.33, blue: 0.30).opacity(0.62),
+                                                   Color(red: 0.20, green: 0.19, blue: 0.20).opacity(0.58)],
+                                          startPoint: .top, endPoint: .bottom))
+                forma.fill(LinearGradient(colors: [Lujo.oro.opacity(presionado ? 0.30 : 0.22), Lujo.oro.opacity(0.06)],
+                                          startPoint: .top, endPoint: .bottom))
+                forma.inset(by: 1.5)
+                    .fill(LinearGradient(colors: [.white.opacity(presionado ? 0.06 : 0.14), .clear], startPoint: .top, endPoint: .center))
+                    .blendMode(.plusLighter)
+            }
+        } else if #available(iOS 26.0, *) {
             Color.clear
                 .glassEffect(.regular.tint(Lujo.oro.opacity(presionado ? 0.42 : 0.34)).interactive(), in: forma)
         } else {
