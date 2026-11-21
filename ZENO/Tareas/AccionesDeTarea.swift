@@ -21,12 +21,14 @@ enum AccionesDeTarea {
 
     /// "Terminé" con pasos (Divídemela): si quedan pasos, pasa al siguiente y devuelve false;
     /// con el último (o sin pasos) termina la tarea entera y devuelve true. Una estrella por tarea.
+    /// `seguir`: en la app, el paso siguiente arranca solo (sin otro "Empezar": el primer segundo es el que
+    /// más cuesta). Desde la pantalla bloqueada no, porque allí el anillo en vivo se cierra.
     @discardableResult
-    static func completarPaso(_ tarea: Tarea, en contexto: ModelContext) -> Bool {
+    static func completarPaso(_ tarea: Tarea, en contexto: ModelContext, seguir: Bool = true) -> Bool {
         let pasos = tarea.pasos
         if !pasos.isEmpty && tarea.pasoActual < pasos.count - 1 {
             tarea.pasoActual += 1
-            tarea.empezadaEn = nil
+            tarea.empezadaEn = seguir ? .now : nil
             return false
         }
         terminar(tarea, en: contexto)
@@ -39,7 +41,7 @@ enum AccionesDeTarea {
         let pendientes = (try? contexto.fetch(FetchDescriptor<Tarea>(predicate: #Predicate { $0.terminadaEn == nil }))) ?? []
         var terminoLaTarea = true
         if let tarea = pendientes.first(where: \.estaEnCurso) {
-            terminoLaTarea = completarPaso(tarea, en: contexto)
+            terminoLaTarea = completarPaso(tarea, en: contexto, seguir: false)
             try? contexto.save()
             // Fuera de la app iOS puede dormirla pronto: se espera a que los avisos queden al día.
             await AvisosDeTareas.sincronizar(contexto)

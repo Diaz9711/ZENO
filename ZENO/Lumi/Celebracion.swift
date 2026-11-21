@@ -53,6 +53,19 @@ struct AnilloDeTiempoView: View {
     let inicio: Date
     let minutos: Double
     var color: Color = .oroZeno
+    /// Tarea dividida (Divídemela): cuántos pasos lleva hechos y cuántos tiene. El anillo de fuera
+    /// muestra el progreso real, paso a paso; nil = sin pasos.
+    var pasos: (hechos: Int, total: Int)? = nil
+
+    /// Si pasan 10 minutos sin "Terminé", el anillo solo baja su luz, despacio, hasta quedar tenue
+    /// (nunca se apaga del todo ni avisa: sin alarma, sin prisa). Función pura.
+    static func intensidad(segundos: TimeInterval) -> Double {
+        let desde = 10.0 * 60, hasta = 15.0 * 60
+        guard segundos > desde else { return 1 }
+        let t = min((segundos - desde) / (hasta - desde), 1)
+        let suave = t * t * (3 - 2 * t)
+        return 1 - 0.6 * suave
+    }
 
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
 
@@ -61,8 +74,13 @@ struct AnilloDeTiempoView: View {
             let total = max(minutos * 60, 1)
             let restante = max(0, 1 - linea.date.timeIntervalSince(inicio) / total)
             let terminado = restante <= 0
+            let luz = Self.intensidad(segundos: linea.date.timeIntervalSince(inicio))
 
             ZStack {
+                if let pasos, pasos.total > 1 {
+                    ProgresoDePasos(hechos: pasos.hechos, total: pasos.total, color: color)
+                        .padding(-9)
+                }
                 // Huella del recorrido completo, muy tenue.
                 Circle()
                     .stroke(color.opacity(terminado ? 0.30 : 0.10), lineWidth: 2)
@@ -85,14 +103,37 @@ struct AnilloDeTiempoView: View {
                 }
             }
             .rotationEffect(.degrees(-90))
+            .opacity(luz)
             .animation(.easeInOut(duration: 1.2), value: terminado)
             .accessibilityElement()
             .accessibilityLabel(Text("Tiempo de la tarea"))
-            .accessibilityValue(terminado
-                ? Text("Terminado, sin prisa")
-                : Text("Quedan \(Int(ceil(restante * minutos))) minutos"))
+            .accessibilityValue(pasos.map { Text("Paso \(min($0.hechos + 1, $0.total)) de \($0.total)") }
+                ?? (terminado ? Text("Terminado, sin prisa") : Text("Quedan \(Int(ceil(restante * minutos))) minutos")))
         }
         .allowsHitTesting(false)
+    }
+}
+
+/// El anillo de fuera de una tarea dividida: un tramo por paso. Los hechos, encendidos en oro;
+/// el de ahora, a media luz; los que faltan, apenas una huella.
+private struct ProgresoDePasos: View {
+    let hechos: Int
+    let total: Int
+    let color: Color
+
+    var body: some View {
+        let hueco = 0.018
+        ZStack {
+            ForEach(0..<total, id: \.self) { i in
+                let desde = Double(i) / Double(total) + hueco / 2
+                let hasta = Double(i + 1) / Double(total) - hueco / 2
+                Circle()
+                    .trim(from: desde, to: hasta)
+                    .stroke(color.opacity(i < hechos ? 0.85 : (i == hechos ? 0.38 : 0.12)),
+                            style: StrokeStyle(lineWidth: i < hechos ? 2.2 : 1.6, lineCap: .round))
+            }
+        }
+        .animation(Lujo.curva(), value: hechos)
     }
 }
 

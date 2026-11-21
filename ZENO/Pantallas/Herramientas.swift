@@ -93,6 +93,27 @@ enum DatosDeEjemplo {
         }
     }
 
+    /// `-pasosDeEjemplo N`: una tarea dividida con su porqué, en el paso 3 de 5, empezada hace N minutos
+    /// (para ver el anillo de pasos y cómo baja su luz pasados los 10 minutos). Solo una vez.
+    @MainActor
+    static func cargarPasos(en contexto: ModelContext) {
+        #if DEBUG
+        guard let texto = UserDefaults.standard.string(forKey: "pasosDeEjemplo"), let minutos = Double(texto) else { return }
+        let todas = (try? contexto.fetch(FetchDescriptor<Tarea>())) ?? []
+        let tarea = todas.first(where: { $0.titulo == "Preparar la presentación del lunes" && $0.pasosCrudo != nil })
+            ?? {
+                let t = Tarea(titulo: "Preparar la presentación del lunes", tamano: .grande)
+                contexto.insert(t)
+                return t
+            }()
+        tarea.porque = "Que mi jefa vea lo que sé hacer"
+        tarea.pasos = ["Abre el documento", "Escribe el título", "Elige las tres ideas principales",
+                       "Haz una diapositiva por idea", "Revísala y guárdala"]
+        tarea.pasoActual = 2
+        tarea.empezadaEn = Date.now.addingTimeInterval(-minutos * 60)
+        #endif
+    }
+
     @MainActor
     static func cargar(en contexto: ModelContext) {
         let pendientes: [(String, TamanoDeTarea, String?)] = [

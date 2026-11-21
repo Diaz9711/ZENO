@@ -190,7 +190,8 @@ struct UniversoView: View {
                         .animation(reducirMovimiento ? .easeInOut(duration: 0.5) : Ritmo.lumi, value: pagina)
 
                     if let tarea = tareaEnCurso, let inicio = tarea.empezadaEn {
-                        AnilloDeTiempoView(inicio: inicio, minutos: Aprendizaje.minutosPrevistos(tarea, eventos: eventos))
+                        AnilloDeTiempoView(inicio: inicio, minutos: Aprendizaje.minutosPrevistos(tarea, eventos: eventos),
+                                           pasos: tarea.pasos.isEmpty ? nil : (tarea.pasoActual, tarea.pasos.count))
                             .frame(width: anchoLumi * tamano * 0.50, height: anchoLumi * tamano * 0.50)
                             .position(x: geo.size.width * centro.x, y: geo.size.height * centro.y)
                             .transition(.opacity.combined(with: .scale(scale: 0.8)))
@@ -341,6 +342,7 @@ struct UniversoView: View {
                 }
             }
             DatosDeEjemplo.cargarCielo(en: contexto)
+            DatosDeEjemplo.cargarPasos(en: contexto)
             // Atajos para probar sin tocar: -formaDePrueba 0|1, -paginaInicial 0|1|2, -sinPresentacion YES.
             let ajustes = UserDefaults.standard
             if let forma = ajustes.string(forKey: "formaDePrueba").flatMap(Int.init) { personas.first?.formaDeLumiCruda = forma }
