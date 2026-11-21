@@ -80,44 +80,57 @@ struct ZenoPrimaryButton: View {
 // MARK: - Estilo vidrio (Liquid Glass)
 
 /// Vidrio de verdad: en iOS 26 el Liquid Glass de Apple (refracta la nebulosa de detrás y reacciona al
-/// dedo), con un tinte de oro apenas visible, borde de luz dorado y resplandor. Antes de iOS 26, un vidrio
-/// dibujado con las mismas capas. Texto marfil.
-struct ZenoGlassStyle: ButtonStyle {
+/// dedo), con un tinte de oro, borde de luz dorado y resplandor. Antes de iOS 26, un vidrio dibujado con
+/// las mismas capas. Texto marfil. Sirve para cualquier forma (cápsula, círculo).
+struct ZenoGlassStyle<Forma: InsettableShape>: ButtonStyle {
+    let forma: Forma
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         let pressed = configuration.isPressed
-        let forma = Capsule(style: .continuous)
-
         configuration.label
             .foregroundStyle(Lujo.marfil)
-            .background { cuerpo(forma, pressed: pressed) }
-            .overlay {
-                // Borde de luz: dorado arriba, se apaga abajo.
-                forma.strokeBorder(LinearGradient(colors: [Lujo.oroLuz, Lujo.oro.opacity(0.20)],
-                                                  startPoint: .top, endPoint: .bottom), lineWidth: 1)
-            }
-            // Resplandor dorado muy suave (el vidrio no lleva sombra gris).
-            .shadow(color: Lujo.oro.opacity(pressed ? 0.18 : 0.36), radius: pressed ? 8 : 18, y: pressed ? 3 : 8)
+            .background { FondoDeVidrio(forma: forma, presionado: pressed) }
             .scaleEffect(pressed ? 0.965 : 1)
             .opacity(isEnabled ? 1 : 0.4)
             .saturation(isEnabled ? 1 : 0.3)
             .animation(.spring(response: 0.28, dampingFraction: 0.65), value: pressed)
             .contentShape(forma)
     }
+}
+
+extension ZenoGlassStyle where Forma == Capsule {
+    init() { self.forma = Capsule(style: .continuous) }
+}
+
+/// El vidrio con tinte de oro, su borde de luz y su resplandor (lo usan los botones, el "+" y los chips).
+struct FondoDeVidrio<Forma: InsettableShape>: View {
+    let forma: Forma
+    var presionado = false
+
+    var body: some View {
+        cuerpo
+            .overlay {
+                // Borde de luz: dorado arriba, se apaga abajo.
+                forma.strokeBorder(LinearGradient(colors: [Lujo.oroLuz, Lujo.oro.opacity(0.20)],
+                                                  startPoint: .top, endPoint: .bottom), lineWidth: 1)
+            }
+            // Resplandor dorado suave (el vidrio no lleva sombra gris).
+            .shadow(color: Lujo.oro.opacity(presionado ? 0.18 : 0.36), radius: presionado ? 8 : 18, y: presionado ? 3 : 8)
+    }
 
     @ViewBuilder
-    private func cuerpo(_ forma: Capsule, pressed: Bool) -> some View {
+    private var cuerpo: some View {
         if #available(iOS 26.0, *) {
             Color.clear
-                .glassEffect(.regular.tint(Lujo.oro.opacity(pressed ? 0.42 : 0.34)).interactive(), in: forma)
+                .glassEffect(.regular.tint(Lujo.oro.opacity(presionado ? 0.42 : 0.34)).interactive(), in: forma)
         } else {
             ZStack {
                 forma.fill(.ultraThinMaterial)
-                forma.fill(LinearGradient(colors: [Lujo.oro.opacity(pressed ? 0.38 : 0.30), Lujo.oro.opacity(0.10)],
+                forma.fill(LinearGradient(colors: [Lujo.oro.opacity(presionado ? 0.38 : 0.30), Lujo.oro.opacity(0.10)],
                                           startPoint: .top, endPoint: .bottom))
                 forma.inset(by: 1.5)
-                    .fill(LinearGradient(colors: [.white.opacity(pressed ? 0.08 : 0.18), .clear], startPoint: .top, endPoint: .center))
+                    .fill(LinearGradient(colors: [.white.opacity(presionado ? 0.08 : 0.18), .clear], startPoint: .top, endPoint: .center))
                     .blendMode(.plusLighter)
             }
             .environment(\.colorScheme, .dark)

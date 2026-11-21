@@ -374,18 +374,11 @@ struct BotonMasLujo: View {
             toques += 1
             accion()
         } label: {
-            IconoFino(icono: .mas, color: Lujo.tinta, tamano: 20, trazo: 1.4)
+            // De vidrio con tinte de oro, como el botón principal (Diaz: "todo vidrio", 21 nov 2026).
+            IconoFino(icono: .mas, color: Lujo.oroLuz, tamano: 20, trazo: 1.5)
                 .frame(width: 48, height: 48)
-                .background {
-                    Circle()
-                        .fill(LinearGradient(colors: [Lujo.oroLuz, Lujo.oro, Lujo.oroHondo],
-                                             startPoint: .top, endPoint: .bottom))
-                        .shadow(color: Lujo.oroHondo.opacity(0.25), radius: 16, y: 8)
-                }
-                .overlay(Circle().strokeBorder(LinearGradient(colors: [.white.opacity(0.55), .clear],
-                                                              startPoint: .top, endPoint: .center), lineWidth: 0.75))
         }
-        .buttonStyle(EstiloLujo())
+        .buttonStyle(ZenoGlassStyle(forma: Circle()))
         .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: toques)
     }
 }

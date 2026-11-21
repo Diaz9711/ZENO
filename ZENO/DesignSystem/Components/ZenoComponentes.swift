@@ -108,7 +108,7 @@ struct ZenoSecondaryButton: View {
 
 // MARK: - Botón de icono
 
-/// Un icono fino en un círculo de vidrio. `fuerte`: relleno de oro, como el principal.
+/// Un icono fino en un círculo de vidrio. `fuerte`: vidrio con tinte de oro, como el principal.
 struct ZenoIconButton: View {
     let icono: IconoLujo
     var fuerte = false
@@ -125,10 +125,10 @@ struct ZenoIconButton: View {
         Group {
             if fuerte {
                 Button { toques += 1; accion() } label: {
-                    IconoFino(icono: icono, color: Lujo.tinta.opacity(0.9), tamano: lado * 0.36, trazo: 1.6)
+                    IconoFino(icono: icono, color: Lujo.oroLuz, tamano: lado * 0.36, trazo: 1.6)
                         .frame(width: lado, height: lado)
                 }
-                .buttonStyle(ZenoPrimaryStyle())
+                .buttonStyle(ZenoGlassStyle(forma: Circle()))
             } else {
                 Button { toques += 1; accion() } label: { Cara(icono: icono, lado: lado) }
                     .buttonStyle(PresionZeno(escala: 0.93))
@@ -195,7 +195,7 @@ struct ZenoCard<Contenido: View>: View {
 
 // MARK: - Chip
 
-/// Una opción pequeña. Sin elegir: vidrio con borde fino. Elegida: oro champán con resplandor.
+/// Una opción pequeña. Sin elegir: vidrio con borde fino. Elegida: vidrio con tinte de oro y resplandor.
 struct ZenoChip: View {
     let titulo: LocalizedStringKey
     var icono: IconoLujo? = nil
@@ -221,26 +221,18 @@ struct ZenoChip: View {
         @Environment(\.zenoPresionado) private var presionado
         var body: some View {
             HStack(spacing: 6) {
-                if let icono { IconoFino(icono: icono, color: elegido ? Lujo.tinta : Lujo.oro, tamano: 12, trazo: 1.3) }
+                if let icono { IconoFino(icono: icono, color: elegido ? Lujo.oroLuz : Lujo.oro, tamano: 12, trazo: 1.3) }
                 Text(titulo)
                     .font(.zenoTexto(.subheadline, elegido ? .semibold : .medium))
                     .lineLimit(1)
             }
-            .foregroundStyle(elegido ? Lujo.tinta.opacity(0.92) : Lujo.marfil.opacity(0.9))
+            .foregroundStyle(elegido ? Lujo.marfil : Lujo.marfil.opacity(0.9))
             .padding(.horizontal, 16)
             .frame(height: 38)
             .background {
                 if elegido {
-                    ZStack {
-                        Capsule(style: .continuous)
-                            .fill(LinearGradient(colors: [Lujo.oroLuz, Lujo.oro, Lujo.oroHondo], startPoint: .top, endPoint: .bottom))
-                        Capsule(style: .continuous).inset(by: 1.5)
-                            .fill(LinearGradient(colors: [.white.opacity(0.22), .clear], startPoint: .top, endPoint: .center))
-                            .blendMode(.plusLighter)
-                        Capsule(style: .continuous)
-                            .strokeBorder(LinearGradient(colors: [.white.opacity(0.6), .white.opacity(0.05)], startPoint: .top, endPoint: .bottom), lineWidth: 1)
-                    }
-                    .shadow(color: Lujo.oro.opacity(presionado ? 0.2 : 0.4), radius: presionado ? 5 : 10, y: presionado ? 2 : 4)
+                    // Elegido: vidrio con tinte de oro (como el principal).
+                    FondoDeVidrio(forma: Capsule(style: .continuous), presionado: presionado)
                 } else {
                     VidrioZeno(forma: Capsule(style: .continuous), presionado: presionado)
                 }
