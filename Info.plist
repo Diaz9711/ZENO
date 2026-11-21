@@ -19,8 +19,6 @@
 	<false/>
 	<key>NSFaceIDUsageDescription</key>
 	<string>ZENO usa Face ID solo para que entres o recuperes tu clave. Nada sale del teléfono.</string>
-	<key>NSHealthShareUsageDescription</key>
-	<string>Si enciendes el modo bienestar, ZENO lee tus horas de sueño y tu pulso en reposo solo para ajustar tu energía del día. No es un diagnóstico y nada sale del teléfono.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>ZENO usa el micrófono solo cuando tocas el botón de dictar, para escribir la tarea que dices.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

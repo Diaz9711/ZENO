@@ -19,6 +19,8 @@ struct AjustesView: View {
     @Namespace private var espacio
     /// "Cómo funciona ZENO": una página dentro de Ajustes, nunca una hoja de sistema.
     @State private var leyendo = false
+    /// La privacidad, también como página dentro de Ajustes.
+    @State private var privacidad = false
     @State private var calidadNueva = CalidadVisual.nivel > 0.5
     @AppStorage(TonoDeCielo.clave) private var tonoDeCielo = TonoDeCielo.azulado
     @AppStorage(DisenoDeBotonDeAhora.clave) private var disenoBoton = DisenoDeBotonDeAhora.elegido.rawValue
@@ -32,6 +34,15 @@ struct AjustesView: View {
             MarcaDeLista(id: "zeno.arriba")
             if leyendo {
                 ComoFuncionaView { withAnimation(Lujo.curva()) { leyendo = false } }
+                    .padding(.top, 8)
+                    .padding(.horizontal, Lujo.margen)
+                    .background(alignment: .top) { HojaDeFondo().padding(.top, -14) }
+                    .padding(.top, arriba)
+                    .padding(.bottom, 150)
+                    .informaDesplazamiento()
+                    .transition(.desenfoque)
+            } else if privacidad {
+                PrivacidadView { withAnimation(Lujo.curva()) { privacidad = false } }
                     .padding(.top, 8)
                     .padding(.horizontal, Lujo.margen)
                     .background(alignment: .top) { HojaDeFondo().padding(.top, -14) }
@@ -212,6 +223,12 @@ struct AjustesView: View {
                     Text("Todo vive solo en este teléfono. Sin cuentas, sin servidores.")
                         .font(.zenoTexto(.caption))
                         .foregroundStyle(Lujo.marfilSecundario)
+                    fila(icono: .ojo, titulo: "Privacidad", detalle: "Qué guarda ZENO y dónde.") {
+                        withAnimation(Lujo.curva()) { privacidad = true }
+                        Desplazamiento.compartido.valor = 0
+                    }
+                    .padding(.horizontal, 20)
+                    .tarjetaLujo()
                     BotonTerciarioLujo(titulo: "Borrar mis datos", icono: .papelera, destructivo: true) {
                         Hojas.compartidas.mostrar {
                             HojaDeConfirmacion(
@@ -325,7 +342,7 @@ struct AjustesView: View {
         .deslizablePorAutopiloto(lector)
         }
         // Al abrir o cerrar "Cómo funciona ZENO" se empieza arriba.
-        .id(leyendo)
+        .id("\(leyendo)-\(privacidad)")
         .coordinateSpace(name: "pagina")
         .bordesFundidos(arriba: arriba)
         .foregroundStyle(Lujo.marfil)

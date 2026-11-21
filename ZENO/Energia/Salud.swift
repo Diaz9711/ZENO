@@ -1,5 +1,6 @@
 import Foundation
-#if canImport(HealthKit)
+// HealthKit NO va en la versión 1.0 (Fable, auditoría): solo se compila con la condición SALUD.
+#if canImport(HealthKit) && SALUD
 import HealthKit
 #endif
 
@@ -9,7 +10,8 @@ import HealthKit
 // Reglas: estos datos nunca van a ninguna IA (ni la local), nunca salen del iPhone y nunca se
 // guardan en `Compartido/` (lo vería el widget).
 // Para encenderla hace falta: la cuenta de desarrollador de pago, la capacidad HealthKit en Xcode,
-// el texto NSHealthShareUsageDescription en Info.plist y un interruptor en Ajustes. Mientras tanto,
+// la condición de compilación SALUD, el texto NSHealthShareUsageDescription en Info.plist (y su
+// traducción en InfoPlist.xcstrings) y un interruptor en Ajustes. Mientras tanto,
 // `LectorDeSalud.disponible` es false y nada de esto corre.
 
 /// Lo que se leería de Salud: solo dos números de la última noche y de los últimos días.
@@ -47,7 +49,7 @@ final class LectorDeSalud: @unchecked Sendable {
     /// Apagado a propósito hasta tener la capacidad HealthKit firmada.
     static let preparado = false
     var disponible: Bool {
-        #if canImport(HealthKit)
+        #if canImport(HealthKit) && SALUD
         return Self.preparado && HKHealthStore.isHealthDataAvailable()
             && UserDefaults.standard.bool(forKey: "modoBienestar")
         #else
@@ -58,7 +60,7 @@ final class LectorDeSalud: @unchecked Sendable {
     /// La última lectura (nil sin permiso o sin datos).
     private(set) var ultima: SenalDeSalud?
 
-    #if canImport(HealthKit)
+    #if canImport(HealthKit) && SALUD
     private let almacen = HKHealthStore()
 
     /// Pide permiso solo de lectura, solo sueño y pulso en reposo. Si dice que no, todo sigue igual.

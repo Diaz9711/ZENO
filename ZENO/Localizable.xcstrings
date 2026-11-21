@@ -3791,6 +3791,166 @@
           }
         }
       }
+    },
+    "Privacidad" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy"
+          }
+        }
+      }
+    },
+    "Qué guarda ZENO y dónde." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What ZENO keeps and where."
+          }
+        }
+      }
+    },
+    "En pocas palabras" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In short"
+          }
+        }
+      }
+    },
+    "ZENO no recopila tus datos. Lo que escribes, tu estrella y tu historial se guardan solo en tu iPhone. Sin cuentas, sin servidores, sin publicidad y sin analíticas." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ZENO doesn’t collect your data. What you write, your star and your history are stored only on your iPhone. No accounts, no servers, no ads and no analytics."
+          }
+        }
+      }
+    },
+    "Qué guarda y dónde" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What it keeps and where"
+          }
+        }
+      }
+    },
+    "Tu nombre y tu fecha de nacimiento (para crear tu estrella), tus tareas con su para qué, y cuándo empiezas, terminas o dejas algo para después (para proponerte lo que encaja con tu energía). Todo en tu iPhone. Si creas una clave, solo se guarda una huella en el Llavero, nunca la clave." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your name and date of birth (to create your star), your tasks with their why, and when you start, finish or put something off (to suggest what fits your energy). All on your iPhone. If you create a passcode, only a fingerprint of it is kept in the Keychain, never the passcode."
+          }
+        }
+      }
+    },
+    "La IA de tu iPhone" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your iPhone’s AI"
+          }
+        }
+      }
+    },
+    "Divídemela, la captura por voz y algunas frases de Chispa usan la IA de Apple que funciona dentro del iPhone. Lo que escribes o dictas no sale del teléfono." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Split it, voice capture and some of Chispa’s lines use Apple’s AI that runs on your iPhone. What you write or dictate never leaves the phone."
+          }
+        }
+      }
+    },
+    "Micrófono y voz" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone and voice"
+          }
+        }
+      }
+    },
+    "El micrófono solo se usa cuando tocas el botón de dictar. Tu voz se convierte en texto dentro del iPhone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The microphone is used only when you tap the dictate button. Your voice is turned into text on your iPhone."
+          }
+        }
+      }
+    },
+    "Avisos, widget y pantalla bloqueada" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminders, widget and Lock Screen"
+          }
+        }
+      }
+    },
+    "Los avisos están apagados hasta que los activas, sin sonido y sin el texto de tus tareas. Con el iPhone bloqueado, el texto de la tarea se oculta." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminders are off until you turn them on, with no sound and no task text. When your iPhone is locked, the task text is hidden."
+          }
+        }
+      }
+    },
+    "Borrar tus datos" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete your data"
+          }
+        }
+      }
+    },
+    "En Ajustes → Tus datos puedes borrarlo todo, incluida tu clave." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Settings → Your data you can delete everything, including your passcode."
+          }
+        }
+      }
+    },
+    "Salud" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health"
+          }
+        }
+      }
+    },
+    "ZENO acompaña tu día. No diagnostica, no trata y no reemplaza a ningún profesional ni tratamiento." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ZENO keeps you company through your day. It doesn’t diagnose, treat or replace any professional or treatment."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
