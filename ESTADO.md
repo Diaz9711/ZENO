@@ -150,6 +150,7 @@ Posicionamiento: "La única app para TDAH que elige la tarea que encaja con tu e
 Riesgos de rechazo: botón "Continuar con Apple" sin la capacidad (esconderlo en 1.0); frase de Safren en Cómo funciona y en la web suena a promesa médica (reescribir); que la clave local nunca deje fuera al revisor; textos en inglés de Face ID y voz marcados para revisar (`InfoPlist.xcstrings`); falta página de privacidad y de soporte con contacto; versión 0.1 → 1.0.
 
 ## Lista para subir a la App Store (lo que falta)
+- **Salud:** la app ya importa HealthKit y trae el texto `NSHealthShareUsageDescription`, pero sin la capacidad (apagada). Antes de enviar: confirmar que la revisión lo acepta así (o quitar el import) y que la página de privacidad lo menciona.
 1. **Cuenta Apple Developer de pago** (99 USD al año). Con el Personal Team gratis no se puede subir.
 2. **"Continuar con Apple"**: activar la capacidad Sign in with Apple con la cuenta de pago, o esconder ese botón antes de enviar. Si no funciona, Apple rechaza la app.
 3. **App Store Connect**: crear la app (nombre ZENO, si está libre), subtítulo, descripción en español e inglés, palabras clave, categoría (Productividad; evitar "Salud/Medicina" para no prometer tratamiento), clasificación por edad.

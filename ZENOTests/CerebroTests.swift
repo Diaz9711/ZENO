@@ -138,9 +138,9 @@ final class CerebroTests: XCTestCase {
         let grandes = (1...4).map { senal(.ahoraNo, haceMin: Double($0) * 1440, tamano: .grande) }
         XCTAssertEqual(Aprendizaje.patronDeAhora(propuesta: .chica, tipo: nil, hayGrandes: true, nivel: .alta,
                                                  franja: 10, eventos: grandes, ahora: ahora), .grandeCuestaAEstaHora)
-        XCTAssertNil(Aprendizaje.patronDeAhora(propuesta: .chica, tipo: nil, hayGrandes: true, nivel: .baja,
+        XCTAssertNil(Aprendizaje.patronDeAhora(propuesta: .chica, tipo: nil, hayGrandes: true, nivel: .media,
                                                franja: 10, eventos: grandes, ahora: ahora),
-                     "con energía baja lo chico es lo normal: no hay nada que contar")
+                     "con energía media lo grande no iba primero: no hay nada que contar")
     }
 
     func testTipoDeTarea() {
@@ -167,6 +167,7 @@ final class CerebroTests: XCTestCase {
     // MARK: Anillo
 
     func testAnilloBajaSuLuzPasados10Minutos() {
+        // (La vista solo la usa en tareas divididas; una tarea larga conserva su luz.)
         XCTAssertEqual(AnilloDeTiempoView.intensidad(segundos: 5 * 60), 1)
         XCTAssertEqual(AnilloDeTiempoView.intensidad(segundos: 10 * 60), 1)
         XCTAssertLessThan(AnilloDeTiempoView.intensidad(segundos: 12 * 60), 1)

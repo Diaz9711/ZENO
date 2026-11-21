@@ -103,7 +103,8 @@ struct AnilloDeTiempoView: View {
                 }
             }
             .rotationEffect(.degrees(-90))
-            .opacity(luz)
+            // Solo en tareas divididas (pasos de unos 5 min): una tarea larga sigue con su luz entera.
+            .opacity(pasos == nil ? 1 : luz)
             .animation(.easeInOut(duration: 1.2), value: terminado)
             .accessibilityElement()
             .accessibilityLabel(Text("Tiempo de la tarea"))

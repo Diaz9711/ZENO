@@ -3671,6 +3671,26 @@
           }
         }
       }
+    },
+    "Lo que te llama de esto. Opcional." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What draws you to it. Optional."
+          }
+        }
+      }
+    },
+    "Toca el micrófono para dictarla. La estrellita guarda para qué te importa." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the microphone to dictate it. The little star keeps why it matters to you."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

@@ -46,7 +46,9 @@ enum Cohete {
             // El porqué de la persona (escrito a mano: la IA nunca lo reescribe). Dos de cada tres turnos,
             // para que no canse.
             let vuelta = turno.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0xFFFF }
-            if let a = anzuelo, vuelta % 3 != 2 {
+            // Un porqué largo se acorta en la frase (entero ya va en la tarjeta), para que la barra nunca se salga.
+            let corto = anzuelo.map { $0.count > 42 ? String($0.prefix(40)).trimmingCharacters(in: .whitespaces) + "…" : $0 }
+            if let a = corto, vuelta % 3 != 2 {
                 if enMarcha { return Idioma.texto("Vas por «\(a)». Sigue a tu ritmo.") }
                 if !enRacha {
                     switch vuelta % 3 {

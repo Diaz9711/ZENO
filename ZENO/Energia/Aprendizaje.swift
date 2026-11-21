@@ -128,7 +128,8 @@ enum Aprendizaje {
     /// El patrón que explica la propuesta de ahora, si hay uno claro. Observacional, nunca culpa.
     static func patronDeAhora(propuesta tamano: TamanoDeTarea, tipo: TipoDeTarea?, hayGrandes: Bool,
                               nivel: NivelDeEnergia, franja: Int, eventos: [Senal], ahora: Date = .now) -> Patron? {
-        if nivel != .baja, hayGrandes, tamano != .grande,
+        // Solo con energía alta: es cuando lo grande iría primero y lo aprendido de verdad cambió la propuesta.
+        if nivel == .alta, hayGrandes, tamano != .grande,
            suelePosponer(.grande, franja: franja, eventos: eventos, ahora: ahora) {
             return .grandeCuestaAEstaHora
         }

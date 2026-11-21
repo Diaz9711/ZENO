@@ -445,15 +445,29 @@ struct TareaDelMomentoView: View {
 
     private var agregar: some View {
         VStack(spacing: 14) {
-            Text(escuchando ? "Te escucho…" : "¿Qué quieres hacer?")
-                .font(.zenoTitulo(.title2))
-                .foregroundStyle(Lujo.marfil)
-                .shadow(color: .black.opacity(0.45), radius: 12, y: 2)
+            // Con el porqué abierto, el título se retira para que todo quepa sobre el teclado.
+            if !conPorque {
+                Text(escuchando ? "Te escucho…" : "¿Qué quieres hacer?")
+                    .font(.zenoTitulo(.title2))
+                    .foregroundStyle(Lujo.marfil)
+                    .shadow(color: .black.opacity(0.45), radius: 12, y: 2)
+                    .transition(.opacity)
+            }
             campo($frase, sugerencia: "Una sola frase")
+            campoDelPorque
             // Los botones quedan siempre a la vista, aunque el teclado esté abierto.
             // El reloj abre el día y la hora (opcional) en una hoja.
             HStack(spacing: 10) {
-                botonChico("Cancelar", fuerte: false) { cerrarAgregar() }
+                // Cancelar es una ✕ fina (con cinco botones el texto no cabía).
+                Button { cerrarAgregar() } label: {
+                    IconoFino(icono: .cerrar, color: Lujo.marfil.opacity(0.75), tamano: 15)
+                        .frame(width: Lujo.altoBoton, height: Lujo.altoBoton)
+                        .background(RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous)
+                            .fill(Lujo.marfil.opacity(0.03)))
+                        .cantoPulido(radio: Lujo.radioBoton, oro: false)
+                }
+                .buttonStyle(EstiloLujo())
+                .accessibilityLabel(Text("Cancelar"))
                 Button {
                     // El día y la hora se eligen en una hoja: Lumi no se mueve y el teclado se baja.
                     escribiendo = false
@@ -478,6 +492,26 @@ struct TareaDelMomentoView: View {
                 }
                 .buttonStyle(EstiloLujo())
                 .accessibilityLabel(dictado.activo ? Text("Dejar de dictar") : Text("Dictar la tarea"))
+                // El porqué (opcional): una estrellita, la misma que lo acompaña luego en Hoy.
+                Button {
+                    toques += 1
+                    if conPorque {
+                        escribiendoPorque = true
+                    } else {
+                        withAnimation(Lujo.curva()) { conPorque = true }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { escribiendoPorque = true }
+                    }
+                } label: {
+                    EstrellitaDeCuatro()
+                        .fill(conPorque || !limpio(porque).isEmpty ? Lujo.oro : Lujo.marfil.opacity(0.75))
+                        .frame(width: 17, height: 17)
+                        .frame(width: Lujo.altoBoton, height: Lujo.altoBoton)
+                        .background(RoundedRectangle(cornerRadius: Lujo.radioBoton, style: .continuous)
+                            .fill(Lujo.marfil.opacity(0.03)))
+                        .cantoPulido(radio: Lujo.radioBoton, oro: conPorque)
+                }
+                .buttonStyle(EstiloLujo())
+                .accessibilityLabel(Text("¿Para qué te importa?"))
                 botonChico("Guardar", fuerte: true) { guardarFrase() }
                     .disabled(limpio(frase).isEmpty)
             }
@@ -485,8 +519,8 @@ struct TareaDelMomentoView: View {
                 EtiquetaDePlanBorrador(plan: plan)
                     .transition(.opacity)
             }
-            campoDelPorque
-            Text(dictado.aviso ?? Idioma.texto("Toca el micrófono para dictarla."))
+            Text(conPorque ? Idioma.texto("Lo que te llama de esto. Opcional.")
+                 : (dictado.aviso ?? Idioma.texto("Toca el micrófono para dictarla. La estrellita guarda para qué te importa.")))
                 .font(.zenoTexto(.caption))
                 .foregroundStyle(Lujo.marfilSecundario)
                 .multilineTextAlignment(.center)
@@ -515,13 +549,6 @@ struct TareaDelMomentoView: View {
                         .animation(Lujo.curva(), value: escribiendoPorque)
                 }
                 .transition(.opacity.combined(with: .offset(y: -6)))
-        } else {
-            BotonTerciarioLujo(titulo: "¿Para qué te importa?", icono: .mas) {
-                toques += 1
-                withAnimation(Lujo.curva()) { conPorque = true }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { escribiendoPorque = true }
-            }
-            .transition(.opacity)
         }
     }
 
@@ -643,14 +670,22 @@ struct TareaDelMomentoView: View {
             propuesta: tarea.tamano, tipo: TipoDeTarea.de(tarea.titulo),
             hayGrandes: pendientes.contains { $0.tamano == .grande },
             nivel: MotorDeEnergia.nivel(puntaje), franja: Calendar.current.component(.hour, from: .now), eventos: eventos)
+        // Si ya está dividida, "la divido en pasos" no aplica.
+        let valido = patron.flatMap { p -> Aprendizaje.Patron? in
+            if case .tipoCuesta = p, !tarea.pasos.isEmpty { return nil }
+            return p
+        }
+        // Una vez al día cada patrón, para una tarea: si se vuelve a Hoy con esa misma tarea, sigue a la vista.
         let hoy = Date.now.formatted(.iso8601.year().month().day())
         var dichos = patronesDichos.hasPrefix(hoy) ? patronesDichos : hoy
-        guard let patron, !dichos.split(separator: "|").dropFirst().contains(Substring(patron.clave)) else {
-            patronDeAhora = nil; return
-        }
-        dichos += "|" + patron.clave
+        guard let valido else { patronDeAhora = nil; return }
+        let marca = valido.clave + ":" + String(tarea.titulo.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0xFFFFFF })
+        let yaDichos = dichos.split(separator: "|").dropFirst()
+        if yaDichos.contains(Substring(marca)) { patronDeAhora = valido; return }
+        if yaDichos.contains(where: { $0.hasPrefix(valido.clave + ":") }) { patronDeAhora = nil; return }
+        dichos += "|" + marca
         patronesDichos = dichos
-        patronDeAhora = patron
+        patronDeAhora = valido
     }
 
     // MARK: Acciones
