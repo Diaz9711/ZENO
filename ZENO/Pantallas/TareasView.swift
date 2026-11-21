@@ -197,7 +197,8 @@ struct TareaDelMomentoView: View {
                 ? Aprendizaje.minutosReales(tarea.tamano, eventos: eventos).map { Int($0.rounded()) } : nil
             return .tarea(enMarcha: enCurso == tarea.persistentModelID, primerPaso: tarea.primerPaso != nil,
                           minutosReales: minutos, enRacha: enRacha && enCurso == nil, anzuelo: tarea.anzuelo,
-                          patron: patronDeAhora, conEnergia: MotorDeEnergia.nivel(puntaje) != .baja)
+                          patron: patronDeAhora, conEnergia: MotorDeEnergia.nivel(puntaje) != .baja,
+                          deVuelta: MotorDeEnergia.deVuelta(eventos: eventos))
         case .descanso: return .descanso
         case .masTarde: return .masTarde(vuelveA: vuelveA)
         case .silencio: return .silencio

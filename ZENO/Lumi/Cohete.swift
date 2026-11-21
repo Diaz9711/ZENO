@@ -17,7 +17,7 @@ enum Cohete {
 
     enum Momento {
         case tarea(enMarcha: Bool, primerPaso: Bool, minutosReales: Int?, enRacha: Bool, anzuelo: String? = nil,
-                   patron: Aprendizaje.Patron? = nil, conEnergia: Bool = false)
+                   patron: Aprendizaje.Patron? = nil, conEnergia: Bool = false, deVuelta: Bool = false)
         case descanso
         case masTarde(vuelveA: Date?)
         /// Modo compañero silencioso: solo presencia.
@@ -53,7 +53,12 @@ enum Cohete {
                 }
             }
             return variada(.celebracion)
-        case .tarea(let enMarcha, let primerPaso, let minutos, let enRacha, let anzuelo, let patron, let conEnergia):
+        case .tarea(let enMarcha, let primerPaso, let minutos, let enRacha, let anzuelo, let patron, let conEnergia, let deVuelta):
+            // Vuelta amable: tras varios días, un hola sin repaso ni culpa.
+            if deVuelta && !enMarcha {
+                return vuelta(turno) % 2 == 0 ? Idioma.texto("Qué bueno verte. Empecemos con algo pequeño, sin repasar nada.")
+                                              : Idioma.texto("Hola otra vez. Una cosa chiquita y ya.")
+            }
             // Bucle de retorno: el patrón se dice una vez, en el momento, cálido y sin culpa.
             if let patron, !enMarcha {
                 switch patron {

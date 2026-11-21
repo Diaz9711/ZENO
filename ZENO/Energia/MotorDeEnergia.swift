@@ -150,12 +150,29 @@ enum MotorDeEnergia {
         puntaje < umbralDeSilencio || ahoraNoSeguidos(eventos: eventos, ahora: ahora) >= 3
     }
 
+    // MARK: Vuelta amable (auditoría)
+
+    /// Días entre lo último que pasó antes de hoy y ahora (0 si nunca hubo nada antes de hoy).
+    static func diasFuera(eventos: [Senal], ahora: Date = .now, calendario: Calendar = .current) -> Double {
+        let hoy = calendario.startOfDay(for: ahora)
+        guard let previo = eventos.lazy.map(\.fecha).filter({ $0 < hoy }).max() else { return 0 }
+        return ahora.timeIntervalSince(previo) / 86_400
+    }
+
+    /// Vuelve tras 3 días o más: hoy se le recibe sin repasar nada y se le propone algo pequeño,
+    /// hasta que termine la primera cosa del día. No se esconde ni se mueve ninguna tarea.
+    static func deVuelta(eventos: [Senal], ahora: Date = .now, calendario: Calendar = .current) -> Bool {
+        diasFuera(eventos: eventos, ahora: ahora, calendario: calendario) >= 3
+            && !eventos.contains { $0.tipo == .tareaTerminada && calendario.isDate($0.fecha, inSameDayAs: ahora) }
+    }
+
     // MARK: Elegir la tarea del momento
 
     /// Energía alta: la más difícil. Media: una rutinaria. Baja: algo de dos minutos, o descanso.
     /// Lo que recibió un "Ahora no" hace menos de 90 minutos no se vuelve a ofrecer todavía.
     static func elegir(pendientes: [Tarea], puntaje: Double, eventos: [Senal],
                        quiereAlgoIgual: Bool = false, ahora: Date = .now) -> Eleccion {
+        let deVueltaHoy = deVuelta(eventos: eventos, ahora: ahora)
         guard !pendientes.isEmpty else { return .nadaPendiente }
 
         let rechazadas = Set(eventos
@@ -202,6 +219,9 @@ enum MotorDeEnergia {
         var pequena: Tarea? {
             primera(.chica) ?? disponibles.first(where: { $0.primerPaso != nil })
         }
+
+        // De vuelta tras varios días: primero algo pequeño, para volver sin peso.
+        if deVueltaHoy, let tarea = pequena { return .tarea(tarea) }
 
         switch nivel(puntaje) {
         case .alta:

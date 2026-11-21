@@ -3951,6 +3951,26 @@
           }
         }
       }
+    },
+    "Qué bueno verte. Empecemos con algo pequeño, sin repasar nada." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So good to see you. Let’s start with something small, no catching up."
+          }
+        }
+      }
+    },
+    "Hola otra vez. Una cosa chiquita y ya." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hi again. One tiny thing, that’s all."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

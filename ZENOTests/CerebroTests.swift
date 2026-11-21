@@ -94,6 +94,18 @@ final class CerebroTests: XCTestCase {
         XCTAssertFalse(MotorDeEnergia.tocaSilencio(puntaje: 40, eventos: [], ahora: ahora))
     }
 
+    // MARK: Vuelta amable
+
+    func testDeVueltaTrasTresDias() {
+        let antes = [senal(.abrioLaApp, haceMin: 4 * 1440), senal(.abrioLaApp, haceMin: 1)]
+        XCTAssertTrue(MotorDeEnergia.deVuelta(eventos: antes, ahora: ahora, calendario: utc))
+        let ayer = [senal(.abrioLaApp, haceMin: 1440), senal(.abrioLaApp, haceMin: 1)]
+        XCTAssertFalse(MotorDeEnergia.deVuelta(eventos: ayer, ahora: ahora, calendario: utc))
+        XCTAssertFalse(MotorDeEnergia.deVuelta(eventos: [], ahora: ahora, calendario: utc), "la primera vez no es una vuelta")
+        XCTAssertFalse(MotorDeEnergia.deVuelta(eventos: antes + [senal(.tareaTerminada, haceMin: 0)], ahora: ahora, calendario: utc),
+                       "tras terminar algo hoy, todo vuelve a lo normal")
+    }
+
     // MARK: Elegir (con el porqué)
 
     func testConEnergiaAltaVaPrimeroLaQueTienePorque() {
