@@ -4301,6 +4301,166 @@
           }
         }
       }
+    },
+    "La planeaste para esta hora." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You planned it for this hour."
+          }
+        }
+      }
+    },
+    "Tú la pusiste a esta hora." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You set it for this time."
+          }
+        }
+      }
+    },
+    "Antes no te llamó. ¿La hacemos distinta?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It didn’t call to you. Try it differently?"
+          }
+        }
+      }
+    },
+    "Te importa, y hay energía para ella." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It matters to you, and there’s energy."
+          }
+        }
+      }
+    },
+    "Tiene su porqué, y te da la energía." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It has its why, and you have energy."
+          }
+        }
+      }
+    },
+    "Esta suele ser una de tus horas." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is usually one of your hours."
+          }
+        }
+      }
+    },
+    "A esta hora sueles rendir." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You tend to do well now."
+          }
+        }
+      }
+    },
+    "A esta hora lo grande cuesta: algo chico." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Big things are hard now: something small."
+          }
+        }
+      }
+    },
+    "Lo grande puede esperar; ahora, algo chico." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Big things can wait; something small now."
+          }
+        }
+      }
+    },
+    "Tu energía va bajando: algo pequeño." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your energy is winding down: something small."
+          }
+        }
+      }
+    },
+    "Viene bajando la energía; algo corto." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Energy is dipping; something short."
+          }
+        }
+      }
+    },
+    "Empiezo por tu ritmo del registro." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I’m starting from the rhythm you told me."
+          }
+        }
+      }
+    },
+    "Por ahora sigo el ritmo que me contaste." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For now I follow the rhythm you shared."
+          }
+        }
+      }
+    },
+    "Estoy sin pilas" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I’m out of energy"
+          }
+        }
+      }
+    },
+    "Esta no me llama" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This one doesn’t call me"
+          }
+        }
+      }
+    },
+    "Por qué no, opcional" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Why not, optional"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

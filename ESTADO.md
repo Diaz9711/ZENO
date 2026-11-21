@@ -89,6 +89,11 @@ Pasos siguientes, uno por uno (Diaz pidió paso a paso, "razona bien", usar a Fa
 5. "Más premium, que la app tenga vida": sin efectos nuevos hasta que lo de arriba esté aprobado.
 - **No tocar** la estrella ni la nebulosa por defecto ni sus colores (Diaz lo repitió).
 
+## Cerebro que se nota (21 nov 2026, plan aprobado por Diaz)
+- **"Por qué ahora"** (`Energia/RazonDeAhora.swift`, `MotorDeEnergia.razon`): línea discreta bajo el título de la tarea propuesta con la razón verdadera, por prioridad: planeada → antes no le llamó (con "Divídemela" / "¿Para qué te importa?") → tiene porqué y hay energía → hora fuerte → lo grande cuesta a esta hora → la energía viene bajando (curva del día) → sin historial. Máx. 8 palabras, dos maneras de decir cada una, es/en. La frase "lo grande te cuesta" ya no la dice Chispa (no dos veces). Foto: `Comparaciones/por-que-ahora.png`.
+- **"No quiero" ≠ "No puedo"**: tras "Ahora no", 3 s en el sitio de Chispa con "Estoy sin pilas · Esta no me llama" (opcional). `EventoDeEnergia.motivoCrudo` (nuevo, opcional). Sin motivo o "sin pilas": como siempre. "No me llama": no baja la energía (ni `ajusteAprendido`, ni `ajusteDeHoy`, ni el modo silencioso), la tarea va al final de su fila 7 días y la próxima vez se ofrece dividirla o darle porqué. El orden por tamaño/tipo sigue contando los dos.
+- Tests: 57 en verde.
+
 ## Auditoría y mejoras (20 nov 2026, plan revisado con Fable) — HECHO, en el iPhone de Diaz
 - **Plan B de la base de datos** (`Modelos/Almacen.swift`): si no abre, aviso tranquilo `AvisoDeDatos` en vez de cerrarse en bucle; base en memoria aparte; Siri y el Terminé de la pantalla bloqueada se detienen. Prueba: `-fallarBaseDeDatos YES`.
 - **Letra grande en Hoy**: desde xxxL se retiran el campo rápido y las medianas; Hoy no pasa de xxxL (Tareas y Ajustes sí, se desplazan); la barra tiene tope xLarge. Foto: `Comparaciones/letra-grande-antes-ahora.jpg`.

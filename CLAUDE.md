@@ -69,6 +69,10 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 - HealthKit fuera de la 1.0 (condición `SALUD`). Privacidad dentro de Ajustes (`Pantallas/Privacidad.swift`); mantenerla igual que `Web/privacidad.html`.
 - Registro de 4 pasos (Diaz, 21 nov 2026): nombre, fecha, **Curva viva** (las tres horas en una pantalla: su curva de energía real que se transforma al tocar; `Pantallas/RegistroDia.swift`, `DiaDeEnergia` siempre da un día válido) y forma: "01 / 04". Los otros diseños (esfera, frase) y las tres preguntas de antes quedan con `-disenoDia 2|3|0`.
 
+## Cerebro que se nota (21 nov 2026)
+- `MotorDeEnergia.razon` (`Energia/RazonDeAhora.swift`): la línea "por qué ahora" de la tarjeta Ahora; siempre la razón verdadera, nunca números de energía.
+- `MotivoDeRechazo` en `EventoDeEnergia.motivoCrudo`: "Esta no me llama" nunca baja la energía; solo cuentan como cansancio `Senal.esRechazoPorEnergia`.
+
 ## Sistema de diseño (Diaz, 21 nov 2026)
 - `ZENO/DesignSystem/Components/`: `ZenoPrimaryButton` es de **vidrio** (Diaz: "glass", Liquid Glass de iOS 26 con tinte de oro; antes de iOS 26 un vidrio dibujado; `ZenoPrimaryButton.acabado`, el oro queda como `.oro`). Base: el archivo de Diaz, con el oro de `Lujo` —`oroLuz`/`oro`/`oroHondo`—, Manrope e `IconoFino`) es el estándar de calidad. `BotonPrimarioLujo` (48 pt, filas) y `BotonZeno` (58 pt) ya lo usan. El Emblema de Empezar también es de vidrio (dibujado, `FondoDeVidrio(liquido: false)`: el Liquid Glass se deforma al girar en 3D).
 - `ZenoSecondaryButton`, `ZenoIconButton`, `ZenoCard`, `ZenoChip` (`ZenoComponentes.swift`): misma calidad (degradado, brillo, borde de luz, resplandor, presión, háptico). **Aún no se usan** hasta que Diaz los apruebe en la galería (Ajustes → Modo de prueba → Ver componentes, o `-galeriaComponentes YES`).

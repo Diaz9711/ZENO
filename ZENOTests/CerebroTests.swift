@@ -14,9 +14,9 @@ final class CerebroTests: XCTestCase {
     }()
 
     func senal(_ tipo: TipoDeEvento, haceMin minutos: Double = 0, hora: Int = 10, valor: Double? = nil,
-               tamano: TamanoDeTarea? = nil, tipoDeTarea: TipoDeTarea? = nil) -> Senal {
+               tamano: TamanoDeTarea? = nil, tipoDeTarea: TipoDeTarea? = nil, motivo: MotivoDeRechazo? = nil) -> Senal {
         Senal(tipo: tipo, fecha: ahora.addingTimeInterval(-minutos * 60), franjaHoraria: hora, valor: valor,
-              tamano: tamano, tipoDeTarea: tipoDeTarea)
+              tamano: tamano, tipoDeTarea: tipoDeTarea, motivo: motivo)
     }
 
     // MARK: Curva base
@@ -92,6 +92,89 @@ final class CerebroTests: XCTestCase {
     func testEnergiaMuyBajaEsSilencio() {
         XCTAssertTrue(MotorDeEnergia.tocaSilencio(puntaje: MotorDeEnergia.umbralDeSilencio - 1, eventos: [], ahora: ahora))
         XCTAssertFalse(MotorDeEnergia.tocaSilencio(puntaje: 40, eventos: [], ahora: ahora))
+    }
+
+    // MARK: "No quiero" frente a "No puedo"
+
+    func testNoMeLlamaNoCambiaElPuntaje() {
+        let persona = Persona(nombre: "Prueba", nacimientoAnio: 1999, nacimientoMes: 6, nacimientoDia: 15)
+        let base = [senal(.abrioLaApp, haceMin: 60)]
+        let sinNada = MotorDeEnergia.puntaje(persona: persona, eventos: base, ahora: ahora, calendario: utc)
+        let conNoMeLlama = MotorDeEnergia.puntaje(persona: persona, eventos: base + [senal(.ahoraNo, haceMin: 5, motivo: .noMeLlama)],
+                                                  ahora: ahora, calendario: utc)
+        XCTAssertEqual(sinNada, conNoMeLlama, accuracy: 0.0001)
+        let viejos = (1...3).map { senal(.ahoraNo, haceMin: Double($0) * 1440, motivo: .noMeLlama) }
+        XCTAssertEqual(MotorDeEnergia.ajusteAprendido(franja: 10, eventos: viejos, ahora: ahora), 0)
+    }
+
+    func testSinPilasSiBajaElPuntaje() {
+        let persona = Persona(nombre: "Prueba", nacimientoAnio: 1999, nacimientoMes: 6, nacimientoDia: 15)
+        let base = [senal(.abrioLaApp, haceMin: 60)]
+        let sinNada = MotorDeEnergia.puntaje(persona: persona, eventos: base, ahora: ahora, calendario: utc)
+        let sinPilas = MotorDeEnergia.puntaje(persona: persona, eventos: base + [senal(.ahoraNo, haceMin: 5, motivo: .sinPilas)],
+                                              ahora: ahora, calendario: utc)
+        XCTAssertLessThan(sinPilas, sinNada)
+    }
+
+    func testEventosViejosSinMotivoSiguenIgual() {
+        let persona = Persona(nombre: "Prueba", nacimientoAnio: 1999, nacimientoMes: 6, nacimientoDia: 15)
+        let base = [senal(.abrioLaApp, haceMin: 60)]
+        let sinMotivo = MotorDeEnergia.puntaje(persona: persona, eventos: base + [senal(.ahoraNo, haceMin: 5)], ahora: ahora, calendario: utc)
+        let sinPilas = MotorDeEnergia.puntaje(persona: persona, eventos: base + [senal(.ahoraNo, haceMin: 5, motivo: .sinPilas)], ahora: ahora, calendario: utc)
+        XCTAssertEqual(sinMotivo, sinPilas, accuracy: 0.0001, "sin motivo cuenta como siempre (cansancio)")
+    }
+
+    func testNoMeLlamaNoLlevaAlSilencio() {
+        let tres = (1...3).map { senal(.ahoraNo, haceMin: Double(4 - $0) * 5, motivo: .noMeLlama) }
+        XCTAssertFalse(MotorDeEnergia.tocaSilencio(puntaje: 70, eventos: tres, ahora: ahora))
+    }
+
+    // MARK: "Por qué ahora"
+
+    func testRazonPlaneada() {
+        let t = Tarea(titulo: "Llamar a mamá", tamano: .chica)
+        t.fechaPlaneada = ahora.addingTimeInterval(10 * 60)
+        XCTAssertEqual(MotorDeEnergia.razon(tarea: t, puntaje: 50, eventos: [], horasDelDia: [], hayGrandes: false,
+                                            ahora: ahora, calendario: utc), .planeada)
+    }
+
+    func testRazonNuncaDicePlaneadaSiNoLoEsta() {
+        let t = Tarea(titulo: "Llamar a mamá", tamano: .chica)
+        t.fechaPlaneada = ahora.addingTimeInterval(5 * 3600)
+        XCTAssertNotEqual(MotorDeEnergia.razon(tarea: t, puntaje: 50, eventos: [], horasDelDia: [], hayGrandes: false,
+                                               ahora: ahora, calendario: utc), .planeada)
+    }
+
+    func testRazonPorqueSoloConEnergia() {
+        let t = Tarea(titulo: "Escribir el cuento", tamano: .mediana)
+        t.porque = "Mi sobrina"
+        XCTAssertEqual(MotorDeEnergia.razon(tarea: t, puntaje: 60, eventos: [], horasDelDia: [], hayGrandes: false,
+                                            ahora: ahora, calendario: utc), .porque)
+        XCTAssertNotEqual(MotorDeEnergia.razon(tarea: t, puntaje: 20, eventos: [], horasDelDia: [], hayGrandes: false,
+                                               ahora: ahora, calendario: utc), .porque)
+    }
+
+    func testRazonSinHistorial() {
+        let t = Tarea(titulo: "Ordenar", tamano: .mediana)
+        XCTAssertEqual(MotorDeEnergia.razon(tarea: t, puntaje: 50, eventos: [], horasDelDia: [], hayGrandes: false,
+                                            ahora: ahora, calendario: utc), .sinHistorial)
+    }
+
+    func testRazonEnergiaBajando() {
+        let t = Tarea(titulo: "Responder a Ana", tamano: .chica)
+        var horas = [Double](repeating: 40, count: 24)
+        horas[9] = 60; horas[10] = 55; horas[11] = 45
+        let terminadas = (1...3).map { senal(.tareaTerminada, haceMin: Double($0) * 1440, hora: 20) }
+        XCTAssertEqual(MotorDeEnergia.razon(tarea: t, puntaje: 50, eventos: terminadas, horasDelDia: horas, hayGrandes: false,
+                                            ahora: ahora, calendario: utc), .energiaBajando)
+    }
+
+    func testRazonTextoCorto() {
+        for r in [RazonDeAhora.planeada, .noLeLlamo, .porque, .horaFuerte, .grandeCuesta, .energiaBajando, .sinHistorial] {
+            for turno in ["a", "b", "c"] {
+                XCTAssertLessThanOrEqual(r.texto(turno: turno).split(separator: " ").count, 8, "\(r)")
+            }
+        }
     }
 
     // MARK: Vuelta amable

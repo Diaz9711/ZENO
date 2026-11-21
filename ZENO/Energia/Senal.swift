@@ -16,10 +16,15 @@ struct Senal: Equatable {
     var conPrimerPaso: Bool
     /// Tipo de la tarea (llamada, trámite…), si se sabe.
     var tipoDeTarea: TipoDeTarea?
+    /// En "Ahora no": por qué (nil = como siempre).
+    var motivo: MotivoDeRechazo?
+
+    /// ¿Es un rechazo por energía? (Los "Esta no me llama" no cuentan como cansancio.)
+    var esRechazoPorEnergia: Bool { (tipo == .ahoraNo || tipo == .tareaIgnorada) && motivo != .noMeLlama }
 
     init(tipo: TipoDeEvento?, fecha: Date, franjaHoraria: Int, valor: Double? = nil,
          tamano: TamanoDeTarea? = nil, tareaID: PersistentIdentifier? = nil, conPrimerPaso: Bool = false,
-         tipoDeTarea: TipoDeTarea? = nil) {
+         tipoDeTarea: TipoDeTarea? = nil, motivo: MotivoDeRechazo? = nil) {
         self.tipo = tipo
         self.fecha = fecha
         self.franjaHoraria = franjaHoraria
@@ -28,6 +33,7 @@ struct Senal: Equatable {
         self.tareaID = tareaID
         self.conPrimerPaso = conPrimerPaso
         self.tipoDeTarea = tipoDeTarea
+        self.motivo = motivo
     }
 
     init(_ e: EventoDeEnergia) {
@@ -35,7 +41,8 @@ struct Senal: Equatable {
         self.init(tipo: e.tipo, fecha: e.fecha, franjaHoraria: e.franjaHoraria, valor: e.valor,
                   tamano: e.tamanoCrudo.flatMap(TamanoDeTarea.init(rawValue:)) ?? tarea?.tamano,
                   tareaID: tarea?.persistentModelID, conPrimerPaso: tarea?.primerPaso != nil,
-                  tipoDeTarea: e.tipoDeTareaCrudo.flatMap(TipoDeTarea.init(rawValue:)) ?? tarea.flatMap { TipoDeTarea.de($0.titulo) })
+                  tipoDeTarea: e.tipoDeTareaCrudo.flatMap(TipoDeTarea.init(rawValue:)) ?? tarea.flatMap { TipoDeTarea.de($0.titulo) },
+                  motivo: e.motivo)
     }
 }
 
@@ -57,17 +64,21 @@ final class Memoria {
         var cuantos: Int
         var ultimo: PersistentIdentifier?
         var ultimaTarea: PersistentIdentifier?
+        /// El motivo de un "Ahora no" se elige unos segundos después: los últimos eventos se vuelven a leer.
+        var ultimosMotivos: [String?]
     }
 
     func senales(de eventos: [EventoDeEnergia]) -> [Senal] {
         let nueva = Firma(cuantos: eventos.count, ultimo: eventos.last?.persistentModelID,
-                          ultimaTarea: eventos.last?.tarea?.persistentModelID)
+                          ultimaTarea: eventos.last?.tarea?.persistentModelID,
+                          ultimosMotivos: eventos.suffix(4).map(\.motivoCrudo))
         if nueva == firma { return copia }
         var vistos = Set<PersistentIdentifier>()
+        let recientes = Set(eventos.suffix(4).map(\.persistentModelID))
         copia = eventos.map { e in
             let id = e.persistentModelID
             vistos.insert(id)
-            if let ya = porID[id], ya.tareaID != nil || e.tarea == nil { return ya }
+            if let ya = porID[id], ya.tareaID != nil || e.tarea == nil, !recientes.contains(id) { return ya }
             let s = Senal(e)
             porID[id] = s
             return s

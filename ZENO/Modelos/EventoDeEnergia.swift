@@ -12,6 +12,15 @@ enum TipoDeEvento: String, Codable, CaseIterable {
     case tareaIgnorada
 }
 
+/// Por qué dijo "Ahora no" (opcional; Diaz, 21 nov 2026). Separa "no puedo" de "no quiero":
+/// solo lo primero baja la energía de esa hora.
+enum MotivoDeRechazo: String, Codable {
+    /// "Estoy sin pilas": cansancio de verdad. Cuenta como siempre.
+    case sinPilas
+    /// "Esta no me llama": aburrimiento, no cansancio. No baja la energía.
+    case noMeLlama
+}
+
 /// Historial de eventos. Se guarda completo para poder recalcular la curva
 /// (y para que en la versión 2 quepan señales de salud como otra fuente).
 @Model
@@ -29,6 +38,8 @@ final class EventoDeEnergia {
     var tamanoCrudo: String? = nil
     /// Tipo de la tarea (llamada, trámite, papeles…), guardado aparte por la misma razón.
     var tipoDeTareaCrudo: String? = nil
+    /// Solo en "Ahora no": el motivo, si la persona lo eligió. nil = como siempre (cuenta como sin pilas).
+    var motivoCrudo: String? = nil
 
     var tarea: Tarea?
 
@@ -51,4 +62,5 @@ final class EventoDeEnergia {
     }
 
     var tipo: TipoDeEvento? { TipoDeEvento(rawValue: tipoCrudo) }
+    var motivo: MotivoDeRechazo? { motivoCrudo.flatMap(MotivoDeRechazo.init(rawValue:)) }
 }

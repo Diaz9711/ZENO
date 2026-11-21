@@ -81,7 +81,8 @@ enum MotorDeEnergia {
             switch evento.tipo {
             case .tareaTerminada: efecto = 6
             case .tareaEmpezada: efecto = 2
-            case .ahoraNo, .tareaIgnorada: efecto = -5
+            // Solo los rechazos por energía: "Esta no me llama" no dice nada de esta hora.
+            case .ahoraNo, .tareaIgnorada: efecto = evento.esRechazoPorEnergia ? -5 : 0
             case .cerroSinHacerNada: efecto = -3
             default: efecto = 0
             }
@@ -97,7 +98,7 @@ enum MotorDeEnergia {
         var ajuste = 0.0
 
         // "Ahora no" recientes: la persona no está para eso en este rato.
-        let rechazos = deHoy.filter { $0.tipo == .ahoraNo && ahora.timeIntervalSince($0.fecha) < 90 * 60 }.count
+        let rechazos = deHoy.filter { $0.tipo == .ahoraNo && $0.esRechazoPorEnergia && ahora.timeIntervalSince($0.fecha) < 90 * 60 }.count
         ajuste -= min(Double(rechazos) * 6, 18)
 
         // Abrir y cerrar sin hacer nada.
@@ -137,7 +138,7 @@ enum MotorDeEnergia {
         for e in eventos.reversed() where e.fecha <= ahora {
             guard ahora.timeIntervalSince(e.fecha) < 2 * 3600 else { break }
             switch e.tipo {
-            case .ahoraNo: cuenta += 1
+            case .ahoraNo where e.esRechazoPorEnergia: cuenta += 1
             case .tareaEmpezada, .tareaTerminada: return cuenta
             default: continue
             }
@@ -207,9 +208,15 @@ enum MotorDeEnergia {
         // Con energía media o alta, dentro del mismo tamaño va primero la que tiene un porqué:
         // el TDAH arranca por interés, no por importancia. Con energía baja no cambia nada.
         let conInteres = nivel(puntaje) != .baja
+        // "Esta no me llama" (últimos 7 días): esas tareas van al final de su fila.
+        let sinGanas = Set(eventos.filter {
+            $0.tipo == .ahoraNo && $0.motivo == .noMeLlama && ahora.timeIntervalSince($0.fecha) < 7 * 86_400
+        }.compactMap(\.tareaID))
         func primera(_ tamanos: TamanoDeTarea...) -> Tarea? {
             for tamano in Aprendizaje.ordenar(tamanos, franja: franja, eventos: eventos, ahora: ahora) {
-                let delTamano = disponibles.filter { $0.tamano == tamano }
+                let todas = disponibles.filter { $0.tamano == tamano }
+                let delTamano = todas.filter { !sinGanas.contains($0.persistentModelID) }
+                    + todas.filter { sinGanas.contains($0.persistentModelID) }
                 if conInteres, let tarea = delTamano.first(where: { $0.anzuelo != nil }) { return tarea }
                 if let tarea = delTamano.first { return tarea }
             }

@@ -61,6 +61,8 @@ struct TareaDelMomentoView: View {
     @State private var quiereAlgoIgual = false
     /// Bucle de retorno: el patrón que Chispa cuenta ahora (cada uno, como mucho una vez al día).
     @State private var patronDeAhora: Aprendizaje.Patron?
+    /// El "Ahora no" recién dicho: unos segundos para elegir su motivo (opcional).
+    @State private var rechazoReciente: EventoDeEnergia?
     @AppStorage("patronesDichos") private var patronesDichos = ""
     @State private var plan = BorradorDePlan()
     @State private var dictado = Dictado()
@@ -143,10 +145,21 @@ struct TareaDelMomentoView: View {
         return recientes.count >= 2
     }
 
-    /// La tarea propuesta ocupa más de lo normal (primer paso o pasos, más su porqué) en un iPhone más bajo.
+    /// La tarea propuesta ocupa más de lo normal en un iPhone más bajo: primer paso o pasos con su porqué,
+    /// o cualquiera de ellos más la línea "por qué ahora" (y sus dos toques si no le llamó).
     private var tarjetaApretada: Bool {
         guard compacto, hayTareaPropuesta, case .tarea(let tarea) = eleccion else { return false }
-        return tarea.anzuelo != nil && (tarea.primerPaso != nil || tarea.pasoDeAhora != nil)
+        let extra = (tarea.anzuelo != nil ? 1 : 0) + (tarea.primerPaso != nil || tarea.pasoDeAhora != nil ? 1 : 0)
+            + (razonDeAhora != nil ? 1 : 0) + (razonDeAhora == .noLeLlamo ? 1 : 0)
+        return extra >= 2
+    }
+
+    /// "Por qué ahora": la razón verdadera de la tarea propuesta (sin empezar). nil = no se dice nada.
+    private var razonDeAhora: RazonDeAhora? {
+        guard case .tarea(let tarea) = eleccion, enCurso == nil else { return nil }
+        return MotorDeEnergia.razon(tarea: tarea, puntaje: puntaje, eventos: eventos,
+                                    horasDelDia: Memoria.compartida.horasGuardadas,
+                                    hayGrandes: pendientes.contains { $0.tamano == .grande })
     }
 
     @ViewBuilder
@@ -155,8 +168,16 @@ struct TareaDelMomentoView: View {
         VStack(alignment: .leading, spacing: 14) {
             // El amigo: una sola frase según el momento; al tocarlo, ofrece ayuda.
             // Cada pieza llega en su turno (Fable): Chispa, Ahora, el campo y las dos medianas.
-            CoheteAmigo(frase: Cohete.consejo(momentoDelCohete, turno: turnoDeFrase)) { pedirAyuda() }
-                .aparece(1)
+            Group {
+                if rechazoReciente != nil {
+                    filaDeMotivo
+                } else {
+                    CoheteAmigo(frase: Cohete.consejo(momentoDelCohete, turno: turnoDeFrase)) { pedirAyuda() }
+                }
+            }
+            .transition(.opacity)
+            .animation(Lujo.curva(), value: rechazoReciente == nil)
+            .aparece(1)
             tarjetaDeAhora
                 .aparece(2)
 
@@ -267,10 +288,24 @@ struct TareaDelMomentoView: View {
                     }
                 }
                 // La siguiente tarea sube desde abajo mientras la anterior se va hacia arriba (sin desenfoque).
-                TareaTocable(tarea: tarea, enCurso: enMarcha)
+                TareaTocable(tarea: tarea, enCurso: enMarcha, razon: razonDeAhora?.texto(turno: turnoDeFrase))
                     .id("\(tarea.persistentModelID.hashValue)-\(tarea.pasoActual)")
                     .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 12)),
                                             removal: .opacity.combined(with: .offset(y: -8))))
+                // Antes no le llamó: dos toques para hacerla distinta (dividirla o darle un porqué).
+                if razonDeAhora == .noLeLlamo {
+                    HStack(spacing: 8) {
+                        if tarea.pasos.isEmpty {
+                            ZenoChip("Divídemela", icono: .check, elegido: false) { dividir(tarea) }
+                        }
+                        if tarea.anzuelo == nil {
+                            ZenoChip("¿Para qué te importa?", elegido: false) {
+                                Hojas.compartidas.mostrar { HojaPrimerPorque(tarea: tarea) }
+                            }
+                        }
+                    }
+                    .transition(.opacity)
+                }
                 // Un botón visible y claro (pedido de Diaz): Empezar y, en marcha, Terminé. Solo tocar.
                 HStack(alignment: .center, spacing: 10) {
                     BotonDeAhora(enMarcha: enMarcha) {
@@ -714,6 +749,8 @@ struct TareaDelMomentoView: View {
         // Si ya está dividida, "la divido en pasos" no aplica.
         let valido = patron.flatMap { p -> Aprendizaje.Patron? in
             if case .tipoCuesta = p, !tarea.pasos.isEmpty { return nil }
+            // "Lo grande te cuesta" ahora lo dice la línea "por qué ahora" de la tarjeta (no dos veces).
+            if p == .grandeCuestaAEstaHora { return nil }
             return p
         }
         // Una vez al día cada patrón, para una tarea: si se vuelve a Hoy con esa misma tarea, sigue a la vista.
@@ -817,12 +854,14 @@ struct TareaDelMomentoView: View {
     }
 
     /// Guarda un evento en el historial. La tarea se enlaza después de insertar, para que siempre quede guardada.
-    private func registrar(_ tipo: TipoDeEvento, valor: Double? = nil, tarea: Tarea) {
+    @discardableResult
+    private func registrar(_ tipo: TipoDeEvento, valor: Double? = nil, tarea: Tarea) -> EventoDeEnergia {
         let evento = EventoDeEnergia(tipo: tipo, valor: valor)
         contexto.insert(evento)
         evento.tarea = tarea
         evento.tamanoCrudo = tarea.tamanoCrudo
         evento.tipoDeTareaCrudo = TipoDeTarea.de(tarea.titulo)?.rawValue
+        return evento
     }
 
     // Sin `toques += 1` en empezar, terminar y "Ahora no": el botón ya da su toque
@@ -857,8 +896,31 @@ struct TareaDelMomentoView: View {
 
     /// "Ahora no" nunca es un fracaso: la app aprende que esta hora no era, y lo intenta más tarde.
     private func ahoraNo(_ tarea: Tarea) {
-        registrar(.ahoraNo, tarea: tarea)
+        let evento = registrar(.ahoraNo, tarea: tarea)
         withAnimation(Ritmo.contenido) { tarea.empezadaEn = nil }
+        // 3 segundos para decir por qué (opcional). Si no elige, cuenta como siempre.
+        withAnimation(Lujo.curva()) { rechazoReciente = evento }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(3))
+            if rechazoReciente === evento { withAnimation(Lujo.curva()) { rechazoReciente = nil } }
+        }
+    }
+
+    /// "¿Por qué no?" en el sitio de Chispa: dos opciones pequeñas, unos segundos, nada obligatorio.
+    private var filaDeMotivo: some View {
+        HStack(spacing: 8) {
+            ZenoChip("Estoy sin pilas", elegido: false) { elegirMotivo(.sinPilas) }
+            ZenoChip("Esta no me llama", elegido: false) { elegirMotivo(.noMeLlama) }
+            Spacer(minLength: 0)
+        }
+        .frame(minHeight: Lujo.altoMinimo)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Text("Por qué no, opcional"))
+    }
+
+    private func elegirMotivo(_ motivo: MotivoDeRechazo) {
+        rechazoReciente?.motivoCrudo = motivo.rawValue
+        withAnimation(Lujo.curva()) { rechazoReciente = nil }
     }
 }
 
@@ -960,6 +1022,8 @@ struct FlechaDibujada: Shape {
 private struct TareaTocable: View {
     let tarea: Tarea
     let enCurso: Bool
+    /// "Por qué ahora": una línea discreta bajo el título (nil = nada).
+    var razon: String? = nil
 
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     @State private var respira = false
@@ -968,6 +1032,14 @@ private struct TareaTocable: View {
         VStack(alignment: .leading, spacing: 6) {
             // Los pasos de Divídemela son frases más largas: un poco más pequeñas, para que se lean enteras.
             Titular(texto: tarea.textoVisible, tamano: tarea.pasoDeAhora != nil ? .title : .largeTitle, alineacion: .leading)
+            if let razon {
+                Text(verbatim: razon)
+                    .font(.zenoTexto(.footnote))
+                    .foregroundStyle(Lujo.marfilSecundario)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                    .contentTransition(.opacity)
+            }
             if tarea.pasoDeAhora != nil {
                 Text("Paso de: \(tarea.titulo)")
                     .font(.zenoTexto(.footnote))
