@@ -75,6 +75,14 @@ struct HojaCaptura: View {
                         }
                         .buttonStyle(EstiloLujo(conReflejo: false))
                     }
+                    if !t.wrappedValue.conPorque {
+                        Button { withAnimation(Lujo.curva()) { t.wrappedValue.conPorque = true } } label: {
+                            EstrellitaDeCuatro().fill(Lujo.oro.opacity(0.85)).frame(width: 11, height: 11)
+                                .frame(width: 30, height: 26).contentShape(Rectangle())
+                        }
+                        .buttonStyle(EstiloLujo(conReflejo: false))
+                        .accessibilityLabel(Text("¿Para qué te importa?"))
+                    }
                     if let fecha = t.wrappedValue.fecha {
                         Button { t.wrappedValue.fecha = nil } label: {
                             HStack(spacing: 4) {
@@ -89,6 +97,14 @@ struct HojaCaptura: View {
                         .accessibilityLabel(Text("Quitar la hora"))
                     }
                 }
+                // El porqué de esta tarea (opcional), una línea.
+                if t.wrappedValue.conPorque {
+                    TextField("", text: t.porque, prompt: Text("¿Para qué te importa? (opcional)").foregroundStyle(Lujo.marfil.opacity(0.3)))
+                        .font(.zenoTitulo(.callout, .light, cursiva: true))
+                        .foregroundStyle(Lujo.oro)
+                        .tint(Lujo.oro)
+                        .transition(.opacity)
+                }
             }
         }
         .padding(.vertical, 10)
@@ -99,13 +115,23 @@ struct HojaCaptura: View {
     }
 
     private func guardar() {
+        var crisis = false
         for t in elegidas {
             let tarea = Tarea(titulo: t.titulo.trimmingCharacters(in: .whitespacesAndNewlines), tamano: t.tamano)
+            let anzuelo = String(t.porque.trimmingCharacters(in: .whitespacesAndNewlines).prefix(120))
+            tarea.porque = anzuelo.isEmpty ? nil : anzuelo
+            if Cuidado.suenaACrisis(anzuelo) { crisis = true }
             contexto.insert(tarea)
             if let fecha = t.fecha { tarea.aplicarPlan(fecha: fecha, aviso: .ninguno, personalizado: fecha) }
         }
         Task { await AvisosDeTareas.sincronizar(contexto) }
         Hojas.compartidas.cerrar()
         alGuardar()
+        if crisis {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(0.5))
+                Hojas.compartidas.mostrar { VistaDeCuidado() }
+            }
+        }
     }
 }

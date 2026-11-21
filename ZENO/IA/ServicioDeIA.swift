@@ -28,6 +28,9 @@ struct TareaCapturada: Equatable, Identifiable {
     /// Solo si la persona dijo cuándo (se calcula en código, nunca la inventa la IA).
     var fecha: Date?
     var incluida = true
+    /// "¿Para qué te importa?" (opcional), escrito en la vista previa.
+    var porque = ""
+    var conPorque = false
 }
 
 /// Un motor de IA. Para cambiar de motor no hace falta tocar el resto de la app.

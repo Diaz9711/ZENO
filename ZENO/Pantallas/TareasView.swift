@@ -53,6 +53,8 @@ struct TareaDelMomentoView: View {
     /// "¿Para qué te importa?" (opcional): se abre con un toque, nunca estorba.
     @State private var porque = ""
     @State private var conPorque = false
+    /// La primera tarea de su vida en ZENO: el porqué sale abierto (se puede dejar vacío).
+    @AppStorage("porquePrimeraVez") private var porquePrimeraVezHecho = false
     @FocusState private var escribiendoPorque: Bool
     @State private var quiereAlgoIgual = false
     /// Bucle de retorno: el patrón que Chispa cuenta ahora (cada uno, como mucho una vez al día).
@@ -453,12 +455,32 @@ struct TareaDelMomentoView: View {
     private var agregar: some View {
         VStack(spacing: 14) {
             // Con el porqué abierto, el título se retira para que todo quepa sobre el teclado.
+            // En cuanto hay algo escrito, el título se vuelve la pregunta del porqué (un toque la abre;
+            // si no, Guardar y listo). Así se ve sin ocupar más sitio.
             if !conPorque {
-                Text(escuchando ? "Te escucho…" : "¿Qué quieres hacer?")
-                    .font(.zenoTitulo(.title2))
-                    .foregroundStyle(Lujo.marfil)
-                    .shadow(color: .black.opacity(0.45), radius: 12, y: 2)
-                    .transition(.opacity)
+                Group {
+                    if !limpio(frase).isEmpty && !escuchando {
+                        Button { abrirPorque() } label: {
+                            HStack(spacing: 8) {
+                                EstrellitaDeCuatro().fill(Lujo.oro).frame(width: 12, height: 12)
+                                Text("¿Para qué te importa?")
+                                    .font(.zenoTitulo(.title2, .light, cursiva: true))
+                                    .foregroundStyle(Lujo.oro)
+                            }
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(EstiloLujo())
+                        .accessibilityHint(Text("Opcional"))
+                    } else {
+                        Text(escuchando ? "Te escucho…" : "¿Qué quieres hacer?")
+                            .font(.zenoTitulo(.title2))
+                            .foregroundStyle(Lujo.marfil)
+                    }
+                }
+                .shadow(color: .black.opacity(0.45), radius: 12, y: 2)
+                .transition(.opacity)
+                .animation(Lujo.curva(), value: limpio(frase).isEmpty)
             }
             campo($frase, sugerencia: "Una sola frase")
             campoDelPorque
@@ -500,15 +522,7 @@ struct TareaDelMomentoView: View {
                 .buttonStyle(EstiloLujo())
                 .accessibilityLabel(dictado.activo ? Text("Dejar de dictar") : Text("Dictar la tarea"))
                 // El porqué (opcional): una estrellita, la misma que lo acompaña luego en Hoy.
-                Button {
-                    toques += 1
-                    if conPorque {
-                        escribiendoPorque = true
-                    } else {
-                        withAnimation(Lujo.curva()) { conPorque = true }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { escribiendoPorque = true }
-                    }
-                } label: {
+                Button { abrirPorque() } label: {
                     EstrellitaDeCuatro()
                         .fill(conPorque || !limpio(porque).isEmpty ? Lujo.oro : Lujo.marfil.opacity(0.75))
                         .frame(width: 17, height: 17)
@@ -534,6 +548,12 @@ struct TareaDelMomentoView: View {
                 .padding(.horizontal, 32)
         }
         .padding(.horizontal, Lujo.margen)
+    }
+
+    private func abrirPorque() {
+        toques += 1
+        if !conPorque { withAnimation(Lujo.curva()) { conPorque = true } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { escribiendoPorque = true }
     }
 
     /// El anzuelo de la tarea, cerrado hasta que la persona lo pide. Una línea, opcional.
@@ -707,7 +727,8 @@ struct TareaDelMomentoView: View {
         plan = BorradorDePlan()
         primerPaso = ""
         porque = ""
-        conPorque = false
+        // La primera vez en ZENO (sin tareas todavía) el porqué sale abierto; se puede dejar vacío.
+        conPorque = !porquePrimeraVezHecho && pendientes.isEmpty && !eventos.contains { $0.tipo == .tareaTerminada }
         dictado.aviso = nil
         withAnimation(Ritmo.contenido) { modo = .agregar }
         enfocarPronto()
@@ -750,6 +771,7 @@ struct TareaDelMomentoView: View {
         let tarea = Tarea(titulo: titulo,
                           tamano: ClasificadorDeTamano.tamano(de: titulo),
                           primerPaso: conPaso && !paso.isEmpty ? paso : nil)
+        porquePrimeraVezHecho = true
         let anzuelo = String(limpio(porque).prefix(120))
         tarea.porque = anzuelo.isEmpty ? nil : anzuelo
         contexto.insert(tarea)
@@ -937,15 +959,17 @@ private struct TareaTocable: View {
             }
             // El anzuelo de la persona viste la tarea (y cada paso): para qué le importa.
             if let anzuelo = tarea.anzuelo {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
                     EstrellitaDeCuatro()
-                        .fill(Lujo.oro.opacity(0.85))
-                        .frame(width: 8, height: 8)
+                        .fill(Lujo.oro)
+                        .frame(width: 10, height: 10)
+                        .shadow(color: Lujo.oro.opacity(0.6), radius: 4)
                     Text(verbatim: anzuelo)
-                        .font(.zenoTitulo(.callout, .light, cursiva: true))
-                        .foregroundStyle(Lujo.oro.opacity(0.9))
+                        .font(.zenoTitulo(.body, .regular, cursiva: true))
+                        .foregroundStyle(Lujo.oro)
                         .lineLimit(2)
                 }
+                .padding(.top, 2)
                 .accessibilityElement(children: .combine)
                 .accessibilityLabel(Text("Para qué: \(anzuelo)"))
             }
