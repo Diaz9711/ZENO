@@ -268,13 +268,16 @@ struct GaleriaDeComponentes: View {
                     Spacer()
                     ZenoIconButton(.cerrar, etiqueta: "Cerrar", lado: 44) { alCerrar() }
                 }
-                seccion("Principal (tu archivo, con el oro y la letra de ZENO)") {
+                seccion("Principal de vidrio (glass), el de la app") {
                     ZenoPrimaryButton("Empezar ahora") {}
                     ZenoPrimaryButton("Hecho", icono: .check) {}
                     ZenoPrimaryButton("Desactivado") {}.disabled(true)
+                }
+                seccion("Principal de oro, para comparar") {
+                    ZenoPrimaryButton("Empezar ahora", acabado: .oro) {}
                     Text("Tu original, con la letra y el icono del sistema:")
                         .font(.zenoTexto(.caption)).foregroundStyle(Lujo.marfilSecundario)
-                    ZenoPrimaryButton("Hecho", letraDelSistema: true, simboloDelSistema: "checkmark") {}
+                    ZenoPrimaryButton("Hecho", letraDelSistema: true, simboloDelSistema: "checkmark", acabado: .oro) {}
                 }
                 seccion("Secundario") {
                     ZenoSecondaryButton("Ahora no") {}

@@ -10,8 +10,16 @@ import SwiftUI
 //   ZenoPrimaryButton("Empezar") { ... }
 //   ZenoPrimaryButton("Hecho", icono: .check) { ... }
 
+/// El acabado del botón principal. Diaz pidió vidrio ("glass", 21 nov 2026); el oro queda para comparar.
+enum AcabadoZeno { case vidrio, oro }
+
 struct ZenoPrimaryButton: View {
+    /// El acabado de todos los botones principales de la app.
+    static let acabado: AcabadoZeno = .vidrio
+
     let titulo: LocalizedStringKey
+    /// nil = el de la app (`acabado`).
+    var acabadoPropio: AcabadoZeno? = nil
     var icono: IconoLujo? = nil
     /// Ancho fijo (nil = todo el ancho disponible).
     var ancho: CGFloat? = nil
@@ -26,8 +34,10 @@ struct ZenoPrimaryButton: View {
     @State private var toques = 0
 
     init(_ titulo: LocalizedStringKey, icono: IconoLujo? = nil, ancho: CGFloat? = nil, alto: CGFloat = 58,
-         letraDelSistema: Bool = false, simboloDelSistema: String? = nil, accion: @escaping () -> Void) {
+         letraDelSistema: Bool = false, simboloDelSistema: String? = nil, acabado: AcabadoZeno? = nil,
+         accion: @escaping () -> Void) {
         self.titulo = titulo
+        self.acabadoPropio = acabado
         self.icono = icono
         self.ancho = ancho
         self.alto = alto
@@ -36,8 +46,10 @@ struct ZenoPrimaryButton: View {
         self.accion = accion
     }
 
+    private var deVidrio: Bool { (acabadoPropio ?? Self.acabado) == .vidrio }
+
     var body: some View {
-        Button {
+        let boton = Button {
             toques += 1
             accion()
         } label: {
@@ -45,7 +57,7 @@ struct ZenoPrimaryButton: View {
                 if let simboloDelSistema {
                     Image(systemName: simboloDelSistema).font(.system(size: 17, weight: .semibold))
                 } else if let icono {
-                    IconoFino(icono: icono, color: Lujo.tinta.opacity(0.92), tamano: 16, trazo: 1.6)
+                    IconoFino(icono: icono, color: deVidrio ? Lujo.oroLuz : Lujo.tinta.opacity(0.92), tamano: 16, trazo: 1.6)
                 }
                 Text(titulo)
                     .font(letraDelSistema ? .system(size: 18, weight: .semibold, design: .rounded)
@@ -58,8 +70,58 @@ struct ZenoPrimaryButton: View {
             .frame(maxWidth: ancho == nil ? .infinity : nil)
             .frame(width: ancho, height: alto)
         }
-        .buttonStyle(ZenoPrimaryStyle())
+        Group {
+            if deVidrio { boton.buttonStyle(ZenoGlassStyle()) } else { boton.buttonStyle(ZenoPrimaryStyle()) }
+        }
         .sensoryFeedback(.impact(weight: .light, intensity: 0.7), trigger: toques)
+    }
+}
+
+// MARK: - Estilo vidrio (Liquid Glass)
+
+/// Vidrio de verdad: en iOS 26 el Liquid Glass de Apple (refracta la nebulosa de detrás y reacciona al
+/// dedo), con un tinte de oro apenas visible, borde de luz dorado y resplandor. Antes de iOS 26, un vidrio
+/// dibujado con las mismas capas. Texto marfil.
+struct ZenoGlassStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        let pressed = configuration.isPressed
+        let forma = Capsule(style: .continuous)
+
+        configuration.label
+            .foregroundStyle(Lujo.marfil)
+            .background { cuerpo(forma, pressed: pressed) }
+            .overlay {
+                // Borde de luz: dorado arriba, se apaga abajo.
+                forma.strokeBorder(LinearGradient(colors: [Lujo.oroLuz, Lujo.oro.opacity(0.20)],
+                                                  startPoint: .top, endPoint: .bottom), lineWidth: 1)
+            }
+            // Resplandor dorado muy suave (el vidrio no lleva sombra gris).
+            .shadow(color: Lujo.oro.opacity(pressed ? 0.18 : 0.36), radius: pressed ? 8 : 18, y: pressed ? 3 : 8)
+            .scaleEffect(pressed ? 0.965 : 1)
+            .opacity(isEnabled ? 1 : 0.4)
+            .saturation(isEnabled ? 1 : 0.3)
+            .animation(.spring(response: 0.28, dampingFraction: 0.65), value: pressed)
+            .contentShape(forma)
+    }
+
+    @ViewBuilder
+    private func cuerpo(_ forma: Capsule, pressed: Bool) -> some View {
+        if #available(iOS 26.0, *) {
+            Color.clear
+                .glassEffect(.regular.tint(Lujo.oro.opacity(pressed ? 0.42 : 0.34)).interactive(), in: forma)
+        } else {
+            ZStack {
+                forma.fill(.ultraThinMaterial)
+                forma.fill(LinearGradient(colors: [Lujo.oro.opacity(pressed ? 0.38 : 0.30), Lujo.oro.opacity(0.10)],
+                                          startPoint: .top, endPoint: .bottom))
+                forma.inset(by: 1.5)
+                    .fill(LinearGradient(colors: [.white.opacity(pressed ? 0.08 : 0.18), .clear], startPoint: .top, endPoint: .center))
+                    .blendMode(.plusLighter)
+            }
+            .environment(\.colorScheme, .dark)
+        }
     }
 }
 
