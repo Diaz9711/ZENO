@@ -3721,6 +3721,76 @@
           }
         }
       }
+    },
+    "Hecho. Eso era por «%@»." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done. That was for “%@”."
+          }
+        }
+      }
+    },
+    "Listo. Un paso más hacia «%@»." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There. One more step toward “%@”."
+          }
+        }
+      }
+    },
+    "Ahí queda, por «%@»." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There it is, for “%@”."
+          }
+        }
+      }
+    },
+    "«%@». Ya estás en ello." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@”. You’re already on it."
+          }
+        }
+      }
+    },
+    "Acuérdate de esto: «%@»." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remember this: “%@”."
+          }
+        }
+      }
+    },
+    "«%@». Con eso basta para empezar." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@”. That’s enough to start."
+          }
+        }
+      }
+    },
+    "Lo haces por «%@». Yo te acompaño." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You do it for “%@”. I’m with you."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

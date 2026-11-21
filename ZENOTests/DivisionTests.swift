@@ -112,6 +112,35 @@ final class DivisionTests: XCTestCase {
         XCTAssertFalse(ServicioDeIA.mismaRaiz("5", "15"))
     }
 
+    // MARK: Chispa y el porqué
+
+    func testSinPorqueChispaDiceLoMismoQueAntes() {
+        for i in 0..<40 {
+            let turno = "t\(i)"
+            XCTAssertEqual(Cohete.consejo(.tarea(enMarcha: false, primerPaso: true, minutosReales: nil, enRacha: false), turno: turno),
+                           Idioma.texto("Solo dos minutos. Yo te acompaño."))
+            XCTAssertEqual(Cohete.consejo(.tarea(enMarcha: false, primerPaso: false, minutosReales: 12, enRacha: false,
+                                                 conEnergia: true), turno: turno),
+                           Idioma.texto("Algo así suele tomarte unos \(12) min. ¿Despegamos?"))
+        }
+    }
+
+    func testConPorqueYEnergiaLoMencionaMasQueSinEnergia() {
+        func veces(_ energia: Bool) -> Int {
+            (0..<200).filter { i in
+                Cohete.consejo(.tarea(enMarcha: false, primerPaso: false, minutosReales: 12, enRacha: false,
+                                      anzuelo: "Mi sobrina", conEnergia: energia), turno: "t\(i)").contains("Mi sobrina")
+            }.count
+        }
+        XCTAssertGreaterThan(veces(true), veces(false))
+        XCTAssertLessThan(veces(true), 200, "las frases de minutos no deben desaparecer")
+    }
+
+    func testPorqueLargoSeAcorta() {
+        XCTAssertLessThanOrEqual(Cohete.acortar(String(repeating: "a", count: 120)).count, 41)
+        XCTAssertEqual(Cohete.acortar("corto"), "corto")
+    }
+
     // MARK: Avisos según la energía
 
     func testTipoDeAvisoSegunEnergia() {

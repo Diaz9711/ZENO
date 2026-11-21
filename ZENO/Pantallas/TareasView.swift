@@ -67,6 +67,8 @@ struct TareaDelMomentoView: View {
     @State private var pasosHechos = 0
     /// Unos segundos después de terminar una tarea, Chispa lo celebra con una frase.
     @State private var celebrando = false
+    /// El porqué de la tarea que se acaba de terminar (la tarea ya no está en pendientes).
+    @State private var anzueloCelebrado: String?
     /// Recuerda la tarea elegida: la pantalla la pide muchas veces por dibujo y calcularla recorre el historial.
     @State private var memoria = MemoriaDeEleccion()
     @FocusState private var escribiendo: Bool
@@ -188,14 +190,14 @@ struct TareaDelMomentoView: View {
     }
 
     private var momentoDelCohete: Cohete.Momento {
-        if celebrando { return .celebrando }
+        if celebrando { return .celebrando(anzuelo: anzueloCelebrado) }
         switch eleccion {
         case .tarea(let tarea):
             let minutos = tarea.primerPaso == nil
                 ? Aprendizaje.minutosReales(tarea.tamano, eventos: eventos).map { Int($0.rounded()) } : nil
             return .tarea(enMarcha: enCurso == tarea.persistentModelID, primerPaso: tarea.primerPaso != nil,
                           minutosReales: minutos, enRacha: enRacha && enCurso == nil, anzuelo: tarea.anzuelo,
-                          patron: patronDeAhora)
+                          patron: patronDeAhora, conEnergia: MotorDeEnergia.nivel(puntaje) != .baja)
         case .descanso: return .descanso
         case .masTarde: return .masTarde(vuelveA: vuelveA)
         case .silencio: return .silencio
@@ -819,6 +821,7 @@ struct TareaDelMomentoView: View {
             pasosHechos += 1
             return
         }
+        anzueloCelebrado = tarea.anzuelo
         celebrando = true
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(6))

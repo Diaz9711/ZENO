@@ -17,14 +17,24 @@ enum Cohete {
 
     enum Momento {
         case tarea(enMarcha: Bool, primerPaso: Bool, minutosReales: Int?, enRacha: Bool, anzuelo: String? = nil,
-                   patron: Aprendizaje.Patron? = nil)
+                   patron: Aprendizaje.Patron? = nil, conEnergia: Bool = false)
         case descanso
         case masTarde(vuelveA: Date?)
         /// Modo compañero silencioso: solo presencia.
         case silencio
         case nada(hechasHoy: Int)
-        /// Justo después de terminar una tarea (unos segundos).
-        case celebrando
+        /// Justo después de terminar una tarea (unos segundos), con el porqué de esa tarea si lo tenía.
+        case celebrando(anzuelo: String? = nil)
+    }
+
+    /// Un porqué largo se acorta en la frase (entero ya va en la tarjeta), para que la barra nunca se salga.
+    static func acortar(_ a: String) -> String {
+        a.count > 42 ? String(a.prefix(40)).trimmingCharacters(in: .whitespaces) + "…" : a
+    }
+
+    /// Un número estable por turno (el mismo turno da siempre la misma frase).
+    static func vuelta(_ turno: String) -> Int {
+        turno.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0xFFFF }
     }
 
     /// Una sola frase, amable y útil. Sale del estado y de lo que el cerebro aprendió.
@@ -33,9 +43,17 @@ enum Cohete {
     static func consejo(_ momento: Momento, turno: String = "") -> String {
         let variada = { (c: CategoriaDeFrase) in MemoriaDeFrases.compartida.frase(c, turno: turno, idioma: Idioma.actual) }
         switch momento {
-        case .celebrando:
+        case .celebrando(let anzuelo):
+            // Al terminar una tarea con porqué: una referencia suave, una de cada dos veces (sin confeti).
+            if let a = anzuelo.map(acortar), vuelta(turno) % 2 == 0 {
+                switch vuelta(turno) / 2 % 3 {
+                case 0: return Idioma.texto("Hecho. Eso era por «\(a)».")
+                case 1: return Idioma.texto("Listo. Un paso más hacia «\(a)».")
+                default: return Idioma.texto("Ahí queda, por «\(a)».")
+                }
+            }
             return variada(.celebracion)
-        case .tarea(let enMarcha, let primerPaso, let minutos, let enRacha, let anzuelo, let patron):
+        case .tarea(let enMarcha, let primerPaso, let minutos, let enRacha, let anzuelo, let patron, let conEnergia):
             // Bucle de retorno: el patrón se dice una vez, en el momento, cálido y sin culpa.
             if let patron, !enMarcha {
                 switch patron {
@@ -43,17 +61,23 @@ enum Cohete {
                 case .tipoCuesta: return Idioma.texto("Esto suele costarte. Si quieres, tócame y la divido en pasos chiquitos.")
                 }
             }
-            // El porqué de la persona (escrito a mano: la IA nunca lo reescribe). Dos de cada tres turnos,
-            // para que no canse.
-            let vuelta = turno.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0xFFFF }
-            // Un porqué largo se acorta en la frase (entero ya va en la tarjeta), para que la barra nunca se salga.
-            let corto = anzuelo.map { $0.count > 42 ? String($0.prefix(40)).trimmingCharacters(in: .whitespaces) + "…" : $0 }
-            if let a = corto, vuelta % 3 != 2 {
-                if enMarcha { return Idioma.texto("Vas por «\(a)». Sigue a tu ritmo.") }
+            // El porqué de la persona (escrito a mano: la IA nunca lo reescribe). Con energía media o alta,
+            // tres de cada cuatro turnos; con energía baja, uno de cada tres. Las otras veces quedan las
+            // frases de minutos, primer paso y racha (que no deben perderse).
+            let v = vuelta(turno)
+            let toca = conEnergia ? v % 4 != 3 : v % 3 == 0
+            if let a = anzuelo.map(acortar), toca {
+                if enMarcha {
+                    return v % 2 == 0 ? Idioma.texto("Vas por «\(a)». Sigue a tu ritmo.")
+                                      : Idioma.texto("«\(a)». Ya estás en ello.")
+                }
                 if !enRacha {
-                    switch vuelta % 3 {
+                    switch v / 4 % 5 {
                     case 0: return Idioma.texto("Esto es para «\(a)». Un paso y ya.")
-                    default: return Idioma.texto("Por «\(a)» vale la pena un ratito.")
+                    case 1: return Idioma.texto("Por «\(a)» vale la pena un ratito.")
+                    case 2: return Idioma.texto("Acuérdate de esto: «\(a)».")
+                    case 3: return Idioma.texto("«\(a)». Con eso basta para empezar.")
+                    default: return Idioma.texto("Lo haces por «\(a)». Yo te acompaño.")
                     }
                 }
             }
@@ -67,8 +91,7 @@ enum Cohete {
         case .silencio:
             let frases = [Idioma.texto("Estoy aquí. Sin prisa."), Idioma.texto("No hace falta hacer nada ahora."),
                           Idioma.texto("Aquí sigo, a tu lado.")]
-            let vuelta = turno.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0xFFFF }
-            return frases[vuelta % frases.count]
+            return frases[vuelta(turno) % frases.count]
         case .masTarde(let vuelveA):
             if let vuelveA {
                 return Idioma.texto("Te propongo algo otra vez a las \(vuelveA.formatted(date: .omitted, time: .shortened)).")
