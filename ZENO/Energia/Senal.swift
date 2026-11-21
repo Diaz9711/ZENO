@@ -14,9 +14,12 @@ struct Senal: Equatable {
     var tareaID: PersistentIdentifier?
     /// La tarea tenía un primer paso de dos minutos.
     var conPrimerPaso: Bool
+    /// Tipo de la tarea (llamada, trámite…), si se sabe.
+    var tipoDeTarea: TipoDeTarea?
 
     init(tipo: TipoDeEvento?, fecha: Date, franjaHoraria: Int, valor: Double? = nil,
-         tamano: TamanoDeTarea? = nil, tareaID: PersistentIdentifier? = nil, conPrimerPaso: Bool = false) {
+         tamano: TamanoDeTarea? = nil, tareaID: PersistentIdentifier? = nil, conPrimerPaso: Bool = false,
+         tipoDeTarea: TipoDeTarea? = nil) {
         self.tipo = tipo
         self.fecha = fecha
         self.franjaHoraria = franjaHoraria
@@ -24,13 +27,15 @@ struct Senal: Equatable {
         self.tamano = tamano
         self.tareaID = tareaID
         self.conPrimerPaso = conPrimerPaso
+        self.tipoDeTarea = tipoDeTarea
     }
 
     init(_ e: EventoDeEnergia) {
         let tarea = e.tarea
         self.init(tipo: e.tipo, fecha: e.fecha, franjaHoraria: e.franjaHoraria, valor: e.valor,
                   tamano: e.tamanoCrudo.flatMap(TamanoDeTarea.init(rawValue:)) ?? tarea?.tamano,
-                  tareaID: tarea?.persistentModelID, conPrimerPaso: tarea?.primerPaso != nil)
+                  tareaID: tarea?.persistentModelID, conPrimerPaso: tarea?.primerPaso != nil,
+                  tipoDeTarea: e.tipoDeTareaCrudo.flatMap(TipoDeTarea.init(rawValue:)) ?? tarea.flatMap { TipoDeTarea.de($0.titulo) })
     }
 }
 

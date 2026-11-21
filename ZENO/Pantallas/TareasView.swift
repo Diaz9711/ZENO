@@ -207,9 +207,10 @@ struct TareaDelMomentoView: View {
     /// Abre "Divídemela" para una tarea. Espera un instante a que se cierre la hoja de Chispa.
     private func dividir(_ tarea: Tarea) {
         let nivel = MotorDeEnergia.nivel(puntaje)
+        let cuesta = Aprendizaje.leCuesta(tipo: TipoDeTarea.de(tarea.titulo), eventos: eventos)
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(0.35))
-            Hojas.compartidas.mostrar { HojaDividir(tarea: tarea, energia: nivel) }
+            Hojas.compartidas.mostrar { HojaDividir(tarea: tarea, energia: nivel, masPequenos: cuesta) }
         }
     }
 
@@ -701,6 +702,7 @@ struct TareaDelMomentoView: View {
         contexto.insert(evento)
         evento.tarea = tarea
         evento.tamanoCrudo = tarea.tamanoCrudo
+        evento.tipoDeTareaCrudo = TipoDeTarea.de(tarea.titulo)?.rawValue
     }
 
     // Sin `toques += 1` en empezar, terminar y "Ahora no": el botón ya da su toque

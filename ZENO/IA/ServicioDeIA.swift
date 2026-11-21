@@ -16,6 +16,8 @@ struct PedidoDeDivision: Equatable {
     var tamano: TamanoDeTarea
     var energia: NivelDeEnergia
     var idioma: Idioma
+    /// Lo aprendido: este tipo de tarea le suele costar (la pospone mucho). Pasos más pequeños.
+    var masPequenos: Bool = false
 }
 
 /// Una tarea encontrada en lo que la persona dijo.
@@ -97,7 +99,15 @@ struct MotorSimple: MotorDeIA {
         if p.tamano == .grande && p.energia == .alta {
             pasos.insert(es ? "Haz otra parte pequeña, 5 minutos" : "Do one more small part, 5 minutes", at: 3)
         }
-        return pasos
+        // Lo aprendido: si este tipo le cuesta, un primer paso casi nulo y partes de 2 minutos.
+        if p.masPequenos {
+            pasos[0] = es ? "Solo deja a la vista lo que necesitas para «\(t)»" : "Just put what you need for “\(t)” where you can see it"
+            if let i = pasos.firstIndex(of: es ? "Haz solo la primera parte, 5 minutos" : "Do just the first part, 5 minutes") {
+                pasos[i] = es ? "Haz solo la primera parte, 2 minutos" : "Do just the first part, 2 minutes"
+                pasos.insert(es ? "Mira qué es lo primero que hay que hacer" : "Look at what the very first thing is", at: i)
+            }
+        }
+        return Array(pasos.prefix(7))
     }
 }
 
@@ -182,7 +192,9 @@ struct MotorLocal: MotorDeIA {
             : "You help people with ADHD start tasks. You split a task into very concrete steps of about 5 minutes. The first step is ridiculously easy (for example: “Open the document”). If the person said why it matters to them, use that interest to make the steps appealing (without repeating it in every step). No guilt, no pressure, no medical advice. Always answer in English."
         let pedido = es
             ? "Tarea: \(p.titulo)\nPor qué: \(p.porque.isEmpty ? "(no lo dijo)" : p.porque)\nEsfuerzo: \(esfuerzo)\nEnergía de ahora: \(energia)"
+                + (p.masPequenos ? "\nEste tipo de tarea le suele costar mucho empezarlo: haz pasos aún más pequeños y concretos (de 2 o 3 minutos), entre 5 y 7, y que el primero sea casi nada." : "")
             : "Task: \(p.titulo)\nWhy: \(p.porque.isEmpty ? "(not given)" : p.porque)\nEffort: \(esfuerzo)\nCurrent energy: \(energia)"
+                + (p.masPequenos ? "\nThis kind of task is usually very hard for them to start: make the steps even smaller and more concrete (2 or 3 minutes), between 5 and 7, with an almost-nothing first step." : "")
         let sesion = LanguageModelSession(instructions: instrucciones)
         let respuesta = try await sesion.respond(to: pedido, generating: PasosGenerados.self,
                                                  options: GenerationOptions(temperature: 0.4))
@@ -341,6 +353,17 @@ enum PruebaDeIA {
             let p = PedidoDeDivision(titulo: titulo, tamano: tamano, energia: energia, idioma: .espanol)
             ok(ServicioDeIA.validarPasos(MotorSimple.plantilla(p)) != nil, "plantilla válida: \(titulo)")
         }
+        // Lo aprendido alimenta a Divídemela: un tipo que pospone mucho → pasos más pequeños
+        for energia in [NivelDeEnergia.baja, .media, .alta] {
+            let p = PedidoDeDivision(titulo: "Llamar al banco", tamano: .grande, energia: energia, idioma: .espanol, masPequenos: true)
+            ok(ServicioDeIA.validarPasos(MotorSimple.plantilla(p)) != nil, "plantilla más pequeña válida (energía \(energia))")
+        }
+        ok(TipoDeTarea.de("Llamar al dentista") == .llamada && TipoDeTarea.de("Pagar la factura") == .papeles, "tipo de tarea por palabras")
+        let ahora = Date.now
+        let llamadas = (0..<4).map { Senal(tipo: .ahoraNo, fecha: ahora.addingTimeInterval(-Double($0) * 86_400), franjaHoraria: 10, tipoDeTarea: .llamada) }
+            + [Senal(tipo: .tareaEmpezada, fecha: ahora, franjaHoraria: 10, tipoDeTarea: .llamada)]
+        ok(Aprendizaje.leCuesta(tipo: .llamada, eventos: llamadas), "4 de 5 llamadas pospuestas → le cuesta")
+        ok(!Aprendizaje.leCuesta(tipo: .correo, eventos: llamadas), "sin datos de correo → no se cambia nada")
         // Captura (sin IA): nunca se parte por puntos ni comas; solo por "y después", "y luego"...
         let dicho = "Llamar al dentista mañana a las 5. Comprar pan. Terminar el informe del trabajo."
         let sinIA = ServicioDeIA.validarCaptura((try? await MotorSimple().capturar(dicho, idioma: .espanol)) ?? [], dicho: dicho, exigirPalabras: false) ?? []

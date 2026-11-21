@@ -15,6 +15,7 @@ enum AccionesDeTarea {
         contexto.insert(evento)
         evento.tarea = tarea
         evento.tamanoCrudo = tarea.tamanoCrudo
+        evento.tipoDeTareaCrudo = TipoDeTarea.de(tarea.titulo)?.rawValue
         tarea.terminadaEn = .now
         Task { await AvisosDeTareas.sincronizar(contexto) }
     }

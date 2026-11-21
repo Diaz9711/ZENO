@@ -27,6 +27,8 @@ final class EventoDeEnergia {
     /// Tamaño de la tarea en ese momento (chica, mediana, grande). Se guarda aparte para que
     /// lo aprendido no se pierda si la tarea se borra después.
     var tamanoCrudo: String? = nil
+    /// Tipo de la tarea (llamada, trámite, papeles…), guardado aparte por la misma razón.
+    var tipoDeTareaCrudo: String? = nil
 
     var tarea: Tarea?
 
@@ -44,6 +46,7 @@ final class EventoDeEnergia {
         self.valor = valor
         self.tarea = tarea
         self.tamanoCrudo = tarea?.tamanoCrudo
+        self.tipoDeTareaCrudo = tarea.flatMap { TipoDeTarea.de($0.titulo)?.rawValue }
         self.fuente = fuente
     }
 

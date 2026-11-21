@@ -90,6 +90,24 @@ enum Aprendizaje {
         return comodos + pospuestos
     }
 
+    // MARK: Qué tipos de tarea le cuestan (para Divídemela)
+
+    /// Qué tan seguido deja para después un tipo de tarea (llamadas, trámites…), de 0 a 1, en los
+    /// últimos 45 días. nil si aún no hay suficientes datos. Sale del historial real, no de reglas fijas.
+    static func tasaDePosponer(tipo: TipoDeTarea, eventos: [Senal], ahora: Date = .now) -> Double? {
+        let deEseTipo = eventos.filter { $0.tipoDeTarea == tipo && ahora.timeIntervalSince($0.fecha) < 45 * 86_400 }
+        let pospuestas = deEseTipo.filter { $0.tipo == .ahoraNo || $0.tipo == .tareaIgnorada }.count
+        let decididas = pospuestas + deEseTipo.filter { $0.tipo == .tareaEmpezada }.count
+        guard decididas >= minimoDeMuestras else { return nil }
+        return Double(pospuestas) / Double(decididas)
+    }
+
+    /// ¿Le cuesta este tipo de tarea? Entonces Divídemela hace pasos más pequeños y concretos.
+    static func leCuesta(tipo: TipoDeTarea?, eventos: [Senal], ahora: Date = .now) -> Bool {
+        guard let tipo else { return false }
+        return (tasaDePosponer(tipo: tipo, eventos: eventos, ahora: ahora) ?? 0) >= 0.5
+    }
+
     // MARK: Lo que la persona puede leer
 
     /// Frases amables de lo aprendido, para Ajustes. Vacío si aún no hay datos.

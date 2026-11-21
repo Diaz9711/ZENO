@@ -37,3 +37,29 @@ enum ClasificadorDeTamano {
         return .mediana
     }
 }
+
+/// El tipo de una tarea (llamadas, trámites, papeles…), por palabras clave. Sirve para aprender qué
+/// tipos le cuestan a la persona y dividirlos en pasos más pequeños. nil = otro tipo.
+enum TipoDeTarea: String, CaseIterable {
+    case llamada, tramite, papeles, correo, compras, limpieza, estudio
+
+    private var raices: [String] {
+        switch self {
+        case .llamada: ["llam", "telefon", "call ", "phone"]
+        case .tramite: ["tramite", "cita", "banco", "renov", "pasaporte", "licencia", "seguro", "hacienda", "impuesto",
+                        "appointment", "bank", "renew", "passport", "license", "insurance", "taxes"]
+        case .papeles: ["papel", "factura", "formulario", "document", "firmar", "declaraci", "recibo",
+                        "paperwork", "form", "invoice", "sign ", "receipt", "bill"]
+        case .correo: ["correo", "mail", "respond", "contest", "mensaje", "email", "reply", "inbox"]
+        case .compras: ["compr", "super", "buy", "shop", "grocer"]
+        case .limpieza: ["limpi", "ordenar", "lavar", "barrer", "basura", "clean", "tidy", "laundry", "dishes"]
+        case .estudio: ["estudi", "tarea de", "examen", "leer", "ensayo", "study", "exam", "read", "essay", "homework"]
+        }
+    }
+
+    static func de(_ titulo: String) -> TipoDeTarea? {
+        let texto = " " + titulo.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+            .lowercased() + " "
+        return allCases.first { tipo in tipo.raices.contains { texto.contains(" " + $0) } }
+    }
+}

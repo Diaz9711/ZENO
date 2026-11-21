@@ -5,6 +5,8 @@ import SwiftUI
 struct HojaDividir: View {
     let tarea: Tarea
     let energia: NivelDeEnergia
+    /// Lo aprendido: este tipo de tarea le cuesta, así que se piden pasos más pequeños.
+    var masPequenos = false
     var alGuardar: () -> Void = {}
 
     @Environment(\.locale) private var idiomaElegido
@@ -158,7 +160,8 @@ struct HojaDividir: View {
             // Ya estaba dividida: se editan sus pasos, sin volver a generar.
             pasos = tarea.pasos; motor = ""; deRespaldo = false; cargando = false; return
         }
-        let pedido = PedidoDeDivision(titulo: tarea.titulo, porque: tarea.anzuelo ?? "", tamano: tarea.tamano, energia: energia, idioma: Idioma.actual)
+        let pedido = PedidoDeDivision(titulo: tarea.titulo, porque: tarea.anzuelo ?? "", tamano: tarea.tamano, energia: energia, idioma: Idioma.actual,
+                                      masPequenos: masPequenos)
         let resultado = await ServicioDeIA.compartido.dividir(pedido)
         pasos = resultado.pasos
         motor = resultado.motor
