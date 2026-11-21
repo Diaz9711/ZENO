@@ -451,6 +451,9 @@ struct UniversoView: View {
                                 .padding(.top, 6)
                                 .aparece(0)
                         }
+                        // Hoy no se desplaza: con los tamaños de accesibilidad se queda en xxxL, el mayor en que
+                        // la tarea y sus botones caben enteros. Tareas y Ajustes sí crecen sin tope (se desplazan).
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         .transition(.pasoDePagina(sentido: sentido))
 
                     case .tareas:
@@ -471,6 +474,8 @@ struct UniversoView: View {
                             pedirAgregar += 1
                         }
                         .padding(.bottom, 4)
+                        // La barra no crece sin fin con la letra grande (sus glifos ya se leen; VoiceOver los nombra).
+                        .dynamicTypeSize(...DynamicTypeSize.xLarge)
                         // Con el teclado abierto (editar una tarea) la barra se queda abajo, no sube encima.
                         .ignoresSafeArea(.keyboard)
                         .transition(.move(edge: .bottom).combined(with: .opacity))

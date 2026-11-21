@@ -27,6 +27,10 @@ struct TareaDelMomentoView: View {
     @Binding var editando: Bool
 
     @Environment(\.modelContext) private var contexto
+    /// Letra grande del iPhone (auditoría): con xxxL o más, lo secundario cede su sitio para que la tarea
+    /// y sus dos botones se vean enteros y la barra no los tape.
+    @Environment(\.dynamicTypeSize) private var tamanoDeLetra
+    private var letraGrande: Bool { tamanoDeLetra >= .xxxLarge }
     /// Leído para que, al cambiar de idioma, también se redibujen las frases armadas en código.
     @Environment(\.locale) private var idiomaElegido
     @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
@@ -144,20 +148,23 @@ struct TareaDelMomentoView: View {
             tarjetaDeAhora
                 .aparece(2)
 
-            if mostrarCampoRapido && !(compacto && hayTareaPropuesta) {
+            if mostrarCampoRapido && !(compacto && hayTareaPropuesta) && !letraGrande {
                 CampoRapido { abrirAgregar() }
                     .aparece(3)
             }
 
             // Las dos tarjetas se estiran con el espacio que sobra (sin tareas, en marcha, en descanso),
             // así abajo no queda un hueco vacío; con una tarea propuesta quedan en su mínimo (Fable).
-            HStack(alignment: .top, spacing: 12) {
-                tarjetaDelDia.aparece(4)
-                tarjetaDeMejorHora.aparece(5)
+            // Con letra grande las medianas (solo datos) se retiran: lo primero es la tarea.
+            if !letraGrande {
+                HStack(alignment: .top, spacing: 12) {
+                    tarjetaDelDia.aparece(4)
+                    tarjetaDeMejorHora.aparece(5)
+                }
+                .frame(minHeight: 128, maxHeight: hayTareaPropuesta ? nil : 184)
+                // Con una tarea propuesta no sobra espacio: tamaño justo, como antes.
+                .fixedSize(horizontal: false, vertical: hayTareaPropuesta)
             }
-            .frame(minHeight: 128, maxHeight: hayTareaPropuesta ? nil : 184)
-            // Con una tarea propuesta no sobra espacio: tamaño justo, como antes.
-            .fixedSize(horizontal: false, vertical: hayTareaPropuesta)
 
             if let aviso = dictado.aviso {
                 Text(aviso)
