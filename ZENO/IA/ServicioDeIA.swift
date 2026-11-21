@@ -364,6 +364,16 @@ enum PruebaDeIA {
             + [Senal(tipo: .tareaEmpezada, fecha: ahora, franjaHoraria: 10, tipoDeTarea: .llamada)]
         ok(Aprendizaje.leCuesta(tipo: .llamada, eventos: llamadas), "4 de 5 llamadas pospuestas → le cuesta")
         ok(!Aprendizaje.leCuesta(tipo: .correo, eventos: llamadas), "sin datos de correo → no se cambia nada")
+        // Modo silencioso y bucle de retorno
+        let tresNo = (1...3).map { Senal(tipo: .ahoraNo, fecha: ahora.addingTimeInterval(-Double($0) * 300), franjaHoraria: 10) }
+        ok(MotorDeEnergia.tocaSilencio(puntaje: 60, eventos: tresNo), "tres «Ahora no» seguidos → silencio")
+        ok(!MotorDeEnergia.tocaSilencio(puntaje: 60, eventos: tresNo + [Senal(tipo: .tareaEmpezada, fecha: ahora, franjaHoraria: 10)]), "empezar algo corta la cuenta")
+        ok(MotorDeEnergia.tocaSilencio(puntaje: 15, eventos: []), "energía muy baja → silencio")
+        ok(!MotorDeEnergia.tocaSilencio(puntaje: 50, eventos: []), "energía normal → sin silencio")
+        let hora = Calendar.current.component(.hour, from: ahora)
+        let grandesPospuestas = (1...4).map { Senal(tipo: .ahoraNo, fecha: ahora.addingTimeInterval(-Double($0) * 86_400), franjaHoraria: hora, tamano: .grande) }
+        ok(Aprendizaje.patronDeAhora(propuesta: .chica, tipo: nil, hayGrandes: true, nivel: .alta, franja: hora, eventos: grandesPospuestas) == .grandeCuestaAEstaHora, "patrón: a esta hora lo grande espera")
+        ok(Aprendizaje.patronDeAhora(propuesta: .chica, tipo: nil, hayGrandes: true, nivel: .alta, franja: hora, eventos: []) == nil, "sin datos no hay patrón")
         // Captura (sin IA): nunca se parte por puntos ni comas; solo por "y después", "y luego"...
         let dicho = "Llamar al dentista mañana a las 5. Comprar pan. Terminar el informe del trabajo."
         let sinIA = ServicioDeIA.validarCaptura((try? await MotorSimple().capturar(dicho, idioma: .espanol)) ?? [], dicho: dicho, exigirPalabras: false) ?? []

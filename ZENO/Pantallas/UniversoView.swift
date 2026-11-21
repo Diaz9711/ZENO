@@ -343,6 +343,7 @@ struct UniversoView: View {
             }
             DatosDeEjemplo.cargarCielo(en: contexto)
             DatosDeEjemplo.cargarPasos(en: contexto)
+            DatosDeEjemplo.cargarSilencio(en: contexto)
             // Atajos para probar sin tocar: -formaDePrueba 0|1, -paginaInicial 0|1|2, -sinPresentacion YES.
             let ajustes = UserDefaults.standard
             if let forma = ajustes.string(forKey: "formaDePrueba").flatMap(Int.init) { personas.first?.formaDeLumiCruda = forma }

@@ -114,6 +114,15 @@ enum DatosDeEjemplo {
         #endif
     }
 
+    /// `-silencioDeEjemplo YES`: tres "Ahora no" seguidos ahora mismo (para ver el modo compañero).
+    @MainActor
+    static func cargarSilencio(en contexto: ModelContext) {
+        #if DEBUG
+        guard UserDefaults.standard.bool(forKey: "silencioDeEjemplo") else { return }
+        for i in 1...3 { contexto.insert(EventoDeEnergia(tipo: .ahoraNo, fecha: Date.now.addingTimeInterval(-Double(i) * 60))) }
+        #endif
+    }
+
     @MainActor
     static func cargar(en contexto: ModelContext) {
         let pendientes: [(String, TamanoDeTarea, String?)] = [

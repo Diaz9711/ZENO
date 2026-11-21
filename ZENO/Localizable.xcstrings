@@ -3591,6 +3591,86 @@
           }
         }
       }
+    },
+    "Estoy aquí. Sin prisa." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I’m here. No rush."
+          }
+        }
+      }
+    },
+    "No hace falta hacer nada ahora." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No need to do anything right now."
+          }
+        }
+      }
+    },
+    "Aquí sigo, a tu lado." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still here, right beside you."
+          }
+        }
+      }
+    },
+    "Sin prisa" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No rush"
+          }
+        }
+      }
+    },
+    "Estoy aquí contigo" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I’m here with you"
+          }
+        }
+      }
+    },
+    "Quiero hacer algo" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I want to do something"
+          }
+        }
+      }
+    },
+    "A esta hora lo grande te cuesta. Probemos algo chico." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Big things are hard at this hour. Let’s try something small."
+          }
+        }
+      }
+    },
+    "Esto suele costarte. Si quieres, tócame y la divido en pasos chiquitos." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This one tends to be hard for you. Tap me and I’ll split it into tiny steps."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

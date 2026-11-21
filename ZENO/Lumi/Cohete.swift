@@ -16,9 +16,12 @@ enum Cohete {
     static let nombre = "Chispa"
 
     enum Momento {
-        case tarea(enMarcha: Bool, primerPaso: Bool, minutosReales: Int?, enRacha: Bool, anzuelo: String? = nil)
+        case tarea(enMarcha: Bool, primerPaso: Bool, minutosReales: Int?, enRacha: Bool, anzuelo: String? = nil,
+                   patron: Aprendizaje.Patron? = nil)
         case descanso
         case masTarde(vuelveA: Date?)
+        /// Modo compañero silencioso: solo presencia.
+        case silencio
         case nada(hechasHoy: Int)
         /// Justo después de terminar una tarea (unos segundos).
         case celebrando
@@ -32,7 +35,14 @@ enum Cohete {
         switch momento {
         case .celebrando:
             return variada(.celebracion)
-        case .tarea(let enMarcha, let primerPaso, let minutos, let enRacha, let anzuelo):
+        case .tarea(let enMarcha, let primerPaso, let minutos, let enRacha, let anzuelo, let patron):
+            // Bucle de retorno: el patrón se dice una vez, en el momento, cálido y sin culpa.
+            if let patron, !enMarcha {
+                switch patron {
+                case .grandeCuestaAEstaHora: return Idioma.texto("A esta hora lo grande te cuesta. Probemos algo chico.")
+                case .tipoCuesta: return Idioma.texto("Esto suele costarte. Si quieres, tócame y la divido en pasos chiquitos.")
+                }
+            }
             // El porqué de la persona (escrito a mano: la IA nunca lo reescribe). Dos de cada tres turnos,
             // para que no canse.
             let vuelta = turno.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0xFFFF }
@@ -52,6 +62,11 @@ enum Cohete {
             return variada(.ahora)
         case .descanso:
             return variada(.descanso)
+        case .silencio:
+            let frases = [Idioma.texto("Estoy aquí. Sin prisa."), Idioma.texto("No hace falta hacer nada ahora."),
+                          Idioma.texto("Aquí sigo, a tu lado.")]
+            let vuelta = turno.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0xFFFF }
+            return frases[vuelta % frases.count]
         case .masTarde(let vuelveA):
             if let vuelveA {
                 return Idioma.texto("Te propongo algo otra vez a las \(vuelveA.formatted(date: .omitted, time: .shortened)).")

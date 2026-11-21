@@ -51,6 +51,9 @@ struct TareaDelMomentoView: View {
     @State private var conPorque = false
     @FocusState private var escribiendoPorque: Bool
     @State private var quiereAlgoIgual = false
+    /// Bucle de retorno: el patrón que Chispa cuenta ahora (cada uno, como mucho una vez al día).
+    @State private var patronDeAhora: Aprendizaje.Patron?
+    @AppStorage("patronesDichos") private var patronesDichos = ""
     @State private var plan = BorradorDePlan()
     @State private var dictado = Dictado()
     @State private var toques = 0
@@ -100,6 +103,7 @@ struct TareaDelMomentoView: View {
             // Al dejar de dictar: si dijo varias cosas, Chispa las separa y las muestra antes de guardar.
             if antes && !activo && modo == .agregar { procesarDictado() }
         }
+        .onChange(of: idPropuesta, initial: true) { _, _ in revisarPatron() }
         .onChange(of: pedirAgregar) { _, _ in abrirAgregar() }
         // El widget de inicio muestra la misma tarea de ahora.
         .onChange(of: firmaParaWidget, initial: true) { _, _ in
@@ -181,9 +185,11 @@ struct TareaDelMomentoView: View {
             let minutos = tarea.primerPaso == nil
                 ? Aprendizaje.minutosReales(tarea.tamano, eventos: eventos).map { Int($0.rounded()) } : nil
             return .tarea(enMarcha: enCurso == tarea.persistentModelID, primerPaso: tarea.primerPaso != nil,
-                          minutosReales: minutos, enRacha: enRacha && enCurso == nil, anzuelo: tarea.anzuelo)
+                          minutosReales: minutos, enRacha: enRacha && enCurso == nil, anzuelo: tarea.anzuelo,
+                          patron: patronDeAhora)
         case .descanso: return .descanso
         case .masTarde: return .masTarde(vuelveA: vuelveA)
+        case .silencio: return .silencio
         case .nadaPendiente: return .nada(hechasHoy: hechasHoy.count)
         }
     }
@@ -259,6 +265,18 @@ struct TareaDelMomentoView: View {
                 Titular(texto: Idioma.texto("Hoy descansa, mañana atacamos"), tamano: .title2, alineacion: .leading)
                 HStack {
                     BotonTerciarioLujo(titulo: "Quiero hacer algo igual") {
+                        toques += 1
+                        withAnimation(Lujo.curva()) { quiereAlgoIgual = true }
+                    }
+                    .padding(.trailing, -12)
+                }
+
+            case .silencio:
+                // Modo compañero: nada que proponer. Una frase de presencia y una puerta discreta.
+                EtiquetaLujo("Sin prisa")
+                Titular(texto: Idioma.texto("Estoy aquí contigo"), tamano: .title2, alineacion: .leading)
+                HStack {
+                    BotonTerciarioLujo(titulo: "Quiero hacer algo") {
                         toques += 1
                         withAnimation(Lujo.curva()) { quiereAlgoIgual = true }
                     }
@@ -616,6 +634,23 @@ struct TareaDelMomentoView: View {
                 }
             }
         }
+    }
+
+    /// Si la propuesta de ahora se explica por un patrón claro, Chispa lo dice (una vez al día cada uno).
+    private func revisarPatron() {
+        guard case .tarea(let tarea) = eleccion, enCurso == nil else { patronDeAhora = nil; return }
+        let patron = Aprendizaje.patronDeAhora(
+            propuesta: tarea.tamano, tipo: TipoDeTarea.de(tarea.titulo),
+            hayGrandes: pendientes.contains { $0.tamano == .grande },
+            nivel: MotorDeEnergia.nivel(puntaje), franja: Calendar.current.component(.hour, from: .now), eventos: eventos)
+        let hoy = Date.now.formatted(.iso8601.year().month().day())
+        var dichos = patronesDichos.hasPrefix(hoy) ? patronesDichos : hoy
+        guard let patron, !dichos.split(separator: "|").dropFirst().contains(Substring(patron.clave)) else {
+            patronDeAhora = nil; return
+        }
+        dichos += "|" + patron.clave
+        patronesDichos = dichos
+        patronDeAhora = patron
     }
 
     // MARK: Acciones

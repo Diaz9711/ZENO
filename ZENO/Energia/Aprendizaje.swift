@@ -108,6 +108,34 @@ enum Aprendizaje {
         return (tasaDePosponer(tipo: tipo, eventos: eventos, ahora: ahora) ?? 0) >= 0.5
     }
 
+    // MARK: Bucle de retorno: decirlo en el momento
+
+    /// Un patrón claro que ZENO puede contar en una línea, en el momento (no en Ajustes).
+    enum Patron: Equatable {
+        /// A esta hora suele dejar lo grande para después; por eso se propone algo más chico.
+        case grandeCuestaAEstaHora
+        /// Este tipo de tarea (llamadas, trámites…) le suele costar.
+        case tipoCuesta(TipoDeTarea)
+
+        var clave: String {
+            switch self {
+            case .grandeCuestaAEstaHora: "grande"
+            case .tipoCuesta(let t): t.rawValue
+            }
+        }
+    }
+
+    /// El patrón que explica la propuesta de ahora, si hay uno claro. Observacional, nunca culpa.
+    static func patronDeAhora(propuesta tamano: TamanoDeTarea, tipo: TipoDeTarea?, hayGrandes: Bool,
+                              nivel: NivelDeEnergia, franja: Int, eventos: [Senal], ahora: Date = .now) -> Patron? {
+        if nivel != .baja, hayGrandes, tamano != .grande,
+           suelePosponer(.grande, franja: franja, eventos: eventos, ahora: ahora) {
+            return .grandeCuestaAEstaHora
+        }
+        if let tipo, leCuesta(tipo: tipo, eventos: eventos, ahora: ahora) { return .tipoCuesta(tipo) }
+        return nil
+    }
+
     // MARK: Lo que la persona puede leer
 
     /// Frases amables de lo aprendido, para Ajustes. Vacío si aún no hay datos.

@@ -11,6 +11,9 @@ enum Eleccion {
     case descanso
     /// Todo lo pendiente recibió un "Ahora no" hace poco: se intenta más tarde.
     case masTarde
+    /// Modo compañero silencioso: energía muy baja o varios "Ahora no" seguidos. ZENO no propone nada,
+    /// solo acompaña. No es un fallo: es parte de la app (Diaz, 20 nov 2026).
+    case silencio
     case nadaPendiente
 }
 
@@ -122,6 +125,30 @@ enum MotorDeEnergia {
         return min(max(ajuste, -25), 12)
     }
 
+    // MARK: Modo compañero silencioso
+
+    /// Por debajo de esto la energía es "muy baja": ZENO se queda en silencio.
+    static let umbralDeSilencio = 22.0
+
+    /// Cuántos "Ahora no" seguidos lleva en las últimas 2 horas (empezar o terminar algo corta la cuenta).
+    static func ahoraNoSeguidos(eventos: [Senal], ahora: Date = .now) -> Int {
+        var cuenta = 0
+        for e in eventos.reversed() where e.fecha <= ahora {
+            guard ahora.timeIntervalSince(e.fecha) < 2 * 3600 else { break }
+            switch e.tipo {
+            case .ahoraNo: cuenta += 1
+            case .tareaEmpezada, .tareaTerminada: return cuenta
+            default: continue
+            }
+        }
+        return cuenta
+    }
+
+    /// ¿Toca el silencio? Energía muy baja, o tres "Ahora no" seguidos.
+    static func tocaSilencio(puntaje: Double, eventos: [Senal], ahora: Date = .now) -> Bool {
+        puntaje < umbralDeSilencio || ahoraNoSeguidos(eventos: eventos, ahora: ahora) >= 3
+    }
+
     // MARK: Elegir la tarea del momento
 
     /// Energía alta: la más difícil. Media: una rutinaria. Baja: algo de dos minutos, o descanso.
@@ -149,6 +176,12 @@ enum MotorDeEnergia {
             .filter({ t in t.fechaPlaneada.map { abs($0.timeIntervalSince(ahora)) < 30 * 60 } ?? false })
             .min(by: { ($0.fechaPlaneada ?? ahora) < ($1.fechaPlaneada ?? ahora) }) {
             return .tarea(planeada)
+        }
+
+        // Modo silencioso: nada que proponer, solo compañía (lo que la persona planeó para ahora sí va).
+        // "Quiero hacer algo" lo deja atrás cuando ella quiera.
+        if !quiereAlgoIgual && tocaSilencio(puntaje: puntaje, eventos: eventos, ahora: ahora) {
+            return .silencio
         }
 
         // Lo aprendido: lo que suele posponer a esta hora pasa al final de la fila.
