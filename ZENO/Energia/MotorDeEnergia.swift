@@ -21,13 +21,13 @@ enum Eleccion {
 ///   A. la curva base del cronotipo (las tres respuestas del registro), y
 ///   B. el comportamiento dentro de la app (lo aprendido por hora + lo que pasa hoy).
 /// Todo sale del historial de eventos, así que siempre se puede recalcular.
-/// En la versión 2 aquí cabe una tercera señal (salud) sumando otro ajuste.
+/// C (opcional, preparada y apagada): sueño y pulso en reposo de Salud (`Energia/Salud.swift`).
 enum MotorDeEnergia {
 
     // MARK: Puntaje
 
     static func puntaje(persona: Persona, eventos: [Senal], ahora: Date = .now,
-                        calendario: Calendar = .current) -> Double {
+                        calendario: Calendar = .current, salud: SenalDeSalud? = nil) -> Double {
         let c = calendario.dateComponents([.hour, .minute], from: ahora)
         let hora = Double(c.hour ?? 12) + Double(c.minute ?? 0) / 60
         let base = curvaBase(hora: hora, despertar: persona.horaDespertar,
@@ -35,7 +35,8 @@ enum MotorDeEnergia {
         let aprendido = ajusteAprendido(franja: c.hour ?? 12, eventos: eventos, ahora: ahora)
         let hoy = ajusteDeHoy(eventos: eventos, ahora: ahora, calendario: calendario)
         // Nunca llega a cero: Lumi baja su luz para dar permiso de descansar, no como castigo.
-        return min(max(base + aprendido + hoy, 8), 100)
+        // C. Salud (opcional, modo bienestar): sin datos suma 0.
+        return min(max(base + aprendido + hoy + ajusteDeSalud(salud), 8), 100)
     }
 
     static func nivel(_ puntaje: Double) -> NivelDeEnergia {

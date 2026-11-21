@@ -111,7 +111,8 @@ final class Memoria {
                       minuto: Int(ahora.timeIntervalSinceReferenceDate / 60),
                       persona: [persona.horaDespertar, persona.horaPico, persona.horaApagado])
         if c != clave {
-            puntajeGuardado = MotorDeEnergia.puntaje(persona: persona, eventos: senales, ahora: ahora)
+            puntajeGuardado = MotorDeEnergia.puntaje(persona: persona, eventos: senales, ahora: ahora,
+                                                     salud: LectorDeSalud.compartido.ultima)
             mejorHoraGuardada = MotorDeEnergia.mejorHora(persona: persona, eventos: senales, ahora: ahora)
             horasGuardadas = MotorDeEnergia.horasDelDia(persona: persona, eventos: senales, ahora: ahora)
             clave = c
