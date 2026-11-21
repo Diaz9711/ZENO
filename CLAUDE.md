@@ -43,7 +43,7 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 
 ## Fuera de la app (extensión `ZENOWidgets`, 14 nov 2026)
 - Tres objetivos de compilación: `ZENO` (app), `ZENOWidgets` (extensión) y la carpeta `Compartido/`, que se compila en los dos (atributos del anillo, `TerminarTareaIntent`, `FotoDeZeno`, fuentes). En la extensión está definido `WIDGET`; el código solo de la app va en `#if !WIDGET`. La extensión no puede usar `Lujo` ni `Font.zeno*`: tiene sus propias `Tinta` y `Font.titulo/texto` (`ZENOWidgets/Tintas.swift`) con los mismos valores, y su propio `Localizable.xcstrings`.
-- **Una sola base de datos**: `Modelos/Almacen.swift` (`Almacen.contenedor`), la misma que usan la app, Siri y el "Terminé" de la pantalla bloqueada. Sigue en su sitio de siempre (no se movió al App Group, para no perder datos).
+- **Una sola base de datos**: `Modelos/Almacen.swift` (`Almacen.contenedor`), la misma que usan la app, Siri y el "Terminé" de la pantalla bloqueada. SwiftData la guarda en el contenedor del App Group (comprobado en el simulador; nunca moverla a mano). Si no abre, `AvisoDeDatos` (plan B, nunca `fatalError`).
 - **Anillo en vivo** (Live Activity): `EnVivo/AnilloEnVivo.swift`. Lo manda el estado: `UniversoView` mira la tarea en curso (`firmaEnVivo`) y lo abre o lo cierra (empezar, terminar, "Ahora no", borrar, borrar todo, cerrar sesión, 6 h). Sin alarma. **En la pantalla bloqueada nunca sale el texto de la tarea** (Diaz); solo en la Isla Dinámica abierta. Diseño de la pantalla bloqueada: Diaz eligió el 1, `.linea` (`Compartido/DisenosDelAnillo.swift`: anillo pequeño con la luz de Lumi, tiempo en Fraunces y "Terminé" con borde fino de oro). El primero, grueso y grande, no le gustó por poco luxury. Las otras dos opciones quedan en la galería `-galeriaAnillo YES`. "Terminé" corre `AccionesDeTarea.terminarLaEnCurso()` dentro de la app. Terminar una tarea siempre pasa por `AccionesDeTarea.terminar`.
 - **Widget de inicio** (pequeño y mediano), diseño **1 · Cielo** elegido por Diaz (`Compartido/DisenosDelWidget.swift`, galería `-galeriaWidget YES`): de fondo, una foto de la Lumi y la nebulosa reales de la persona. La app la toma con el mismo shader (`EnVivo/RetratoDeLumi.swift`, `ImageRenderer`) y la guarda en el App Group cuando cambian la forma o la energía. Encima, la tarea de ahora en letra pequeña (`.privacySensitive()`) y la firma ZENO. El primer widget, con una Lumi dibujada aparte, le pareció poco trabajado. Lee una foto pequeña (`FotoDeZeno`) del App Group `group.app.zeno.ZENO`, que escribe `EnVivo/Widgets.swift`. Tocar el widget o el anillo abre `zeno://hoy`.
 - El widget y el anillo hablan en el idioma elegido en ZENO (`FotoDeZeno.idioma`, `AtributosDelAnillo.idioma`). Siri y los nombres de los atajos siguen el idioma del iPhone (iOS no deja cambiarlo).
@@ -62,6 +62,12 @@ La especificación completa está en `ZENO_SPEC.md`. Léela antes de cambiar alg
 - Avisos: el texto depende de la energía esperada a esa hora (baja: solo Chispa). Nunca texto de tareas.
 - Salud (señal C) preparada y apagada en `Energia/Salud.swift`; nunca a ninguna IA.
 - Tests: objetivo `ZENOTests` (funciones puras). Mantenerlos verdes al cambiar el cerebro.
+
+## Auditoría (20–21 nov 2026)
+- Hoy con letra grande: campo rápido desde xL, medianas desde xxL, Hoy con tope xxxL, barra con tope xLarge; `tarjetaApretada` en iPhones bajos. Revisar siempre con una tarea propuesta (no en marcha), porqué largo y primer paso en el iPhone 17 Pro.
+- Al escribir una tarea, el título se vuelve "¿Para qué te importa?"; la primera tarea pregunta su porqué una vez (`HojaPrimerPorque`).
+- HealthKit fuera de la 1.0 (condición `SALUD`). Privacidad dentro de Ajustes (`Pantallas/Privacidad.swift`); mantenerla igual que `Web/privacidad.html`.
+- Registro corto solo como opción (`-registroCorto YES`), pendiente de que Diaz elija.
 
 ## Código
 - Nombres en español, sin acentos ni ñ en nombres de archivos y tipos (`EventoDeEnergia`, `TamanoDeTarea`).

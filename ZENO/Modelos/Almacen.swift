@@ -3,7 +3,8 @@ import SwiftData
 import SwiftUI
 
 /// La única base de datos de ZENO. La usan la app, el "Terminé" de la pantalla bloqueada y Siri,
-/// así todos ven lo mismo al instante. Está en el sitio de siempre (los datos viejos siguen ahí).
+/// así todos ven lo mismo al instante. SwiftData la guarda en el contenedor del App Group
+/// (`.../AppGroup/.../Library/Application Support/default.store`, comprobado en el simulador).
 @MainActor
 enum Almacen {
     /// Por qué no se pudo abrir la base de datos (nil = todo bien).

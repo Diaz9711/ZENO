@@ -27,10 +27,12 @@ struct TareaDelMomentoView: View {
     @Binding var editando: Bool
 
     @Environment(\.modelContext) private var contexto
-    /// Letra grande del iPhone (auditoría): con xxxL o más, lo secundario cede su sitio para que la tarea
+    /// Letra grande del iPhone (auditoría): con xxL o más, lo secundario cede su sitio para que la tarea
     /// y sus dos botones se vean enteros y la barra no los tape.
     @Environment(\.dynamicTypeSize) private var tamanoDeLetra
-    private var letraGrande: Bool { tamanoDeLetra >= .xxxLarge }
+    private var letraGrande: Bool { tamanoDeLetra >= .xxLarge }
+    /// Desde xL el campo rápido se queda en el "+" de la barra (hace lo mismo), para que nada toque la barra.
+    private var letraAlgoGrande: Bool { tamanoDeLetra >= .xLarge }
     /// Leído para que, al cambiar de idioma, también se redibujen las frases armadas en código.
     @Environment(\.locale) private var idiomaElegido
     @Query(filter: #Predicate<Tarea> { $0.terminadaEn == nil }, sort: \Tarea.creadaEn)
@@ -141,6 +143,12 @@ struct TareaDelMomentoView: View {
         return recientes.count >= 2
     }
 
+    /// La tarea propuesta ocupa más de lo normal (primer paso o pasos, más su porqué) en un iPhone más bajo.
+    private var tarjetaApretada: Bool {
+        guard compacto, hayTareaPropuesta, case .tarea(let tarea) = eleccion else { return false }
+        return tarea.anzuelo != nil && (tarea.primerPaso != nil || tarea.pasoDeAhora != nil)
+    }
+
     @ViewBuilder
     private var ver: some View {
         // Una tarjeta ancha con lo de ahora (la única acción), y debajo dos tarjetas medianas con datos.
@@ -152,7 +160,7 @@ struct TareaDelMomentoView: View {
             tarjetaDeAhora
                 .aparece(2)
 
-            if mostrarCampoRapido && !(compacto && hayTareaPropuesta) && !letraGrande {
+            if mostrarCampoRapido && !(compacto && hayTareaPropuesta) && !letraAlgoGrande {
                 CampoRapido { abrirAgregar() }
                     .aparece(3)
             }
@@ -160,7 +168,9 @@ struct TareaDelMomentoView: View {
             // Las dos tarjetas se estiran con el espacio que sobra (sin tareas, en marcha, en descanso),
             // así abajo no queda un hueco vacío; con una tarea propuesta quedan en su mínimo (Fable).
             // Con letra grande las medianas (solo datos) se retiran: lo primero es la tarea.
-            if !letraGrande {
+            // También se retiran en un iPhone más bajo cuando la tarea propuesta trae primer paso (o pasos)
+            // y su porqué: son tres líneas más y no cabrían sin cortar el título ni tocar la barra.
+            if !letraGrande && !tarjetaApretada {
                 HStack(alignment: .top, spacing: 12) {
                     tarjetaDelDia.aparece(4)
                     tarjetaDeMejorHora.aparece(5)
@@ -456,7 +466,7 @@ struct TareaDelMomentoView: View {
     // MARK: Agregar
 
     private var agregar: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 12) {
             // Con el porqué abierto, el título se retira para que todo quepa sobre el teclado.
             // En cuanto hay algo escrito, el título se vuelve la pregunta del porqué (un toque la abre;
             // si no, Guardar y listo). Así se ve sin ocupar más sitio.
@@ -470,7 +480,7 @@ struct TareaDelMomentoView: View {
                                     .font(.zenoTitulo(.title2, .light, cursiva: true))
                                     .foregroundStyle(Lujo.oro)
                             }
-                            .frame(minHeight: 44)
+                            .frame(height: 40)
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(EstiloLujo())
@@ -479,6 +489,7 @@ struct TareaDelMomentoView: View {
                         Text(escuchando ? "Te escucho…" : "¿Qué quieres hacer?")
                             .font(.zenoTitulo(.title2))
                             .foregroundStyle(Lujo.marfil)
+                            .frame(height: 40)
                     }
                 }
                 .shadow(color: .black.opacity(0.45), radius: 12, y: 2)
@@ -571,7 +582,7 @@ struct TareaDelMomentoView: View {
                 .submitLabel(.done)
                 .focused($escribiendoPorque)
                 .onSubmit { guardarFrase() }
-                .padding(.vertical, 10)
+                .padding(.vertical, 8)
                 .padding(.horizontal, 16)
                 .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Lujo.marfil.opacity(0.03)))
                 .overlay(alignment: .bottom) {
@@ -597,7 +608,7 @@ struct TareaDelMomentoView: View {
             }
             // O que Chispa la divida en pasos de unos 5 minutos (fase IA).
             BotonTerciarioLujo(titulo: "Divídemela", icono: .check) {
-                if let tarea = guardarTarea(conPaso: false) { dividir(tarea) }
+                if let tarea = guardarTarea(conPaso: false, preguntarPorque: false) { dividir(tarea) }
             }
             Text(verbatim: limpio(frase))
                 .font(.zenoTexto(.caption))
@@ -731,7 +742,7 @@ struct TareaDelMomentoView: View {
         primerPaso = ""
         porque = ""
         // La primera vez en ZENO (sin tareas todavía) el porqué sale abierto; se puede dejar vacío.
-        conPorque = !porquePrimeraVezHecho && pendientes.isEmpty && !eventos.contains { $0.tipo == .tareaTerminada }
+        conPorque = false
         dictado.aviso = nil
         withAnimation(Ritmo.contenido) { modo = .agregar }
         enfocarPronto()
@@ -767,7 +778,9 @@ struct TareaDelMomentoView: View {
     }
 
     @discardableResult
-    private func guardarTarea(conPaso: Bool) -> Tarea? {
+    private func guardarTarea(conPaso: Bool, preguntarPorque: Bool = true) -> Tarea? {
+        // ¿Es la primera tarea de su vida en ZENO? Entonces, al guardarla, se pregunta (opcional) su porqué.
+        let primeraVez = !porquePrimeraVezHecho && pendientes.isEmpty && !eventos.contains { $0.tipo == .tareaTerminada }
         let titulo = limpio(frase)
         guard !titulo.isEmpty else { return nil }
         let paso = limpio(primerPaso)
@@ -793,6 +806,11 @@ struct TareaDelMomentoView: View {
             Task { @MainActor in
                 try? await Task.sleep(for: .seconds(0.4))
                 Hojas.compartidas.mostrar { VistaDeCuidado() }
+            }
+        } else if primeraVez && anzuelo.isEmpty && preguntarPorque {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(0.5))
+                Hojas.compartidas.mostrar { HojaPrimerPorque(tarea: tarea) }
             }
         }
         return tarea
@@ -1026,5 +1044,53 @@ final class MemoriaDeEleccion {
             clave = nueva
         }
         return guardada
+    }
+}
+
+/// La primera tarea de su vida en ZENO: una sola vez, Chispa pregunta (opcional) para qué le importa.
+/// "Ahora no" la cierra sin más. Nunca vuelve a salir.
+struct HojaPrimerPorque: View {
+    let tarea: Tarea
+    @State private var porque = ""
+    @FocusState private var escribiendo: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            HStack(spacing: 14) {
+                DibujoDeCohete(diseno: .clasico).frame(width: 34, height: 40)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(verbatim: Cohete.nombre.uppercased())
+                        .font(.zenoTexto(.caption2, .semibold)).kerning(1.6).foregroundStyle(Lujo.oro)
+                    Text("¿Para qué te importa?")
+                        .font(.zenoTitulo(.title2, .regular)).foregroundStyle(Lujo.marfil)
+                    Text(verbatim: tarea.titulo)
+                        .font(.zenoTexto(.caption)).foregroundStyle(Lujo.marfilSecundario).lineLimit(2)
+                }
+            }
+            Text("Lo que te llama de esto. Te lo recordaré cuando cueste empezar. Es opcional.")
+                .font(.zenoTexto(.callout))
+                .foregroundStyle(Lujo.marfilSecundario)
+                .fixedSize(horizontal: false, vertical: true)
+            CampoTextoLujo(texto: $porque, sugerencia: "Por ejemplo: ver feliz a mi sobrina", enfocado: $escribiendo)
+            HStack(spacing: 10) {
+                BotonSecundarioLujo("Ahora no") { Hojas.compartidas.cerrar() }
+                BotonPrimarioLujo("Guardar") { guardar() }
+                    .disabled(porque.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+        }
+        .onAppear { DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { escribiendo = true } }
+    }
+
+    private func guardar() {
+        let anzuelo = String(porque.trimmingCharacters(in: .whitespacesAndNewlines).prefix(120))
+        tarea.porque = anzuelo.isEmpty ? nil : anzuelo
+        escribiendo = false
+        Hojas.compartidas.cerrar()
+        if Cuidado.suenaACrisis(anzuelo) {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(0.5))
+                Hojas.compartidas.mostrar { VistaDeCuidado() }
+            }
+        }
     }
 }

@@ -4055,6 +4055,26 @@
     },
     "2:00" : {
       "shouldTranslate" : false
+    },
+    "Lo que te llama de esto. Te lo recordaré cuando cueste empezar. Es opcional." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What draws you to it. I’ll remind you when starting is hard. It’s optional."
+          }
+        }
+      }
+    },
+    "Por ejemplo: ver feliz a mi sobrina" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For example: seeing my niece happy"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

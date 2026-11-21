@@ -97,6 +97,8 @@ Pasos siguientes, uno por uno (Diaz pidió paso a paso, "razona bien", usar a Fa
 - **Salud fuera de la 1.0**: HealthKit solo compila con la condición `SALUD`; sin `NSHealthShareUsageDescription` (comprobado con `otool -L` en Release).
 - **Privacidad dentro de la app** (`Pantallas/Privacidad.swift`, Ajustes → Tus datos → Privacidad). `Web/privacidad.html` ya menciona la IA del iPhone (sin publicar).
 - **Vuelta amable**: tras 3+ días sin abrir, Chispa recibe sin repaso y se propone algo pequeño hasta terminar la primera cosa del día (`MotorDeEnergia.deVuelta`).
+- **Primera tarea**: al guardar la primera tarea de su vida sin porqué, una hoja (una sola vez, "Ahora no" la cierra) lo pregunta (`HojaPrimerPorque`).
+- **Tarjeta apretada**: en iPhones más bajos, si la tarea propuesta trae primer paso o pasos y su porqué, las medianas se retiran (`tarjetaApretada`). Foto: `Comparaciones/hoy-porque-largo-17pro.png`. Campo rápido desde xL, medianas desde xxL.
 - **Registro corto**: solo como opción para que Diaz elija (`-registroCorto YES`, foto `Comparaciones/registro-corto-opciones.jpg`). El registro real no cambió.
 - **Copia de seguridad**: la base de datos está en el contenedor del App Group (`.../AppGroup/.../Library/Application Support/default.store`), sin exclusión de copia: muy probablemente va en la copia de iCloud/Mac del iPhone (restaurar no está probado). Exportar se deja para después.
 - **No hecho esta vez (Fable)**: widget de pantalla bloqueada (necesita diseño elegido por Diaz), recompensas que cambian (toca la celebración de Lumi), modo acompañamiento (sin definir), próximo compromiso (agranda la tarjeta de Hoy).
@@ -162,7 +164,7 @@ Posicionamiento: "La única app para TDAH que elige la tarea que encaja con tu e
 Riesgos de rechazo: botón "Continuar con Apple" sin la capacidad (esconderlo en 1.0); frase de Safren en Cómo funciona y en la web suena a promesa médica (reescribir); que la clave local nunca deje fuera al revisor; textos en inglés de Face ID y voz marcados para revisar (`InfoPlist.xcstrings`); falta página de privacidad y de soporte con contacto; versión 0.1 → 1.0.
 
 ## Lista para subir a la App Store (lo que falta)
-- **Salud:** la app ya importa HealthKit y trae el texto `NSHealthShareUsageDescription`, pero sin la capacidad (apagada). Antes de enviar: confirmar que la revisión lo acepta así (o quitar el import) y que la página de privacidad lo menciona.
+- **Salud:** resuelto para la 1.0: HealthKit ya no se compila (condición `SALUD`) y no hay texto de permiso. Al encenderlo: capacidad, texto (es/en) y página de privacidad.
 1. **Cuenta Apple Developer de pago** (99 USD al año). Con el Personal Team gratis no se puede subir.
 2. **"Continuar con Apple"**: activar la capacidad Sign in with Apple con la cuenta de pago, o esconder ese botón antes de enviar. Si no funciona, Apple rechaza la app.
 3. **App Store Connect**: crear la app (nombre ZENO, si está libre), subtítulo, descripción en español e inglés, palabras clave, categoría (Productividad; evitar "Salud/Medicina" para no prometer tratamiento), clasificación por edad.

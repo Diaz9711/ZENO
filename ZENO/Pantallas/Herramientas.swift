@@ -133,7 +133,10 @@ enum DatosDeEjemplo {
             ("Leer diez páginas", .mediana, nil)
         ]
         for (titulo, tamano, paso) in pendientes {
-            contexto.insert(Tarea(titulo: titulo, tamano: tamano, primerPaso: paso))
+            let tarea = Tarea(titulo: titulo, tamano: tamano, primerPaso: paso)
+            // Un porqué largo de ejemplo en las dos primeras (para ver dos líneas en Hoy).
+            if tamano != .chica { tarea.porque = "Que mi jefa vea lo que sé hacer y me dé el proyecto nuevo" }
+            contexto.insert(tarea)
         }
 
         // Dos tareas ya hechas hoy, con su duración.
