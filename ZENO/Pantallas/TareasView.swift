@@ -981,17 +981,15 @@ private struct TareaTocable: View {
             }
             // El anzuelo de la persona viste la tarea (y cada paso): para qué le importa.
             if let anzuelo = tarea.anzuelo {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
                     EstrellitaDeCuatro()
-                        .fill(Lujo.oro)
-                        .frame(width: 10, height: 10)
-                        .shadow(color: Lujo.oro.opacity(0.6), radius: 4)
+                        .fill(Lujo.oro.opacity(0.85))
+                        .frame(width: 8, height: 8)
                     Text(verbatim: anzuelo)
-                        .font(.zenoTitulo(.body, .regular, cursiva: true))
-                        .foregroundStyle(Lujo.oro)
+                        .font(.zenoTitulo(.callout, .light, cursiva: true))
+                        .foregroundStyle(Lujo.oro.opacity(0.9))
                         .lineLimit(2)
                 }
-                .padding(.top, 2)
                 .accessibilityElement(children: .combine)
                 .accessibilityLabel(Text("Para qué: \(anzuelo)"))
             }
