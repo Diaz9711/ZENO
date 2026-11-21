@@ -89,6 +89,18 @@ Pasos siguientes, uno por uno (Diaz pidió paso a paso, "razona bien", usar a Fa
 5. "Más premium, que la app tenga vida": sin efectos nuevos hasta que lo de arriba esté aprobado.
 - **No tocar** la estrella ni la nebulosa por defecto ni sus colores (Diaz lo repitió).
 
+## Auditoría y mejoras (20 nov 2026, plan revisado con Fable) — HECHO, en el iPhone de Diaz
+- **Plan B de la base de datos** (`Modelos/Almacen.swift`): si no abre, aviso tranquilo `AvisoDeDatos` en vez de cerrarse en bucle; base en memoria aparte; Siri y el Terminé de la pantalla bloqueada se detienen. Prueba: `-fallarBaseDeDatos YES`.
+- **Letra grande en Hoy**: desde xxxL se retiran el campo rápido y las medianas; Hoy no pasa de xxxL (Tareas y Ajustes sí, se desplazan); la barra tiene tope xLarge. Foto: `Comparaciones/letra-grande-antes-ahora.jpg`.
+- **Para qué más visible**: al escribir, el título se vuelve "¿Para qué te importa?" (un toque); abierto la primera vez (`porquePrimeraVez`); también por fila en la vista previa de la captura (con revisión de crisis); más grande en la tarjeta de Hoy.
+- **Chispa**: con energía media/alta menciona el porqué 3 de 4 turnos (baja: 1 de 3), 7 frases; al terminar una tarea con porqué, referencia suave 1 de 2 (`Momento.celebrando(anzuelo:)`).
+- **Salud fuera de la 1.0**: HealthKit solo compila con la condición `SALUD`; sin `NSHealthShareUsageDescription` (comprobado con `otool -L` en Release).
+- **Privacidad dentro de la app** (`Pantallas/Privacidad.swift`, Ajustes → Tus datos → Privacidad). `Web/privacidad.html` ya menciona la IA del iPhone (sin publicar).
+- **Vuelta amable**: tras 3+ días sin abrir, Chispa recibe sin repaso y se propone algo pequeño hasta terminar la primera cosa del día (`MotorDeEnergia.deVuelta`).
+- **Registro corto**: solo como opción para que Diaz elija (`-registroCorto YES`, foto `Comparaciones/registro-corto-opciones.jpg`). El registro real no cambió.
+- **Copia de seguridad**: la base de datos está en el contenedor del App Group (`.../AppGroup/.../Library/Application Support/default.store`), sin exclusión de copia: muy probablemente va en la copia de iCloud/Mac del iPhone (restaurar no está probado). Exportar se deja para después.
+- **No hecho esta vez (Fable)**: widget de pantalla bloqueada (necesita diseño elegido por Diaz), recompensas que cambian (toca la celebración de Lumi), modo acompañamiento (sin definir), próximo compromiso (agranda la tarjeta de Hoy).
+
 ## Compañero TDAH (20 nov 2026, pedido de Diaz con un texto de 9 puntos; plan revisado con Fable) — HECHO, en su iPhone
 1. **"¿Para qué te importa?"** (opcional): `Tarea.porque` (nuevo, con valor por defecto). Se escribe con un toque al crear (botoncito bajo el campo) o en el editor. Viste la tarjeta de Hoy (línea dorada en cursiva con estrellita), Chispa lo menciona (frases a mano, 2 de cada 3 turnos), con energía media/alta va primero dentro del mismo tamaño, y Divídemela lo usa. Si suena a crisis no se repite (`Tarea.anzuelo`).
 2. **Captura por voz**: ya no se parte por puntos ni comas. El fallo real era `validarCaptura` ("Llamar" vs "llama", "5" vs "cinco"); ahora acepta la misma raíz y cifras. Sin IA solo separa por "y después / y luego / and then", y la hora va solo con su tarea. Probado en el iPhone con IA: «llama al dentista mañana a las cinco y después revisa el correo» → 2 tareas, la primera mañana 17:00.

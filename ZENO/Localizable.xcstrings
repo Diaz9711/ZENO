@@ -3971,6 +3971,90 @@
           }
         }
       }
+    },
+    "Así es tu *día*" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is your *day*"
+          }
+        }
+      }
+    },
+    "Toca lo que más se parezca. Si no sabes, déjalo así." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap what fits best. If you’re not sure, leave it as is."
+          }
+        }
+      }
+    },
+    "Despierto" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I wake up"
+          }
+        }
+      }
+    },
+    "Más energía" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most energy"
+          }
+        }
+      }
+    },
+    "Me apago" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I wind down"
+          }
+        }
+      }
+    },
+    "Mediodía" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Midday"
+          }
+        }
+      }
+    },
+    "5:30" : {
+      "shouldTranslate" : false
+    },
+    "7:00" : {
+      "shouldTranslate" : false
+    },
+    "9:00" : {
+      "shouldTranslate" : false
+    },
+    "11:00" : {
+      "shouldTranslate" : false
+    },
+    "20:30" : {
+      "shouldTranslate" : false
+    },
+    "22:00" : {
+      "shouldTranslate" : false
+    },
+    "0:00" : {
+      "shouldTranslate" : false
+    },
+    "2:00" : {
+      "shouldTranslate" : false
     }
   },
   "version" : "1.0"

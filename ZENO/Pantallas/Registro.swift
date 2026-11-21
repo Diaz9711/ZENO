@@ -100,17 +100,37 @@ struct RegistroView: View {
             .disabled(paso == .forma)
             .accessibilityLabel(Text("Atrás"))
 
-            ProgresoDeRegistro(actual: numeroDePaso, total: 6)
+            ProgresoDeRegistro(actual: numeroDePaso, total: totalDePasos)
                 .frame(height: 3)
-                .accessibilityLabel(Text("Paso \(numeroDePaso) de 6"))
+                .accessibilityLabel(Text("Paso \(numeroDePaso) de \(totalDePasos)"))
 
             Color.clear.frame(width: 44, height: 44)
         }
         .padding(.horizontal, 12)
     }
 
+    /// Opción de registro corto (auditoría, solo para comparar; Diaz elige): las tres horas en una pantalla.
+    /// `-registroCorto YES`. El registro de siempre no cambia.
+    private var corto: Bool {
+        #if DEBUG
+        return UserDefaults.standard.bool(forKey: "registroCorto")
+        #else
+        return false
+        #endif
+    }
+    private var totalDePasos: Int { corto ? 4 : 6 }
+
     private var numeroDePaso: Int {
-        switch paso {
+        if corto {
+            switch paso {
+            case .bienvenida: return 0
+            case .nombre: return 1
+            case .fecha: return 2
+            case .despertar, .pico, .apagado: return 3
+            case .nacimiento, .forma: return 4
+            }
+        }
+        return switch paso {
         case .bienvenida: 0
         case .nombre: 1
         case .fecha: 2
@@ -139,6 +159,7 @@ struct RegistroView: View {
                            })
         case .nombre: nombre
         case .fecha: fecha
+        case .despertar where corto: tuDia
         case .despertar:
             pregunta("¿A qué hora sueles *despertar*?",
                      razon: "Con esto ZENO empieza a entender tu ritmo de energía.",
@@ -172,7 +193,7 @@ struct RegistroView: View {
                                            @ViewBuilder contenido: () -> Contenido,
                                            @ViewBuilder pie: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(verbatim: String(format: "%02d / %02d", numeroDePaso, 6))
+            Text(verbatim: String(format: "%02d / %02d", numeroDePaso, totalDePasos))
                 .font(.lujoEtiqueta(.caption2, .medium))
                 .versalitas(2.5)
                 .foregroundStyle(Lujo.oro)
@@ -272,6 +293,47 @@ struct RegistroView: View {
             }
         } pie: {
             Color.clear.frame(height: 50)   // el botón no hace falta: elegir ya avanza
+        }
+    }
+
+    /// Registro corto: despertar, energía y apagado juntos, ya marcados con lo más común. Un toque basta.
+    private var tuDia: some View {
+        pantalla("Así es tu *día*", razon: "Toca lo que más se parezca. Si no sabes, déjalo así.") {
+            VStack(alignment: .leading, spacing: 22) {
+                filaDeHoras("Despierto", valor: borrador.horaDespertar,
+                            opciones: [("5:30", 5.5), ("7:00", 7), ("9:00", 9), ("11:00", 11)]) { borrador.horaDespertar = $0 }
+                filaDeHoras("Más energía", valor: borrador.horaPico,
+                            opciones: [("Mañana", 10), ("Mediodía", 13), ("Tarde", 17), ("Noche", 21)]) { borrador.horaPico = $0 }
+                filaDeHoras("Me apago", valor: borrador.horaApagado,
+                            opciones: [("20:30", 20.5), ("22:00", 22), ("0:00", 0), ("2:00", 2)]) { borrador.horaApagado = $0 }
+            }
+        } pie: {
+            BotonZeno("Continuar") { ir(a: .nacimiento) }
+        }
+    }
+
+    private func filaDeHoras(_ titulo: LocalizedStringKey, valor: Double, opciones: [(LocalizedStringKey, Double)],
+                             elegir: @escaping (Double) -> Void) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            EtiquetaLujo(titulo)
+            HStack(spacing: 8) {
+                ForEach(Array(opciones.enumerated()), id: \.offset) { _, opcion in
+                    let elegida = valor == opcion.1
+                    Button { withAnimation(Lujo.curva(0.25)) { elegir(opcion.1) } } label: {
+                        Text(opcion.0)
+                            .font(.zenoTexto(.subheadline, elegida ? .semibold : .regular))
+                            .foregroundStyle(elegida ? Lujo.oro : Lujo.marfil)
+                            .lineLimit(1).minimumScaleFactor(0.8)
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                            .background(RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(elegida ? Lujo.oro.opacity(0.10) : Lujo.marfil.opacity(0.04)))
+                            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .strokeBorder(elegida ? Lujo.oro.opacity(0.9) : Lujo.marfil.opacity(0.12), lineWidth: 0.75))
+                    }
+                    .buttonStyle(EstiloLujo(conReflejo: false))
+                    .sensoryFeedback(.selection, trigger: elegida)
+                }
+            }
         }
     }
 
