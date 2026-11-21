@@ -1,8 +1,7 @@
 import SwiftUI
 
-// Opciones de diseño para preguntar las tres horas del día en una sola pantalla (Diaz, 21 nov 2026:
-// "nada genérico, natural, fluido y con calidad"). Solo para comparar: `-disenoDia 1|2|3`.
-// El registro de siempre (tres preguntas) no cambia hasta que Diaz elija.
+// Las tres horas del día en una sola pantalla (Diaz, 21 nov 2026: "nada genérico, natural, fluido y con
+// calidad"). Diaz eligió la 1, Curva viva: es la del registro. Las otras quedan para pruebas (`-disenoDia 2|3`).
 // 1 · Curva viva: su curva de energía real (la misma cuenta que usa ZENO) se transforma al tocar.
 // 2 · Esfera: un reloj de 24 horas con su día encendido; se gira tocando o arrastrando el aro.
 // 3 · Frase: una frase con tres palabras doradas que ruedan al tocarlas.

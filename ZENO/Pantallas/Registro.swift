@@ -109,14 +109,14 @@ struct RegistroView: View {
         .padding(.horizontal, 12)
     }
 
-    /// Diseños a comparar para las tres horas en una sola pantalla (Diaz, 21 nov 2026), solo en pruebas:
-    /// `-disenoDia 1` curva viva, `2` esfera, `3` frase. Sin el argumento, el registro de siempre.
+    /// Las tres horas en una sola pantalla: Diaz eligió la 1, "Curva viva" (21 nov 2026). En pruebas,
+    /// `-disenoDia 2` esfera, `3` frase y `0` las tres preguntas de antes.
     private var disenoDia: Int {
         #if DEBUG
-        return UserDefaults.standard.integer(forKey: "disenoDia")
-        #else
-        return 0
+        if let n = UserDefaults.standard.object(forKey: "disenoDia") as? Int { return n }
+        if let t = UserDefaults.standard.string(forKey: "disenoDia"), let n = Int(t) { return n }
         #endif
+        return 1
     }
     private var corto: Bool { disenoDia != 0 }
     private var totalDePasos: Int { corto ? 4 : 6 }

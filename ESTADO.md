@@ -99,7 +99,7 @@ Pasos siguientes, uno por uno (Diaz pidió paso a paso, "razona bien", usar a Fa
 - **Vuelta amable**: tras 3+ días sin abrir, Chispa recibe sin repaso y se propone algo pequeño hasta terminar la primera cosa del día (`MotorDeEnergia.deVuelta`).
 - **Primera tarea**: al guardar la primera tarea de su vida sin porqué, una hoja (una sola vez, "Ahora no" la cierra) lo pregunta (`HojaPrimerPorque`).
 - **Tarjeta apretada**: en iPhones más bajos, si la tarea propuesta trae primer paso o pasos y su porqué, las medianas se retiran (`tarjetaApretada`). Foto: `Comparaciones/hoy-porque-largo-17pro.png`. Campo rápido desde xL, medianas desde xxL.
-- **Registro corto**: solo como opción para que Diaz elija (`-registroCorto YES`, foto `Comparaciones/registro-corto-opciones.jpg`). El registro real no cambió.
+- **Registro**: Diaz rechazó filas y botones ("genéricos") y eligió la **1 · Curva viva** de tres diseños nuevos (`Comparaciones/registro-tres-disenos.jpg` y videos `registro-opcion-*.mp4`). Ahora el registro tiene 4 pasos.
 - **Copia de seguridad**: la base de datos está en el contenedor del App Group (`.../AppGroup/.../Library/Application Support/default.store`), sin exclusión de copia: muy probablemente va en la copia de iCloud/Mac del iPhone (restaurar no está probado). Exportar se deja para después.
 - **No hecho esta vez (Fable)**: widget de pantalla bloqueada (necesita diseño elegido por Diaz), recompensas que cambian (toca la celebración de Lumi), modo acompañamiento (sin definir), próximo compromiso (agranda la tarjeta de Hoy).
 
