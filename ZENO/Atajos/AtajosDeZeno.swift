@@ -18,6 +18,7 @@ struct AgregarTareaIntent: AppIntent {
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let texto = tarea.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !texto.isEmpty else { throw $tarea.needsValueError(IntentDialog("¿Qué quieres hacer?")) }
+        guard !Almacen.falla else { return .result(dialog: IntentDialog("Abre ZENO, por favor.")) }
         let contexto = Almacen.contenedor.mainContext
         guard ((try? contexto.fetchCount(FetchDescriptor<Persona>())) ?? 0) > 0 else {
             return .result(dialog: IntentDialog("Primero abre ZENO y conoce a Lumi."))

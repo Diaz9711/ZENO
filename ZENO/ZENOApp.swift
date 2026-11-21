@@ -40,7 +40,9 @@ struct RaizDeZeno: View {
     @AppStorage(Idioma.clave) private var idioma = Idioma.actual.rawValue
 
     var body: some View {
-        UniversoView()
+        Group {
+            if Almacen.falla { AvisoDeDatos() } else { UniversoView() }
+        }
             .environment(\.locale, (Idioma(rawValue: idioma) ?? .espanol).locale)
             .preferredColorScheme(.dark)
     }

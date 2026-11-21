@@ -3691,6 +3691,36 @@
           }
         }
       }
+    },
+    "Tus datos están a salvo" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your data is safe"
+          }
+        }
+      }
+    },
+    "ZENO no pudo abrirlos esta vez. No se borró nada: siguen en tu iPhone. Cierra ZENO del todo y vuelve a abrirla. Si sigue igual, espera a la próxima actualización." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ZENO couldn’t open it this time. Nothing was deleted: it’s still on your iPhone. Close ZENO completely and open it again. If nothing changes, wait for the next update."
+          }
+        }
+      }
+    },
+    "Abre ZENO, por favor." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please open ZENO."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

@@ -38,6 +38,7 @@ enum AccionesDeTarea {
 
     /// Desde fuera de la app (pantalla bloqueada): termina la tarea que está en marcha.
     static func terminarLaEnCurso() async {
+        guard !Almacen.falla else { return }
         let contexto = Almacen.contenedor.mainContext
         let pendientes = (try? contexto.fetch(FetchDescriptor<Tarea>(predicate: #Predicate { $0.terminadaEn == nil }))) ?? []
         var terminoLaTarea = true
