@@ -33,6 +33,9 @@ final class Tarea {
     var pasosCrudo: String? = nil
     /// El paso en el que va (0 = el primero).
     var pasoActual: Int = 0
+    /// "¿Para qué te importa?" (opcional, una línea). El TDAH se mueve por interés: este anzuelo
+    /// acompaña a la tarea en Hoy, en las frases de Chispa y al dividirla. nil = no lo dijo.
+    var porque: String? = nil
 
     @Relationship(deleteRule: .nullify, inverse: \EventoDeEnergia.tarea)
     var eventos: [EventoDeEnergia] = []
@@ -69,4 +72,11 @@ final class Tarea {
 
     /// Lo que se le muestra a la persona: el paso de ahora, el primer paso o el título.
     var textoVisible: String { pasoDeAhora ?? primerPaso ?? titulo }
+
+    /// El porqué, si lo dijo y no suena a crisis (en ese caso ZENO no lo repite).
+    var anzuelo: String? {
+        guard let p = porque?.trimmingCharacters(in: .whitespacesAndNewlines), !p.isEmpty else { return nil }
+        if Cuidado.suenaACrisis(p) { return nil }
+        return p
+    }
 }

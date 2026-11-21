@@ -163,10 +163,12 @@ struct EditorDeTarea: View {
     @Environment(\.modelContext) private var contexto
     @State private var titulo = ""
     @State private var paso = ""
+    @State private var porque = ""
     @State private var plan = BorradorDePlan()
     @State private var guardados = 0
     @FocusState private var enTitulo: Bool
     @FocusState private var enPaso: Bool
+    @FocusState private var enPorque: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 30) {
@@ -193,6 +195,13 @@ struct EditorDeTarea: View {
                 .aparece(2)
             }
 
+            // El anzuelo (opcional): lo que le llama de esta tarea. Una línea, nunca obligatorio.
+            VStack(alignment: .leading, spacing: 10) {
+                EtiquetaLujo("Para qué te importa")
+                CampoTextoLujo(texto: $porque, sugerencia: "Lo que te llama de esto (opcional)", enfocado: $enPorque)
+            }
+            .aparece(2)
+
             PlanDeTareaView(plan: $plan)
                 .aparece(3)
 
@@ -205,7 +214,7 @@ struct EditorDeTarea: View {
             .aparece(4)
 
             BotonTerciarioLujo(titulo: "Borrar esta tarea", icono: .papelera, destructivo: true) {
-                enTitulo = false; enPaso = false
+                enTitulo = false; enPaso = false; enPorque = false
                 Hojas.compartidas.mostrar { ConfirmarBorrado(alBorrar: borrar) }
             }
             .frame(maxWidth: .infinity)
@@ -217,6 +226,7 @@ struct EditorDeTarea: View {
         .onAppear {
             titulo = tarea.titulo
             paso = tarea.primerPaso ?? ""
+            porque = tarea.porque ?? ""
             plan = BorradorDePlan(de: tarea)
         }
     }
@@ -226,15 +236,23 @@ struct EditorDeTarea: View {
     private func guardar() {
         let nuevo = limpio(titulo)
         guard !nuevo.isEmpty else { return }
-        enTitulo = false; enPaso = false
+        enTitulo = false; enPaso = false; enPorque = false
         if nuevo != tarea.titulo {
             tarea.titulo = nuevo
             tarea.tamano = ClasificadorDeTamano.tamano(de: nuevo)
         }
         let p = limpio(paso)
         tarea.primerPaso = p.isEmpty ? nil : p
+        let q = String(limpio(porque).prefix(120))
+        tarea.porque = q.isEmpty ? nil : q
         plan.aplicar(a: tarea)
         guardados += 1
+        if Cuidado.suenaACrisis(q) {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(0.4))
+                Hojas.compartidas.mostrar { VistaDeCuidado() }
+            }
+        }
         Task { await AvisosDeTareas.sincronizar(contexto) }
         alCerrar()
     }

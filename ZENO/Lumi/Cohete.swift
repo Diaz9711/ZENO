@@ -16,7 +16,7 @@ enum Cohete {
     static let nombre = "Chispa"
 
     enum Momento {
-        case tarea(enMarcha: Bool, primerPaso: Bool, minutosReales: Int?, enRacha: Bool)
+        case tarea(enMarcha: Bool, primerPaso: Bool, minutosReales: Int?, enRacha: Bool, anzuelo: String? = nil)
         case descanso
         case masTarde(vuelveA: Date?)
         case nada(hechasHoy: Int)
@@ -32,7 +32,19 @@ enum Cohete {
         switch momento {
         case .celebrando:
             return variada(.celebracion)
-        case .tarea(let enMarcha, let primerPaso, let minutos, let enRacha):
+        case .tarea(let enMarcha, let primerPaso, let minutos, let enRacha, let anzuelo):
+            // El porqué de la persona (escrito a mano: la IA nunca lo reescribe). Dos de cada tres turnos,
+            // para que no canse.
+            let vuelta = turno.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0xFFFF }
+            if let a = anzuelo, vuelta % 3 != 2 {
+                if enMarcha { return Idioma.texto("Vas por «\(a)». Sigue a tu ritmo.") }
+                if !enRacha {
+                    switch vuelta % 3 {
+                    case 0: return Idioma.texto("Esto es para «\(a)». Un paso y ya.")
+                    default: return Idioma.texto("Por «\(a)» vale la pena un ratito.")
+                    }
+                }
+            }
             if enMarcha { return variada(.enMarcha) }
             if enRacha { return Idioma.texto("¡Qué buen ritmo! Una más si te apetece, sin prisa.") }
             if primerPaso { return Idioma.texto("Solo dos minutos. Yo te acompaño.") }

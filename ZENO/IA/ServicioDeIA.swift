@@ -11,7 +11,7 @@ import FoundationModels
 /// Lo que se le pide a un motor para dividir una tarea.
 struct PedidoDeDivision: Equatable {
     var titulo: String
-    /// El porqué de la tarea. ZENO no lo pregunta todavía: va vacío.
+    /// El porqué de la tarea ("¿Para qué te importa?"), vacío si no lo dijo.
     var porque: String = ""
     var tamano: TamanoDeTarea
     var energia: NivelDeEnergia
@@ -50,12 +50,28 @@ struct MotorSimple: MotorDeIA {
 
     func dividir(_ p: PedidoDeDivision) async throws -> [String] { Self.plantilla(p) }
 
-    /// Sin IA: cada frase (separada por la puntuación del dictado) es una tarea de esfuerzo medio.
+    /// Sin IA: nunca se parte por la puntuación (el dictado la pone al azar y salían tareas basura).
+    /// Solo se separa donde la persona encadenó otra acción ("y después", "y luego", "and then");
+    /// si no, todo lo dicho es una sola tarea. El tamaño lo pone el clasificador de siempre.
     func capturar(_ texto: String, idioma: Idioma) async throws -> [(titulo: String, tamano: TamanoDeTarea, cuando: String)] {
-        texto.components(separatedBy: CharacterSet(charactersIn: ".!?;\n"))
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines.union(CharacterSet(charactersIn: ","))) }
+        Self.partirPorConectores(texto).map { (titulo: $0, tamano: ClasificadorDeTamano.tamano(de: $0), cuando: $0) }
+    }
+
+    /// Los conectores que de verdad separan una acción de otra.
+    static let conectores = ["y después", "y despues", "y luego", "y también", "y tambien", "y además", "y ademas",
+                             "después de eso", "and then", "and after that", "and also"]
+
+    static func partirPorConectores(_ texto: String) -> [String] {
+        var partes = [texto]
+        for conector in conectores {
+            partes = partes.flatMap { $0.components(separatedBy: conector) }
+            partes = partes.flatMap { $0.components(separatedBy: conector.prefix(1).uppercased() + conector.dropFirst()) }
+        }
+        let limpias = partes
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines.union(CharacterSet(charactersIn: ".,;!?"))) }
             .filter { !$0.isEmpty }
-            .map { (titulo: $0, tamano: .mediana, cuando: $0) }
+        // Cada parte con su mayúscula inicial, como una tarea escrita.
+        return limpias.map { $0.prefix(1).uppercased() + $0.dropFirst() }
     }
 
     /// Sin IA: las frases escritas a mano (el banco).
@@ -162,8 +178,8 @@ struct MotorLocal: MotorDeIA {
         case .grande: es ? "grande" : "large"
         }
         let instrucciones = es
-            ? "Ayudas a personas con TDAH a empezar tareas. Divides una tarea en pasos muy concretos de unos 5 minutos. El primer paso es ridículamente fácil (por ejemplo: «Abre el documento»). Sin culpa, sin presión, sin consejos médicos. Responde siempre en español."
-            : "You help people with ADHD start tasks. You split a task into very concrete steps of about 5 minutes. The first step is ridiculously easy (for example: “Open the document”). No guilt, no pressure, no medical advice. Always answer in English."
+            ? "Ayudas a personas con TDAH a empezar tareas. Divides una tarea en pasos muy concretos de unos 5 minutos. El primer paso es ridículamente fácil (por ejemplo: «Abre el documento»). Si la persona dijo para qué le importa, usa ese interés para que los pasos den ganas (sin repetirlo en cada paso). Sin culpa, sin presión, sin consejos médicos. Responde siempre en español."
+            : "You help people with ADHD start tasks. You split a task into very concrete steps of about 5 minutes. The first step is ridiculously easy (for example: “Open the document”). If the person said why it matters to them, use that interest to make the steps appealing (without repeating it in every step). No guilt, no pressure, no medical advice. Always answer in English."
         let pedido = es
             ? "Tarea: \(p.titulo)\nPor qué: \(p.porque.isEmpty ? "(no lo dijo)" : p.porque)\nEsfuerzo: \(esfuerzo)\nEnergía de ahora: \(energia)"
             : "Task: \(p.titulo)\nWhy: \(p.porque.isEmpty ? "(not given)" : p.porque)\nEffort: \(esfuerzo)\nCurrent energy: \(energia)"
@@ -177,8 +193,8 @@ struct MotorLocal: MotorDeIA {
         guard estado.disponible else { throw ErrorDeIA.noDisponible }
         let es = idioma == .espanol
         let instrucciones = es
-            ? "Conviertes lo que una persona dijo en voz alta en una lista de tareas. Solo tareas que dijo de verdad, con sus palabras. No inventes tareas, fechas ni detalles. Responde en español."
-            : "You turn what a person said out loud into a list of tasks. Only tasks they really said, in their words. Don't invent tasks, dates or details. Answer in English."
+            ? "Conviertes lo que una persona dijo en voz alta en una lista de tareas. Una tarea es una acción con su objeto; el día y la hora van con su tarea, no son otra tarea. No separes por comas ni puntos: el dictado los pone al azar. Ejemplo: «llama al dentista mañana a las cinco y después revisa el correo» son dos tareas: «Llamar al dentista» (cuándo: «mañana a las cinco») y «Revisar el correo». Solo tareas que dijo de verdad, con sus palabras. No inventes tareas, fechas ni detalles. Responde en español."
+            : "You turn what a person said out loud into a list of tasks. A task is one action with its object; the day and time belong to their task, they are not a task. Don't split on commas or periods: dictation adds them at random. Example: “call the dentist tomorrow at five and then check my email” is two tasks: “Call the dentist” (when: “tomorrow at five”) and “Check my email”. Only tasks they really said, in their words. Don't invent tasks, dates or details. Answer in English."
         let sesion = LanguageModelSession(instructions: instrucciones)
         let r = try await sesion.respond(to: (es ? "Lo que dijo: " : "What they said: ") + texto,
                                          generating: TareasDichas.self, options: GenerationOptions(temperature: 0.2))
@@ -325,11 +341,20 @@ enum PruebaDeIA {
             let p = PedidoDeDivision(titulo: titulo, tamano: tamano, energia: energia, idioma: .espanol)
             ok(ServicioDeIA.validarPasos(MotorSimple.plantilla(p)) != nil, "plantilla válida: \(titulo)")
         }
-        // Captura (sin IA): una tarea por frase; con IA, nada que no se haya dicho
+        // Captura (sin IA): nunca se parte por puntos ni comas; solo por "y después", "y luego"...
         let dicho = "Llamar al dentista mañana a las 5. Comprar pan. Terminar el informe del trabajo."
         let sinIA = ServicioDeIA.validarCaptura((try? await MotorSimple().capturar(dicho, idioma: .espanol)) ?? [], dicho: dicho, exigirPalabras: false) ?? []
-        ok(sinIA.count == 3, "captura sin IA: 3 frases → 3 tareas")
+        ok(sinIA.count == 1, "captura sin IA: los puntos ya no parten la frase")
+        let dentista = "llama al dentista mañana a las cinco y después revisa el correo"
+        let sinIA2 = ServicioDeIA.validarCaptura((try? await MotorSimple().capturar(dentista, idioma: .espanol)) ?? [], dicho: dentista, exigirPalabras: false) ?? []
+        ok(sinIA2.map(\.titulo) == ["Llama al dentista mañana a las cinco", "Revisa el correo"], "captura sin IA: «y después» separa dos tareas")
+        ok(sinIA2.first?.fecha != nil && sinIA2.last?.fecha == nil, "captura sin IA: la hora solo va con su tarea")
         ok(ServicioDeIA.validarCaptura([(titulo: "Pasear al perro", tamano: .chica, cuando: "")], dicho: dicho) == nil, "captura rechaza una tarea inventada")
+        let conIA = ServicioDeIA.validarCaptura([(titulo: "Llamar al dentista", tamano: .chica, cuando: "mañana a las 5"),
+                                                 (titulo: "Revisar el correo", tamano: .chica, cuando: "")], dicho: dentista) ?? []
+        ok(conIA.count == 2, "captura con IA: «Llamar» vale aunque dijo «llama»")
+        ok(conIA.first?.fecha != nil, "captura con IA: «5» vale aunque dijo «cinco»")
+        ok(ServicioDeIA.numerosComoCifras("a las cinco, la dosis") == "a las 5, la dosis", "cifras solo en horas")
         ok(ServicioDeIA.fechaEn("mañana a las 5") != nil, "fecha en español: «mañana a las 5»")
         ok(ServicioDeIA.fechaEn("tomorrow at 5pm") != nil, "fecha en inglés: «tomorrow at 5pm»")
         // Frases
@@ -347,7 +372,8 @@ enum PruebaDeIA {
             ok((3...7).contains(d.pasos.count), "dividir «\(titulo)» con \(d.motor)")
             d.pasos.enumerated().forEach { print("PRUEBA-IA   \($0.offset + 1). \($0.element)") }
         }
-        for dicho in ["Mañana tengo que llamar al dentista a las cinco, comprar pan y terminar el informe del trabajo",
+        for dicho in ["llama al dentista mañana a las cinco y después revisa el correo",
+                      "Mañana tengo que llamar al dentista a las cinco, comprar pan y terminar el informe del trabajo",
                       "I need to email my boss, pick up the kids at four and clean the kitchen tonight"] {
             let c = await servicio.capturar(dicho)
             ok(!c.tareas.isEmpty, "capturar con \(c.motor)")

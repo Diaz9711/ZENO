@@ -46,6 +46,10 @@ struct TareaDelMomentoView: View {
     @State private var modo = Modo.ver
     @State private var frase = ""
     @State private var primerPaso = ""
+    /// "¿Para qué te importa?" (opcional): se abre con un toque, nunca estorba.
+    @State private var porque = ""
+    @State private var conPorque = false
+    @FocusState private var escribiendoPorque: Bool
     @State private var quiereAlgoIgual = false
     @State private var plan = BorradorDePlan()
     @State private var dictado = Dictado()
@@ -177,7 +181,7 @@ struct TareaDelMomentoView: View {
             let minutos = tarea.primerPaso == nil
                 ? Aprendizaje.minutosReales(tarea.tamano, eventos: eventos).map { Int($0.rounded()) } : nil
             return .tarea(enMarcha: enCurso == tarea.persistentModelID, primerPaso: tarea.primerPaso != nil,
-                          minutosReales: minutos, enRacha: enRacha && enCurso == nil)
+                          minutosReales: minutos, enRacha: enRacha && enCurso == nil, anzuelo: tarea.anzuelo)
         case .descanso: return .descanso
         case .masTarde: return .masTarde(vuelveA: vuelveA)
         case .nadaPendiente: return .nada(hechasHoy: hechasHoy.count)
@@ -462,6 +466,7 @@ struct TareaDelMomentoView: View {
                 EtiquetaDePlanBorrador(plan: plan)
                     .transition(.opacity)
             }
+            campoDelPorque
             Text(dictado.aviso ?? Idioma.texto("Toca el micrófono para dictarla."))
                 .font(.zenoTexto(.caption))
                 .foregroundStyle(Lujo.marfilSecundario)
@@ -469,6 +474,36 @@ struct TareaDelMomentoView: View {
                 .padding(.horizontal, 32)
         }
         .padding(.horizontal, Lujo.margen)
+    }
+
+    /// El anzuelo de la tarea, cerrado hasta que la persona lo pide. Una línea, opcional.
+    @ViewBuilder
+    private var campoDelPorque: some View {
+        if conPorque {
+            TextField("", text: $porque, prompt: Text("¿Para qué te importa? (opcional)").foregroundStyle(Lujo.marfil.opacity(0.3)))
+                .font(.zenoTexto(.callout))
+                .foregroundStyle(Lujo.marfil)
+                .tint(Lujo.oro)
+                .multilineTextAlignment(.center)
+                .submitLabel(.done)
+                .focused($escribiendoPorque)
+                .onSubmit { guardarFrase() }
+                .padding(.vertical, 10)
+                .padding(.horizontal, 16)
+                .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Lujo.marfil.opacity(0.03)))
+                .overlay(alignment: .bottom) {
+                    Rectangle().fill(Lujo.oro.opacity(escribiendoPorque ? 0.7 : 0.12)).frame(height: 0.75)
+                        .animation(Lujo.curva(), value: escribiendoPorque)
+                }
+                .transition(.opacity.combined(with: .offset(y: -6)))
+        } else {
+            BotonTerciarioLujo(titulo: "¿Para qué te importa?", icono: .mas) {
+                toques += 1
+                withAnimation(Lujo.curva()) { conPorque = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { escribiendoPorque = true }
+            }
+            .transition(.opacity)
+        }
     }
 
     private var preguntaDelPrimerPaso: some View {
@@ -569,7 +604,9 @@ struct TareaDelMomentoView: View {
         }
         Task { @MainActor in
             let captura = await ServicioDeIA.compartido.capturar(dicho)
-            guard captura.tareas.count > 1, modo == .agregar else { return }
+            // Varias tareas, o una con su día y hora: vista previa antes de guardar.
+            let conFecha = captura.tareas.count == 1 && captura.tareas[0].fecha != nil
+            guard captura.tareas.count > 1 || conFecha, modo == .agregar else { return }
             escribiendo = false
             Hojas.compartidas.mostrar {
                 HojaCaptura(tareas: captura.tareas, conIA: !captura.deRespaldo) {
@@ -591,6 +628,8 @@ struct TareaDelMomentoView: View {
         frase = ""
         plan = BorradorDePlan()
         primerPaso = ""
+        porque = ""
+        conPorque = false
         dictado.aviso = nil
         withAnimation(Ritmo.contenido) { modo = .agregar }
         enfocarPronto()
@@ -607,6 +646,7 @@ struct TareaDelMomentoView: View {
     private func cerrarAgregar() {
         toques += 1
         escribiendo = false
+        escribiendoPorque = false
         plan = BorradorDePlan()
         withAnimation(Ritmo.contenido) { modo = .ver }
     }
@@ -632,6 +672,8 @@ struct TareaDelMomentoView: View {
         let tarea = Tarea(titulo: titulo,
                           tamano: ClasificadorDeTamano.tamano(de: titulo),
                           primerPaso: conPaso && !paso.isEmpty ? paso : nil)
+        let anzuelo = String(limpio(porque).prefix(120))
+        tarea.porque = anzuelo.isEmpty ? nil : anzuelo
         contexto.insert(tarea)
         plan.aplicar(a: tarea)
         plan = BorradorDePlan()
@@ -640,7 +682,16 @@ struct TareaDelMomentoView: View {
         escribiendo = false
         frase = ""
         primerPaso = ""
+        porque = ""
+        conPorque = false
+        escribiendoPorque = false
         withAnimation(Ritmo.contenido) { modo = .ver }
+        if Cuidado.suenaACrisis(anzuelo) {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(0.4))
+                Hojas.compartidas.mostrar { VistaDeCuidado() }
+            }
+        }
         return tarea
     }
 
@@ -805,6 +856,20 @@ private struct TareaTocable: View {
                     .font(.zenoTexto(.footnote))
                     .foregroundStyle(Lujo.marfilSecundario)
             }
+            // El anzuelo de la persona viste la tarea (y cada paso): para qué le importa.
+            if let anzuelo = tarea.anzuelo {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    EstrellitaDeCuatro()
+                        .fill(Lujo.oro.opacity(0.85))
+                        .frame(width: 8, height: 8)
+                    Text(verbatim: anzuelo)
+                        .font(.zenoTitulo(.callout, .light, cursiva: true))
+                        .foregroundStyle(Lujo.oro.opacity(0.9))
+                        .lineLimit(2)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(Text("Para qué: \(anzuelo)"))
+            }
         }
         .padding(.vertical, 4)
         // Sin empezar, la tarea respira una luz dorada: "empieza". Al mantenerla, se enciende.
@@ -838,6 +903,7 @@ final class MemoriaDeEleccion {
             h.combine(t.persistentModelID)
             h.combine(t.textoVisible)
             h.combine(t.tamanoCrudo)
+            h.combine(t.porque)
             h.combine(t.fechaPlaneada)
             h.combine(t.empezadaEn)
         }

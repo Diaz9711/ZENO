@@ -3461,6 +3461,86 @@
           }
         }
       }
+    },
+    "Para qué te importa" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Why it matters to you"
+          }
+        }
+      }
+    },
+    "Lo que te llama de esto (opcional)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What draws you to it (optional)"
+          }
+        }
+      }
+    },
+    "¿Para qué te importa? (opcional)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Why does it matter to you? (optional)"
+          }
+        }
+      }
+    },
+    "¿Para qué te importa?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Why does it matter to you?"
+          }
+        }
+      }
+    },
+    "Para qué: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Why: %@"
+          }
+        }
+      }
+    },
+    "Vas por «%@». Sigue a tu ritmo." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’re doing it for “%@”. Keep your own pace."
+          }
+        }
+      }
+    },
+    "Esto es para «%@». Un paso y ya." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is for “%@”. One step, that’s all."
+          }
+        }
+      }
+    },
+    "Por «%@» vale la pena un ratito." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For “%@”, a little while is worth it."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

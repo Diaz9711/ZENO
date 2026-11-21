@@ -153,9 +153,14 @@ enum MotorDeEnergia {
 
         // Lo aprendido: lo que suele posponer a esta hora pasa al final de la fila.
         let franja = calendario.component(.hour, from: ahora)
+        // Con energía media o alta, dentro del mismo tamaño va primero la que tiene un porqué:
+        // el TDAH arranca por interés, no por importancia. Con energía baja no cambia nada.
+        let conInteres = nivel(puntaje) != .baja
         func primera(_ tamanos: TamanoDeTarea...) -> Tarea? {
             for tamano in Aprendizaje.ordenar(tamanos, franja: franja, eventos: eventos, ahora: ahora) {
-                if let tarea = disponibles.first(where: { $0.tamano == tamano }) { return tarea }
+                let delTamano = disponibles.filter { $0.tamano == tamano }
+                if conInteres, let tarea = delTamano.first(where: { $0.anzuelo != nil }) { return tarea }
+                if let tarea = delTamano.first { return tarea }
             }
             return nil
         }

@@ -153,12 +153,12 @@ struct HojaDividir: View {
     private func dividir() async {
         guard cargando else { return }
         // Crisis: se revisa en código antes de cualquier motor.
-        if Cuidado.suenaACrisis(tarea.titulo) { crisis = true; cargando = false; return }
+        if Cuidado.suenaACrisis(tarea.titulo) || Cuidado.suenaACrisis(tarea.porque ?? "") { crisis = true; cargando = false; return }
         if !tarea.pasos.isEmpty {
             // Ya estaba dividida: se editan sus pasos, sin volver a generar.
             pasos = tarea.pasos; motor = ""; deRespaldo = false; cargando = false; return
         }
-        let pedido = PedidoDeDivision(titulo: tarea.titulo, tamano: tarea.tamano, energia: energia, idioma: Idioma.actual)
+        let pedido = PedidoDeDivision(titulo: tarea.titulo, porque: tarea.anzuelo ?? "", tamano: tarea.tamano, energia: energia, idioma: Idioma.actual)
         let resultado = await ServicioDeIA.compartido.dividir(pedido)
         pasos = resultado.pasos
         motor = resultado.motor
